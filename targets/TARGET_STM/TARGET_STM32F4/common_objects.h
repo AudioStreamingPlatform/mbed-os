@@ -107,6 +107,15 @@ struct i2c_s {
     uint8_t XferOperation;
     volatile uint8_t event;
 #if DEVICE_I2CSLAVE
+    /* when slave ready to transmit, return buffer to transmit from */
+    void (*irqOnSlaveAddrTx)(void * privData, uint8_t** buf, size_t* bufSizeBytes);
+    /* when slave ready to receive return buffer to receive into */
+    void (*irqOnSlaveAddrRx)(void * privData, uint8_t** buf, size_t* bufSizeBytes);
+    /* when a frame received into buffer from irqOnSlaveAddrRx */
+    void (*irqOnSlaveRxComplete)(void * privData, const uint8_t* buf, size_t bufSizeBytes);
+    /* passed to irqOnSlaveAddrTx, irqOnSlaveAddrRx & irqOnSlaveRxComplete */
+    void* irqOnSlavePrivData;
+
     uint8_t slave;
     volatile uint8_t pending_slave_tx_master_rx;
     volatile uint8_t pending_slave_rx_maxter_tx;
