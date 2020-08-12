@@ -27,6 +27,7 @@
  */
 #include "cmsis.h"
 #include "objects.h"
+#include "mbed_error.h"
 
 int mbed_sdk_inited = 0;
 extern void SetSysClock(void);

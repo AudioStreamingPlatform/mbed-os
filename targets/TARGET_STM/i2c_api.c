@@ -409,7 +409,11 @@ void i2c_frequency(i2c_t *obj, int hz)
 
 #ifdef I2C_IP_VERSION_V1
     handle->Init.ClockSpeed      = hz;
-    handle->Init.DutyCycle       = I2C_DUTYCYCLE_2;
+    if (hz >= 400000) {
+        handle->Init.DutyCycle   = I2C_DUTYCYCLE_16_9;
+    } else {
+        handle->Init.DutyCycle   = I2C_DUTYCYCLE_2;
+    }
 #endif
 #ifdef I2C_IP_VERSION_V2
     /*  Only predefined timing for below frequencies are supported */
@@ -488,6 +492,12 @@ void i2c_frequency(i2c_t *obj, int hz)
     handle->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
     handle->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
     handle->Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;
+#if DEVICE_I2CSLAVE
+    /* B&O need nostretch mode for SummitRx module (for now hardcoded to keep it simple) */
+    if (obj_s->slave) {
+        handle->Init.NoStretchMode   = I2C_NOSTRETCH_ENABLED;
+    }
+#endif
     handle->Init.OwnAddress1     = 0;
     handle->Init.OwnAddress2     = 0;
 #ifdef I2C_IP_VERSION_V2
@@ -515,7 +525,6 @@ i2c_t *get_i2c_obj(I2C_HandleTypeDef *hi2c)
 
 void i2c_reset(i2c_t *obj)
 {
-    struct i2c_s *obj_s = I2C_S(obj);
     /*  As recommended in i2c_api.h, mainly send stop */
     i2c_stop(obj);
     /* then re-init */
@@ -1040,12 +1049,73 @@ const PinMap *i2c_slave_scl_pinmap()
 }
 
 #if DEVICE_I2CSLAVE
+/*static*/ DMA_HandleTypeDef i2c3_hdma_tx;
+void DMA1_Stream4_IRQHandler(void)
+{
+	HAL_DMA_IRQHandler(&i2c3_hdma_tx);
+}
+
+static void PrepareNextSlaveTransmit(I2C_HandleTypeDef *I2cHandle)
+{
+    /* Get object ptr based on handler ptr */
+    i2c_t *obj = get_i2c_obj(I2cHandle);
+    struct i2c_s *obj_s = I2C_S(obj);
+    if (obj_s->irqOnSlaveAddrTx) {
+        uint8_t* buf = NULL;
+        size_t bufSizeBytes = 0;
+        obj_s->irqOnSlaveAddrTx(obj_s->irqOnSlavePrivData, &buf, &bufSizeBytes);
+        if (buf && bufSizeBytes > 0) {
+            HAL_I2C_Slave_Seq_Transmit_DMA(I2cHandle, buf, bufSizeBytes, I2C_NEXT_FRAME);
+        }
+    }
+}
+
 /* SLAVE API FUNCTIONS */
 void i2c_slave_address(i2c_t *obj, int idx, uint32_t address, uint32_t mask)
 {
     struct i2c_s *obj_s = I2C_S(obj);
     I2C_HandleTypeDef *handle = &(obj_s->handle);
 
+    /* B&O: quick-and-dirty support for TX DMA (a lot of work to do it "right")
+     * note: currently only I2C3 supported (to keep it simple/stupid) */
+    static int dmaLinked = 0; /* init once - and deinit not yet supported */
+    if (obj_s->irqOnSlaveAddrTx && obj_s->i2c == I2C_3 && !dmaLinked) {
+        /* DMA init steps from stm32f4xx_hal_i2c.c
+         * - Declare a DMA_HandleTypeDef handle structure for the transmit or receive stream
+         * - Enable the DMAx interface clock using
+         * - Configure the DMA handle parameters
+         * - Configure the DMA Tx or Rx Stream
+         * - Associate the initialized DMA handle to the hi2c DMA Tx or Rx handle
+         * - Configure the priority and enable the NVIC for the transfer complete interrupt on 
+         *   the DMA Tx or Rx Stream */
+        DMA_Stream_TypeDef* const I2C_DMA_TX_STREAM = DMA1_Stream4;
+        const uint32_t I2C_DMA_TX_CHANNEL = DMA_CHANNEL_3;
+        const int I2C_DMA_TX_IRQn = DMA1_Stream4_IRQn;
+        const int I2C_DMA_TX_IRQ_PRIORITY = 4; /* I2C DMA should be the lowest */
+        const int I2C_DMA_TX_IRQ_SUBPRIORITY = 3;
+        __HAL_RCC_DMA1_CLK_ENABLE();
+        /* Configure the DMA handler for Transmission process */
+        i2c3_hdma_tx.Instance = I2C_DMA_TX_STREAM;
+        i2c3_hdma_tx.Init.Channel = I2C_DMA_TX_CHANNEL;
+        i2c3_hdma_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+        i2c3_hdma_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+        i2c3_hdma_tx.Init.MemInc = DMA_MINC_ENABLE;
+        i2c3_hdma_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        i2c3_hdma_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+        i2c3_hdma_tx.Init.Mode = DMA_NORMAL;
+        i2c3_hdma_tx.Init.Priority = DMA_PRIORITY_LOW;
+        i2c3_hdma_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        i2c3_hdma_tx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+        i2c3_hdma_tx.Init.MemBurst = DMA_MBURST_INC4;
+        i2c3_hdma_tx.Init.PeriphBurst = DMA_PBURST_INC4;
+        HAL_DMA_Init(&i2c3_hdma_tx);
+        /* Associate the initialized DMA handle to the the I2C handle */
+        __HAL_LINKDMA(handle, hdmatx, i2c3_hdma_tx);
+        /* Configure the NVIC for DMA */
+        HAL_NVIC_SetPriority(I2C_DMA_TX_IRQn, I2C_DMA_TX_IRQ_PRIORITY, I2C_DMA_TX_IRQ_SUBPRIORITY);
+        HAL_NVIC_EnableIRQ(I2C_DMA_TX_IRQn);
+        dmaLinked = 1;
+    }
     // I2C configuration
     handle->Init.OwnAddress1     = address;
     HAL_I2C_Init(handle);
@@ -1053,6 +1123,7 @@ void i2c_slave_address(i2c_t *obj, int idx, uint32_t address, uint32_t mask)
     i2c_ev_err_enable(obj, i2c_get_irq_handler(obj));
 
     HAL_I2C_EnableListen_IT(handle);
+    PrepareNextSlaveTransmit(handle);
 }
 
 void i2c_slave_mode(i2c_t *obj, int enable_slave)
@@ -1064,6 +1135,7 @@ void i2c_slave_mode(i2c_t *obj, int enable_slave)
     if (enable_slave) {
         obj_s->slave = 1;
         HAL_I2C_EnableListen_IT(handle);
+        PrepareNextSlaveTransmit(handle);
     } else {
         obj_s->slave = 0;
         HAL_I2C_DisableListen_IT(handle);
@@ -1085,10 +1157,37 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
 
     /*  Transfer direction in HAL is from Master point of view */
     if (TransferDirection == I2C_DIRECTION_RECEIVE) {
+        if (obj_s->irqOnSlaveAddrTx) {
+            /* B&O NOSTRETCH timing cannot be met by IRQ, instead prepare DMA before ADDR setup */
+#if 0
+            uint8_t* buf = NULL;
+            size_t bufSizeBytes = 0;
+            obj_s->irqOnSlaveAddrTx(obj_s->irqOnSlavePrivData, &buf, &bufSizeBytes);
+            if (buf && bufSizeBytes > 0) {
+                HAL_I2C_Slave_Seq_Transmit_IT(hi2c, buf, bufSizeBytes, I2C_NEXT_FRAME);
+            }
+#endif
+        }
         obj_s->pending_slave_tx_master_rx = 1;
     }
 
     if (TransferDirection == I2C_DIRECTION_TRANSMIT) {
+        if (obj_s->irqOnSlaveAddrRx) {
+            uint8_t* buf = NULL;
+            size_t bufSizeBytes = 0;
+            obj_s->irqOnSlaveAddrRx(obj_s->irqOnSlavePrivData, &buf, &bufSizeBytes);
+            if (buf && bufSizeBytes > 0) {
+                /* Abort any TX DMA transfer, because direction changed */
+                if ((hi2c->Instance->CR2 & I2C_CR2_DMAEN) == I2C_CR2_DMAEN) {
+                    hi2c->Instance->CR2 &= ~I2C_CR2_DMAEN;
+                    if (hi2c->hdmatx && hi2c->hdmatx->State != HAL_DMA_STATE_READY) {
+                        (void)HAL_DMA_Abort_IT(hi2c->hdmatx);
+                    }
+                    hi2c->State = HAL_I2C_STATE_LISTEN;
+                }
+                HAL_I2C_Slave_Sequential_Receive_IT(hi2c, buf, bufSizeBytes, I2C_NEXT_FRAME);
+            }
+        }
         obj_s->pending_slave_rx_maxter_tx = 1;
     }
 }
@@ -1099,13 +1198,18 @@ void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *I2cHandle)
     i2c_t *obj = get_i2c_obj(I2cHandle);
     struct i2c_s *obj_s = I2C_S(obj);
     obj_s->pending_slave_tx_master_rx = 0;
+    HAL_I2C_EnableListen_IT(I2cHandle);
+    PrepareNextSlaveTransmit(I2cHandle);
 }
 
-void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *I2cHandle)
+void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *I2cHandle, uint8_t *pData, uint16_t Size)
 {
     /* Get object ptr based on handler ptr */
     i2c_t *obj = get_i2c_obj(I2cHandle);
     struct i2c_s *obj_s = I2C_S(obj);
+    if (obj_s->irqOnSlaveRxComplete && Size > 0) {
+        obj_s->irqOnSlaveRxComplete(obj_s->irqOnSlavePrivData, pData, Size);
+    }
     obj_s->pending_slave_rx_maxter_tx = 0;
 }
 
@@ -1113,6 +1217,7 @@ void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
 {
     /* restart listening for master requests */
     HAL_I2C_EnableListen_IT(hi2c);
+    PrepareNextSlaveTransmit(hi2c);
 }
 
 int i2c_slave_receive(i2c_t *obj)

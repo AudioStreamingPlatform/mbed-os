@@ -24,13 +24,13 @@
 namespace mbed {
 
 SerialBase::SerialBase(PinName tx, PinName rx, int baud) :
+    _init_func(&SerialBase::_init),
 #if DEVICE_SERIAL_ASYNCH
     _thunk_irq(this),
 #endif
     _baud(baud),
     _tx_pin(tx),
-    _rx_pin(rx),
-    _init_func(&SerialBase::_init)
+    _rx_pin(rx)
 {
     // No lock needed in the constructor
 
@@ -42,6 +42,7 @@ SerialBase::SerialBase(PinName tx, PinName rx, int baud) :
 }
 
 SerialBase::SerialBase(const serial_pinmap_t &static_pinmap, int baud) :
+    _init_func(&SerialBase::_init_direct),
 #if DEVICE_SERIAL_ASYNCH
     _thunk_irq(this), _tx_usage(DMA_USAGE_NEVER),
     _rx_usage(DMA_USAGE_NEVER), _tx_callback(NULL),
@@ -52,8 +53,7 @@ SerialBase::SerialBase(const serial_pinmap_t &static_pinmap, int baud) :
     _baud(baud),
     _tx_pin(static_pinmap.tx_pin),
     _rx_pin(static_pinmap.rx_pin),
-    _static_pinmap(&static_pinmap),
-    _init_func(&SerialBase::_init_direct)
+    _static_pinmap(&static_pinmap)
 {
     // No lock needed in the constructor
 
@@ -107,17 +107,9 @@ void SerialBase::attach(Callback<void()> func, IrqType type)
         // Disable interrupts when attaching interrupt handler
         core_util_critical_section_enter();
         if (func) {
-            // lock deep sleep only the first time
-            if (!_irq[type]) {
-                sleep_manager_lock_deep_sleep();
-            }
             _irq[type] = func;
             serial_irq_set(&_serial, (SerialIrq)type, 1);
         } else {
-            // unlock deep sleep only the first time
-            if (_irq[type]) {
-                sleep_manager_unlock_deep_sleep();
-            }
             _irq[type] = NULL;
             serial_irq_set(&_serial, (SerialIrq)type, 0);
         }
