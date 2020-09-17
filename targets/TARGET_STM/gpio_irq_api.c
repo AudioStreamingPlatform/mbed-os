@@ -36,6 +36,7 @@
 #include "gpio_irq_api.h"
 #include "pinmap.h"
 #include "mbed_error.h"
+#include "mbed_interface.h"
 #include "gpio_irq_device.h"
 
 #define EDGE_NONE (0)
@@ -52,6 +53,7 @@ typedef struct gpio_channel {
 } gpio_channel_t;
 
 static gpio_irq_handler irq_handler;
+static uint32_t pin_index_used;
 
 static gpio_channel_t channels[CHANNEL_NUM] = {
 #ifdef EXTI_IRQ0_NUM_LINES
@@ -410,6 +412,14 @@ int gpio_irq_init(gpio_irq_t *obj, PinName pin, gpio_irq_handler handler, uint32
             return -1;
     }
 
+    uint32_t pin_index_bit = (1 << pin_index);
+    if (pin_index_used & pin_index_bit) {
+        /* STM only supports one IRQ for each pin_index */
+        mbed_error_printf("InterruptIn error: pin=%d conflict, pin_index=%ld already used\n", pin, pin_index);
+        return -1;
+    }
+    pin_index_used |= pin_index_bit;
+
     // Enable GPIO clock
     GPIO_TypeDef *gpio_add = Set_GPIO_Clock(port_index);
 
@@ -445,6 +455,8 @@ void gpio_irq_free(gpio_irq_t *obj)
     gpio_channel->channel_gpio[gpio_idx] = 0;
     gpio_channel->channel_pin[gpio_idx] = 0;
     gpio_irq_disable(obj);
+
+    pin_index_used &= ~(1 << STM_PIN(obj->pin));
 }
 
 void gpio_irq_set(gpio_irq_t *obj, gpio_irq_event event, uint32_t enable)
