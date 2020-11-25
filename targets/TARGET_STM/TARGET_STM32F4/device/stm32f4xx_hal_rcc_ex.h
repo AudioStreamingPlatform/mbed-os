@@ -3571,6 +3571,20 @@ typedef struct
                                         tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOEEN);\
                                         UNUSED(tmpreg); \
                                         } while(0U)
+#define __HAL_RCC_GPIOF_CLK_ENABLE()  do { \
+                                      __IO uint32_t tmpreg = 0x00U; \
+                                      SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOFEN);\
+                                      /* Delay after an RCC peripheral clock enabling */ \
+                                      tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOFEN);\
+                                      UNUSED(tmpreg); \
+                                      } while(0U)
+#define __HAL_RCC_GPIOG_CLK_ENABLE()  do { \
+                                      __IO uint32_t tmpreg = 0x00U; \
+                                      SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOGEN);\
+                                      /* Delay after an RCC peripheral clock enabling */ \
+                                      tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOGEN);\
+                                      UNUSED(tmpreg); \
+                                      } while(0U)
 #define __HAL_RCC_CRC_CLK_ENABLE()     do { \
                                         __IO uint32_t tmpreg = 0x00U; \
                                         SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_CRCEN);\
@@ -4722,7 +4736,7 @@ typedef struct
 /*----------------------------------------------------------------------------*/
 
 /*-------STM32F412Zx || STM32F412Vx || STM32F412Rx || STM32F412Cx || STM32F413xx || STM32F423xx-------*/
-#if defined(STM32F412Zx) || defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) || defined(STM32F413xx) || defined(STM32F423xx) 
+#if defined(STM32F412Zx) || defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) || defined(STM32F413xx) || defined(STM32F423xx)
 /** @defgroup RCCEx_AHB1_Clock_Enable_Disable AHB1 Peripheral Clock Enable Disable
   * @brief  Enables or disables the AHB1 peripheral clock.
   * @note   After reset, the peripheral clock (used for registers read/write access)
