@@ -120,7 +120,7 @@ function(mbed_configure_app_target target)
     target_compile_features(${target}
         PUBLIC
             c_std_11
-            cxx_std_14
+            cxx_std_20
     )
 endfunction()
 
