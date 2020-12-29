@@ -20,6 +20,8 @@ function(mbed_set_profile_options target mbed_toolchain)
             "-fno-rtti"
             "-Wvla"
             "-Og"
+            "-std=c++20"
+            "-Wno-register"
         )
         target_compile_options(${target}
             INTERFACE
