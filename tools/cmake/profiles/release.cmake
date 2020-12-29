@@ -22,6 +22,7 @@ function(mbed_set_profile_options target mbed_toolchain)
             "-Os"
             "-std=c++20"
             "-Wno-register"
+            "-Wno-volatile"
         )
         target_compile_options(${target}
             INTERFACE
