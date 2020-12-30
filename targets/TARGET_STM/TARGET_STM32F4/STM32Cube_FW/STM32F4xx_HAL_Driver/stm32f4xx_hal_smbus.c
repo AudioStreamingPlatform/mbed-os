@@ -1925,7 +1925,6 @@ static HAL_StatusTypeDef SMBUS_MasterTransmit_TXE(SMBUS_HandleTypeDef *hsmbus)
 {
   /* Declaration of temporary variables to prevent undefined behavior of volatile usage */
   uint32_t CurrentState       = hsmbus->State;
-  uint32_t CurrentMode        = hsmbus->Mode;
   uint32_t CurrentXferOptions = hsmbus->XferOptions;
 
   if ((hsmbus->XferSize == 0U) && (CurrentState == HAL_SMBUS_STATE_BUSY_TX))
@@ -2268,8 +2267,6 @@ static HAL_StatusTypeDef SMBUS_Master_ADD10(SMBUS_HandleTypeDef *hsmbus)
 static HAL_StatusTypeDef SMBUS_Master_ADDR(SMBUS_HandleTypeDef *hsmbus)
 {
   /* Declaration of temporary variable to prevent undefined behavior of volatile usage */
-  uint32_t CurrentMode        = hsmbus->Mode;
-  uint32_t CurrentXferOptions = hsmbus->XferOptions;
   uint32_t Prev_State         = hsmbus->PreviousState;
 
   if (hsmbus->State == HAL_SMBUS_STATE_BUSY_RX)
