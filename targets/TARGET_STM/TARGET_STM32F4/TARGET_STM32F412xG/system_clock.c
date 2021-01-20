@@ -18,8 +18,8 @@
 /**
   * This file configures the system clock as follows:
   *-----------------------------------------------------------------------------
-  * System clock source | 1- USE_PLL_HSE_EXTC (external 8 MHz clock)
-  *                     | 2- USE_PLL_HSE_XTAL (external 8 MHz xtal)
+  * System clock source | 1- USE_PLL_HSE_EXTC (external 24 MHz clock)
+  *                     | 2- USE_PLL_HSE_XTAL (external 24 MHz xtal)
   *                     | 3- USE_PLL_HSI (internal 16 MHz)
   *-----------------------------------------------------------------------------
   * SYSCLK(MHz)         | 100
@@ -113,15 +113,15 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
         /* Enable HSE oscillator and activate PLL with HSE as source */
         RCC_OscInitStruct.OscillatorType      = RCC_OSCILLATORTYPE_HSE;
         if (bypass == 0) {
-            RCC_OscInitStruct.HSEState          = RCC_HSE_ON; /* External 8 MHz xtal on OSC_IN/OSC_OUT */
+            RCC_OscInitStruct.HSEState          = RCC_HSE_ON; /* External 24 MHz xtal on OSC_IN/OSC_OUT */
         } else {
-            RCC_OscInitStruct.HSEState          = RCC_HSE_BYPASS; /* External 8 MHz clock on OSC_IN */
+            RCC_OscInitStruct.HSEState          = RCC_HSE_BYPASS; /* External 24 MHz clock on OSC_IN */
         }
 
         RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
         RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_HSE;
 
-        RCC_OscInitStruct.PLL.PLLM            = 8;             // VCO input clock = 1 MHz (8 MHz / 8)
+        RCC_OscInitStruct.PLL.PLLM            = 24;            // VCO input clock = 1 MHz (24 MHz / 24)
         RCC_OscInitStruct.PLL.PLLN            = 200;           // VCO output clock = 200 MHz (1 MHz * 200)
         RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2; // PLLCLK = 100 MHz (200 MHz / 2)
         RCC_OscInitStruct.PLL.PLLQ            = 7;
@@ -134,7 +134,7 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 
     /* Select PLLSAI output as USB clock source */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
-    PeriphClkInitStruct.PLLI2S.PLLI2SM = 8;
+    PeriphClkInitStruct.PLLI2S.PLLI2SM = 24;
     PeriphClkInitStruct.PLLI2S.PLLI2SQ = 4;
     PeriphClkInitStruct.PLLI2S.PLLI2SN = 192;
     PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
