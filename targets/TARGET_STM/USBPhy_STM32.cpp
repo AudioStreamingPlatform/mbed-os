@@ -312,6 +312,7 @@ void USBPhyHw::init(USBPhyEvents *events)
     hpcd.pData = (void *)this;
     hpcd.State = HAL_PCD_STATE_RESET;
     HAL_StatusTypeDef ret = HAL_PCD_Init(&hpcd);
+    std::ignore = ret;
     MBED_ASSERT(ret == HAL_OK);
 
     // Configure FIFOs
@@ -380,6 +381,7 @@ void USBPhyHw::init(USBPhyEvents *events)
 void USBPhyHw::deinit()
 {
     HAL_StatusTypeDef ret = HAL_PCD_DeInit(&hpcd);
+    std::ignore = ret;
     MBED_ASSERT(ret == HAL_OK);
 
     NVIC_DisableIRQ(USBHAL_IRQn);
@@ -409,6 +411,7 @@ void USBPhyHw::connect()
 #endif
 
     HAL_StatusTypeDef ret = HAL_PCD_Start(&hpcd);
+    std::ignore = ret;
     MBED_ASSERT(ret == HAL_OK);
 
     wait_us(10000);
@@ -421,6 +424,7 @@ void USBPhyHw::disconnect()
     wait_us(10000);
 
     HAL_StatusTypeDef ret = HAL_PCD_Stop(&hpcd); // USB_DisableGlobalInt + USB_StopDevice
+    std::ignore = ret;
     MBED_ASSERT(ret == HAL_OK);
 }
 
@@ -447,6 +451,7 @@ void USBPhyHw::sof_disable()
 void USBPhyHw::set_address(uint8_t address)
 {
     HAL_StatusTypeDef ret = HAL_PCD_SetAddress(&hpcd, address);
+    std::ignore = ret;
     MBED_ASSERT(ret == HAL_OK);
 }
 
@@ -511,6 +516,7 @@ void USBPhyHw::ep0_read(uint8_t *data, uint32_t size)
     HAL_StatusTypeDef ret;
     epComplete[EP_TO_IDX(0x00)] = 2;
     ret = HAL_PCD_EP_Receive(&hpcd, 0x00, data, size > MAX_PACKET_SIZE_EP0 ? MAX_PACKET_SIZE_EP0 : size);
+    std::ignore = ret;
     MBED_ASSERT(ret != HAL_BUSY);
 }
 
@@ -536,14 +542,13 @@ void USBPhyHw::ep0_stall()
 bool USBPhyHw::endpoint_add(usb_ep_t endpoint, uint32_t max_packet, usb_ep_type_t type)
 {
 #if (MBED_CONF_TARGET_USB_SPEED != USE_USB_NO_OTG)
-    uint32_t len;
-
     /*
      * Endpoints are configured in init since re-configuring
      * fifos when endpoints are added or removed causes tests to fail.
      */
     if (endpoint & 0x80) {
-        len = HAL_PCDEx_GetTxFiFo(&hpcd, endpoint & 0x7f);
+        uint32_t len = HAL_PCDEx_GetTxFiFo(&hpcd, endpoint & 0x7f);
+        std::ignore = len;
         MBED_ASSERT(len >= max_packet);
     }
 #endif
@@ -556,6 +561,7 @@ bool USBPhyHw::endpoint_add(usb_ep_t endpoint, uint32_t max_packet, usb_ep_type_
 void USBPhyHw::endpoint_remove(usb_ep_t endpoint)
 {
     HAL_StatusTypeDef ret = HAL_PCD_EP_Close(&hpcd, endpoint);
+    std::ignore = ret;
     MBED_ASSERT(ret == HAL_OK);
 }
 
@@ -563,6 +569,7 @@ void USBPhyHw::endpoint_stall(usb_ep_t endpoint)
 {
     HAL_StatusTypeDef ret;
     ret = HAL_PCD_EP_SetStall(&hpcd, endpoint);
+    std::ignore = ret;
     MBED_ASSERT(ret != HAL_BUSY);
 }
 
@@ -570,6 +577,7 @@ void USBPhyHw::endpoint_unstall(usb_ep_t endpoint)
 {
     HAL_StatusTypeDef ret;
     ret = HAL_PCD_EP_ClrStall(&hpcd, endpoint);
+    std::ignore = ret;
     MBED_ASSERT(ret != HAL_BUSY);
 }
 
@@ -577,6 +585,7 @@ bool USBPhyHw::endpoint_read(usb_ep_t endpoint, uint8_t *data, uint32_t size)
 {
     // clean reception end flag before requesting reception
     HAL_StatusTypeDef ret = HAL_PCD_EP_Receive(&hpcd, endpoint, data, size);
+    std::ignore = ret;
     MBED_ASSERT(ret != HAL_BUSY);
     return true;
 }
@@ -599,6 +608,7 @@ bool USBPhyHw::endpoint_write(usb_ep_t endpoint, uint8_t *data, uint32_t size)
     // clean transmission end flag before requesting transmission
     epComplete[EP_TO_IDX(endpoint)] = 2;
     ret = HAL_PCD_EP_Transmit(&hpcd, endpoint, data, size);
+    std::ignore = ret;
     MBED_ASSERT(ret != HAL_BUSY);
     // update the status
     if (ret != HAL_OK) {
@@ -615,6 +625,7 @@ void USBPhyHw::endpoint_abort(usb_ep_t endpoint)
 #else
     HAL_StatusTypeDef ret = HAL_PCD_EP_Close(&hpcd, endpoint); // fix me: implementation not correct
 #endif
+    std::ignore = ret;
     MBED_ASSERT(ret == HAL_OK);
 }
 

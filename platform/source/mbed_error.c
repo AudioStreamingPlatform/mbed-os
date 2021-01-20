@@ -146,6 +146,7 @@ static inline bool mbed_error_is_hw_fault(mbed_error_status_t error_status)
             error_status == MBED_ERROR_HARDFAULT_EXCEPTION);
 }
 
+#if MBED_CONF_PLATFORM_ERROR_ALL_THREADS_INFO && defined(MBED_CONF_RTOS_PRESENT)
 static bool mbed_error_is_handler(const mbed_error_ctx *ctx)
 {
     bool is_handler = false;
@@ -163,6 +164,7 @@ static bool mbed_error_is_handler(const mbed_error_ctx *ctx)
     }
     return is_handler;
 }
+#endif
 
 //Set an error status with the error handling system
 static mbed_error_status_t handle_error(mbed_error_status_t error_status, unsigned int error_value, const char *filename, int line_number, void *caller)
