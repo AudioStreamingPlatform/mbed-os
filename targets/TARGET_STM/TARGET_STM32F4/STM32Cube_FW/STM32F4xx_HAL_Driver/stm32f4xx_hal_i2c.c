@@ -3575,7 +3575,7 @@ __weak void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
   *                the configuration information for the specified I2C.
   * @retval None
   */
-__weak void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+__weak void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size)
 {
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hi2c);
@@ -4350,7 +4350,7 @@ static HAL_StatusTypeDef I2C_SlaveReceive_RXNE(I2C_HandleTypeDef *hi2c)
       hi2c->State = HAL_I2C_STATE_LISTEN;
 
       /* Call the Rx complete callback to inform upper layer of the end of receive process */
-      HAL_I2C_SlaveRxCpltCallback(hi2c);
+      HAL_I2C_SlaveRxCpltCallback(hi2c, hi2c->pBuffPtr, hi2c->XferSize);
     }
   }
   return HAL_OK;
@@ -4487,7 +4487,7 @@ static HAL_StatusTypeDef I2C_Slave_STOPF(I2C_HandleTypeDef *hi2c)
         hi2c->State = HAL_I2C_STATE_READY;
         hi2c->Mode = HAL_I2C_MODE_NONE;
 
-        HAL_I2C_SlaveRxCpltCallback(hi2c);
+        HAL_I2C_SlaveRxCpltCallback(hi2c, hi2c->pBuffPtr, hi2c->XferSize);
       }
     }
   }

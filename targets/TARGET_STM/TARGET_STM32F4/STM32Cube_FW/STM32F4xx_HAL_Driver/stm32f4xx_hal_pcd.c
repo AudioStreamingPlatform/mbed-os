@@ -1261,7 +1261,7 @@ static HAL_StatusTypeDef PCD_WriteEmptyTxFifo(PCD_HandleTypeDef *hpcd, uint32_t 
 {
   USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;  
   USB_OTG_EPTypeDef *ep;
-  int32_t len = 0U;
+  uint32_t len = 0U;
   uint32_t len32b;
   uint32_t fifoemptymsk = 0U;
 
