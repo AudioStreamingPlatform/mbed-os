@@ -64,6 +64,36 @@ static mbed_error_status_t handle_error(mbed_error_status_t error_status, unsign
 #if MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED
 #define report_error_ctx MBED_CRASH_DATA.error.context
 static bool is_reboot_error_valid = false;
+
+//Helper function to calculate CRC
+//NOTE: It would have been better to use MbedCRC implementation. But
+//MbedCRC uses table based calculation and we dont want to keep that table memory
+//used up for this purpose. Also we cannot force bitwise calculation in MbedCRC
+//and it also requires a new wrapper to be called from C implementation. Since
+//we dont have many uses cases to create a C wrapper for MbedCRC and the data
+//we calculate CRC on in this context is very less we will use a local
+//implementation here.
+__attribute__ ((unused)) static unsigned int compute_crc32(const void *data, int datalen)
+{
+    const unsigned int polynomial = 0x04C11DB7; /* divisor is 32bit */
+    unsigned int crc = 0; /* CRC value is 32bit */
+    unsigned char *buf = (unsigned char *)data;//use a temp variable to make code readable and to avoid typecasting issues.
+
+    for (; datalen > 0; datalen--) {
+        unsigned char b = *buf++;
+        crc ^= (unsigned int)(b << 24); /* move byte into upper 8bit */
+        for (int i = 0; i < 8; i++) {
+            /* is MSB 1 */
+            if ((crc & 0x80000000) != 0) {
+                crc = (unsigned int)((crc << 1) ^ polynomial);
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+
+    return crc;
+}
 #endif
 
 //Helper function to halt the system
@@ -116,6 +146,7 @@ static inline bool mbed_error_is_hw_fault(mbed_error_status_t error_status)
             error_status == MBED_ERROR_HARDFAULT_EXCEPTION);
 }
 
+#if MBED_CONF_PLATFORM_ERROR_ALL_THREADS_INFO && defined(MBED_CONF_RTOS_PRESENT)
 static bool mbed_error_is_handler(const mbed_error_ctx *ctx)
 {
     bool is_handler = false;
@@ -133,6 +164,7 @@ static bool mbed_error_is_handler(const mbed_error_ctx *ctx)
     }
     return is_handler;
 }
+#endif
 
 //Set an error status with the error handling system
 static mbed_error_status_t handle_error(mbed_error_status_t error_status, unsigned int error_value, const char *filename, int line_number, void *caller)
@@ -176,7 +208,13 @@ static mbed_error_status_t handle_error(mbed_error_status_t error_status, unsign
 #if MBED_CONF_PLATFORM_ERROR_FILENAME_CAPTURE_ENABLED
     //Capture filename/linenumber if provided
     //Index for tracking error_filename
-    strncpy(current_error_ctx.error_filename, filename, MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN);
+    const char* copy_from = strrchr(filename, '/');
+    if (!copy_from) {
+        copy_from = filename;
+    } else {
+        ++copy_from; // Skip the '/'
+    }
+    strncpy(current_error_ctx.error_filename, copy_from, MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN);
     current_error_ctx.error_line_number = line_number;
 #endif
 
