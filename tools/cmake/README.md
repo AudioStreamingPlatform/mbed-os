@@ -19,17 +19,21 @@ The full profile with the selected printf and C libraries.
 Only a limited set of targets is supported at the moment.
 
 The following targets are supported:
-- NRF52840_DK
+- Ambiq Micro targets
 - Analog Devices targets
 - ARM FM targets
+- ARM SSG targets
 - Cypress targets
 - Freescale targets
 - GigaDevice targets
 - MAXIM targets
+- Nordic targets
 - NXP targets
+- Renesas targets
 - Samsung targets
 - Silicon Labs targets
 - STM targets
+- Toshiba targets
 - WICED targets
 
 ### Supported toolchains
@@ -49,6 +53,7 @@ Supported examples can be identified by the presence of a top level `CMakeLists.
 Prerequisities:
 - CMake >=3.19.0
 - mbed-tools >=4.0.0
+- Python modules defined in [`tools/cmake/requirements.txt`](./requirements.txt)
 
 From the application root or wherever `mbed-os.lib` is found, run the following command to:
  * create the Mbed OS configuration CMake module
@@ -72,3 +77,24 @@ If you're running CMake directly, you may need to pass it in yourself as follows
 ```
 cmake -S <source-dir> -B <build-dir> -DCMAKE_BUILD_TYPE=debug
 ```
+
+## How to build a greentea test
+
+Install prerequisites suggested in the previous section and follow the below steps to build:
+* Generate the `.mbedbuild/` configuration directory for the Mbed target you want to run the test on using [mbed-os-example-blinky](https://github.com/ARMmbed/mbed-os-example-blinky)
+```
+$ mbedtools configure -t <TOOLCHAIN> -m <MBED_TARGET> 
+```
+* Copy `.mbedbuild/` into the test suite directory.
+* Set your current directory to the test suite directory
+* Run the following command to build the test binary with the full profile
+
+  ```
+  touch mbed-os.lib && mkdir cmake_build && cd cmake_build && cmake .. -G Ninja && cmake --build .
+  ```
+* Run the following command to build the test binary with the baremetal profile
+  ```
+  touch mbed-os.lib && mkdir cmake_build && cd cmake_build && cmake .. -G Ninja -DMBED_BAREMETAL_GREENTEA_TEST=ON && cmake --build .
+  ```
+
+Note: These steps will change when `mbedtools` implements a sub-command to invoke Greentea tests
