@@ -1065,7 +1065,7 @@ static void PrepareNextSlaveTransmit(I2C_HandleTypeDef *I2cHandle)
         size_t bufSizeBytes = 0;
         obj_s->irqOnSlaveAddrTx(obj_s->irqOnSlavePrivData, &buf, &bufSizeBytes);
         if (buf && bufSizeBytes > 0) {
-            HAL_I2C_Slave_Seq_Transmit_DMA(I2cHandle, buf, bufSizeBytes, I2C_NEXT_FRAME);
+            HAL_I2C_Slave_Sequential_Transmit_DMA(I2cHandle, buf, bufSizeBytes, I2C_NEXT_FRAME);
         }
     }
 }
