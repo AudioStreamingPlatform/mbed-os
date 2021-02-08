@@ -1284,7 +1284,7 @@ static void PrepareNextSlaveTransmit(I2C_HandleTypeDef *I2cHandle)
         size_t bufSizeBytes = 0;
         obj_s->irqOnSlaveAddrTx(obj_s->irqOnSlavePrivData, &buf, &bufSizeBytes);
         if (buf && bufSizeBytes > 0) {
-            HAL_I2C_Slave_Transmit_DMA(I2cHandle, buf, bufSizeBytes);
+            HAL_I2C_Slave_Sequential_Transmit_DMA(I2cHandle, buf, bufSizeBytes, I2C_NEXT_FRAME);
         }
     }
 }
@@ -1635,7 +1635,7 @@ void i2c_transfer_asynch(i2c_t *obj, const void *tx, size_t tx_length, void *rx,
             HAL_I2C_Master_Sequential_Transmit_IT(handle, address, (uint8_t *)tx, tx_length, I2C_NEXT_FRAME);
         }
 #elif defined(I2C_IP_VERSION_V2)
-        HAL_I2C_Master_Seq_Transmit_IT(handle, address, (uint8_t *)tx, tx_length, I2C_FIRST_FRAME);
+        HAL_I2C_Master_Sequential_Transmit_IT(handle, address, (uint8_t *)tx, tx_length, I2C_FIRST_FRAME);
 #endif
     }
 }
