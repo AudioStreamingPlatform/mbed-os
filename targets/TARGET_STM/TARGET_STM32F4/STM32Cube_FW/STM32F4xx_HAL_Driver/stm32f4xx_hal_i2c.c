@@ -1789,7 +1789,7 @@ HAL_StatusTypeDef HAL_I2C_Slave_Sequential_Transmit_IT(I2C_HandleTypeDef *hi2c, 
   * @param  XferOptions Options of Transfer, value of @ref I2C_XferOptions_definition
   * @retval HAL status
   */
-HAL_StatusTypeDef HAL_I2C_Slave_Seq_Transmit_DMA(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size, uint32_t XferOptions)
+HAL_StatusTypeDef HAL_I2C_Slave_Sequential_Transmit_DMA(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size, uint32_t XferOptions)
 {
   uint32_t count;
   HAL_StatusTypeDef dmaxferstatus;
