@@ -132,7 +132,7 @@ public:
      *       0 on success (ack),
      *       nonzero on failure (nack)
      */
-    int read(int address, char *data, int length, bool repeated = false);
+    virtual int read(int address, char *data, int length, bool repeated = false);
 
     /** Read a single byte from the I2C bus
      *
@@ -158,7 +158,7 @@ public:
      *       0 on success (ack),
      *       nonzero on failure (nack)
      */
-    int write(int address, const char *data, int length, bool repeated = false);
+    virtual int write(int address, const char *data, int length, bool repeated = false);
 
     /** Write single byte out on the I2C bus
      *
