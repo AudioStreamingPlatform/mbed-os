@@ -5502,8 +5502,10 @@ static void I2C_DMAAbort(DMA_HandleTypeDef *hdma)
   hi2c->XferCount = 0U;
 
   /* Reset XferAbortCallback */
-  hi2c->hdmatx->XferAbortCallback = NULL;
-  hi2c->hdmarx->XferAbortCallback = NULL;
+  if (hi2c->hdmatx)
+    hi2c->hdmatx->XferAbortCallback = NULL;
+  if (hi2c->hdmarx)
+    hi2c->hdmarx->XferAbortCallback = NULL;
 
   /* Check if come from abort from user */
   if(hi2c->State == HAL_I2C_STATE_ABORT)
