@@ -699,6 +699,21 @@ HAL_StatusTypeDef HAL_NAND_Read_Page_16b(NAND_HandleTypeDef *hnand, NAND_Address
       /* Go back to read mode */
       *(__IO uint8_t *)((uint32_t)(deviceaddress | CMD_AREA)) = ((uint8_t)0x00);
     }
+
+    /* Calculate PageSize */
+#ifdef FSMC_PCR2_PWID
+    if (hnand->Init.MemoryDataWidth == FSMC_NAND_PCC_MEM_BUS_WIDTH_8)
+#else /* FMC_PCR2_PWID is defined */
+    if (hnand->Init.MemoryDataWidth == FMC_NAND_PCC_MEM_BUS_WIDTH_8)
+#endif
+    {
+      size = size / 2U;
+    }
+    else
+    {
+      /* Do nothing */
+      /* Keep the same PageSize for FMC_NAND_MEM_BUS_WIDTH_16*/
+    }
     
     /* Get Data into Buffer */    
     for(; index < size; index++)
@@ -940,6 +955,21 @@ HAL_StatusTypeDef HAL_NAND_Write_Page_16b(NAND_HandleTypeDef *hnand, NAND_Addres
         *(__IO uint8_t *)((uint32_t)(deviceaddress | ADDR_AREA)) = ADDR_3RD_CYCLE(nandaddress);
       }
     }
+
+    /* Calculate PageSize */
+#ifdef FSMC_PCR2_PWID
+    if (hnand->Init.MemoryDataWidth == FSMC_NAND_PCC_MEM_BUS_WIDTH_8)
+#else /* FMC_PCR2_PWID is defined */
+    if (hnand->Init.MemoryDataWidth == FMC_NAND_PCC_MEM_BUS_WIDTH_8)
+#endif
+    {
+      size = size / 2U;
+    }
+    else
+    {
+      /* Do nothing */
+      /* Keep the same PageSize for FMC_NAND_MEM_BUS_WIDTH_16*/
+    }
   
     /* Write data to memory */
     for(; index < size; index++)
@@ -1157,7 +1187,7 @@ HAL_StatusTypeDef HAL_NAND_Read_SpareArea_16b(NAND_HandleTypeDef *hnand, NAND_Ad
   nandaddress = ARRAY_ADDRESS(pAddress, hnand);
   
   /* Column in page address */
-  columnaddress = (uint32_t)(COLUMN_ADDRESS(hnand) * 2U);
+  columnaddress = (uint32_t)(COLUMN_ADDRESS(hnand));
   
   /* Spare area(s) read loop */ 
   while((NumSpareAreaToRead != 0U) && (nandaddress < ((hnand->Config.BlockSize) * (hnand->Config.BlockNbr))))
@@ -1425,7 +1455,7 @@ HAL_StatusTypeDef HAL_NAND_Write_SpareArea_16b(NAND_HandleTypeDef *hnand, NAND_A
   nandaddress = ARRAY_ADDRESS(pAddress, hnand);
   
   /* Column in page address */
-  columnaddress = (uint32_t)(COLUMN_ADDRESS(hnand) * 2U);
+  columnaddress = (uint32_t)(COLUMN_ADDRESS(hnand));
   
   /* Spare area(s) write loop */
   while((NumSpareAreaTowrite != 0U) && (nandaddress < ((hnand->Config.BlockSize) * (hnand->Config.BlockNbr))))

@@ -255,7 +255,6 @@ __STATIC_INLINE uint32_t LL_IWDG_GetReloadCounter(IWDG_TypeDef *IWDGx)
   return (uint32_t)(READ_REG(IWDGx->RLR));
 }
 
-
 /**
   * @}
   */
@@ -302,7 +301,6 @@ __STATIC_INLINE uint32_t LL_IWDG_IsReady(IWDG_TypeDef *IWDGx)
 /**
   * @}
   */
-
 
 /**
   * @}
