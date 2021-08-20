@@ -179274,6 +179274,120 @@
         "sub_family": "M2351",
         "vendor": "Nuvoton:18"
     }, 
+    "M2354KJFAE": {
+        "algorithms": [
+            {
+                "default": false, 
+                "file_name": "Flash/M2354_NS.FLM",
+                "ram_size": 4608,
+                "ram_start": 805371904,
+                "size": 1048576,
+                "start": 268435456
+            },
+            {
+                "default": false,
+                "file_name": "Flash/M2354_LD_16.FLM", 
+                "ram_size": 4608,
+                "ram_start": 536870912,
+                "size": 16384, 
+                "start": 1048576
+            }, 
+            {
+                "default": false, 
+                "file_name": "Flash/M2354_AP_1M.FLM", 
+                "ram_size": 4608,
+                "ram_start": 536870912,
+                "size": 1048576, 
+                "start": 0
+            }
+        ], 
+        "family": "NuMicro M23 Family",
+        "from_pack": {
+            "pack": "NuMicro_DFP", 
+            "url": "http://www.nuvoton.com/hq/enu/Documents/KEILSoftwarePack", 
+            "vendor": "Nuvoton", 
+            "version": "1.3.7"
+        }, 
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": true
+                }, 
+                "default": true, 
+                "size": 131072, 
+                "start": 536870912, 
+                "startup": false
+            }, 
+            "IRAM2": {
+                "access": {
+                    "execute": false, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": true
+                }, 
+                "default": false, 
+                "size": 131072, 
+                "start": 805437440, 
+                "startup": false
+            }, 
+            "IROM1": {
+                "access": {
+                    "execute": true, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": false
+                }, 
+                "default": true, 
+                "size": 524288, 
+                "start": 0, 
+                "startup": true
+            }, 
+            "IROM2": {
+                "access": {
+                    "execute": true, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": false
+                }, 
+                "default": false, 
+                "size": 524288, 
+                "start": 268959744, 
+                "startup": false
+            }
+        }, 
+        "name": "M2354KJFAE", 
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM23", 
+                "fpu": "None", 
+                "mpu": "Present", 
+                "units": 1
+            }
+        }, 
+        "sectors": [
+            [
+                0, 
+                2048
+            ]
+        ],
+        "sub_family": "M2354",
+        "vendor": "Nuvoton:18"
+    },
     "M251EB2AE": {
         "algorithms": [
             {
@@ -437140,6 +437254,89 @@
         "sub_family": "STM32H743", 
         "vendor": "STMicroelectronics:13"
     }, 
+    "STM32H7A3ZITxQ": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32H7x_2048.FLM",
+                "ram_size": 32768,
+                "ram_start": 536870912,
+                "size": 2097152,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32H7 Series",
+        "from_pack": {
+            "pack": "STM32H7xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "2.7.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 1048576,
+                "start": 603979776,
+                "startup": false
+            },
+            "IRAM2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 2097152,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32H7A3ZITxQ",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM7",
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                131072
+            ]
+        ],
+        "sub_family": "STM32H7A3",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32H745BGTx": {
         "algorithms": [
             {
@@ -440294,7 +440491,7 @@
                 "startup": false
             }
         }, 
-        "name": "STM32H747XIHx", 
+        "name": "STM32H747XIHx:CM7",
         "processor": {
             "Asymmetric": {
                 "CM4": {
@@ -459205,7 +459402,7 @@
         "sub_family": "STM32L151xxA",
         "vendor": "STMicroelectronics:13"
     }, 
-    "STM32L151CC": {
+    "STM32L151CCTx": {
         "algorithms": [
             {
                 "default": true,
@@ -459271,7 +459468,7 @@
                 "startup": true
             }
         }, 
-        "name": "STM32L151CC",
+        "name": "STM32L151CCTx",
         "processor": {
             "Symmetric": {
                 "core": "CortexM3", 
@@ -463069,7 +463266,7 @@
         "sub_family": "STM32L152xxA",
         "vendor": "STMicroelectronics:13"
     }, 
-    "STM32L152RC": {
+    "STM32L152RCTx": {
         "algorithms": [
             {
                 "default": true,
@@ -463135,7 +463332,7 @@
                 "startup": true
             }
         }, 
-        "name": "STM32L152RC",
+        "name": "STM32L152RCTx",
         "processor": {
             "Symmetric": {
                 "core": "CortexM3", 
@@ -463345,7 +463542,7 @@
         "sub_family": "STM32L152",
         "vendor": "STMicroelectronics:13"
     }, 
-    "STM32L152RE": {
+    "STM32L152RETx": {
         "algorithms": [
             {
                 "default": true,
@@ -463411,7 +463608,7 @@
                 "startup": true
             }
         }, 
-        "name": "STM32L152RE",
+        "name": "STM32L152RETx",
         "processor": {
             "Symmetric": {
                 "core": "CortexM3", 
@@ -479422,6 +479619,142 @@
         "sub_family": "STM32L4S9",
         "vendor": "STMicroelectronics:13"
     }, 
+    "STM32L552ZETxQ": {
+        "family": "STM32L5 Series",
+        "from_pack": {
+            "pack": "STM32L5xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32L5x_512_0800.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 262144,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32L552ZETxQ",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM33",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32L562",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32L562QEIxQ": {
+        "family": "STM32L5 Series",
+        "from_pack": {
+            "pack": "STM32L5xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32L5x_512_0800.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 262144,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32L562QEIxQ",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM33",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32L562",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32W108C8": {
         "algorithms": [
             {
@@ -479821,7 +480154,276 @@
         ], 
         "sub_family": "STM32W1",
         "vendor": "STMicroelectronics:13"
-    }, 
+    },
+    "STM32WL55JCIx": {
+        "name": "STM32WL55JCIx:CM4",
+        "memories": {
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 65536,
+            "startup": false,
+            "default": true
+          },
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 262144,
+            "startup": true,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WLxx_CM4.FLM",
+            "start": 134217728,
+            "size": 262144,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "None",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WLxx_DFP",
+          "version": "1.0.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WL Series",
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32WL55"
+    },
+    "STM32WLE5JCIx": {
+        "name": "STM32WLE5JCIx:CM4",
+        "memories": {
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 65536,
+            "startup": false,
+            "default": true
+          },
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 262144,
+            "startup": true,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WLxx_CM4.FLM",
+            "start": 134217728,
+            "size": 262144,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "None",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WLxx_DFP",
+          "version": "1.1.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WL Series",
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32WLE5"
+      },
+      "STM32WLE5CCUx": {
+        "name": "STM32WLE5CCUx:CM4",
+        "memories": {
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 65536,
+            "startup": false,
+            "default": true
+          },
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 262144,
+            "startup": true,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WLxx_CM4.FLM",
+            "start": 134217728,
+            "size": 262144,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "None",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WLxx_DFP",
+          "version": "1.1.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WL Series",
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32WLE5"
+      },
+      "STM32WB15CCUx": {
+        "name": "STM32WB15CCUx",
+        "memories": {
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 327680,
+            "startup": true,
+            "default": true
+          },
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 49152,
+            "startup": false,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WB_M4.FLM",
+            "start": 134217728,
+            "size": 1048576,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "SinglePrecision",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WBxx_DFP",
+          "version": "1.2.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "sectors" : [
+            [ 134217728, 4096 ]
+        ],
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WB Series",
+        "sub_family": "STM32WB15"
+    },
     "STM32WB55CCUx": {
         "name": "STM32WB55CCUx",
         "memories": {
