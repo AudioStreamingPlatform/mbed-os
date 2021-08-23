@@ -28,6 +28,7 @@
 #include "platform/mbed_wait_api.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #if DEVICE_SLEEP
 

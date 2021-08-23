@@ -18,6 +18,7 @@
 #ifdef MBED_MINIMAL_PRINTF
 
 #include "mbed_printf_implementation.h"
+#include "mbed_toolchain.h"
 
 #include <limits.h>
 
