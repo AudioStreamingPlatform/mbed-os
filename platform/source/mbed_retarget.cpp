@@ -1935,7 +1935,7 @@ extern "C" MBED_WEAK long int _scanf_mbtowc(
     return 0;
 }
 
-static  void validate_errno_values(int value)
+[[maybe_unused]] static  void validate_errno_values(int value)
 {
 
     switch (value) {
