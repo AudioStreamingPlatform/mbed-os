@@ -1809,26 +1809,39 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive_IT(I2C_HandleTypeDef *hi2c, uint16_t De
   */
 HAL_StatusTypeDef HAL_I2C_Slave_Transmit_IT(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size)
 {
+  __IO uint32_t count = 0U;
 
-  if (hi2c->State == HAL_I2C_STATE_READY)
-  {
-    if ((pData == NULL) || (Size == 0U))
-    {
+  if (hi2c->State == HAL_I2C_STATE_READY) {
+    if ((pData == NULL) || (Size == 0U)) {
       return  HAL_ERROR;
     }
+
+    /* Wait until BUSY flag is reset */
+    count = I2C_TIMEOUT_BUSY_FLAG * (SystemCoreClock /25U /1000U);
+    do {
+      if (count-- == 0U) {
+        hi2c->PreviousState = I2C_STATE_NONE;
+        hi2c->State = HAL_I2C_STATE_READY;
+
+        /* Process Unlocked */
+        __HAL_UNLOCK(hi2c);
+
+        return HAL_TIMEOUT;
+      }
+    }
+    while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
     /* Process Locked */
     __HAL_LOCK(hi2c);
 
     /* Check if the I2C is already enabled */
-    if ((hi2c->Instance->CR1 & I2C_CR1_PE) != I2C_CR1_PE)
-    {
+    if ((hi2c->Instance->CR1 & I2C_CR1_PE) != I2C_CR1_PE) {
       /* Enable I2C peripheral */
       __HAL_I2C_ENABLE(hi2c);
     }
 
     /* Disable Pos */
-    CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_POS);
+    hi2c->Instance->CR1 &= ~I2C_CR1_POS;
 
     hi2c->State     = HAL_I2C_STATE_BUSY_TX;
     hi2c->Mode      = HAL_I2C_MODE_SLAVE;
@@ -1837,11 +1850,11 @@ HAL_StatusTypeDef HAL_I2C_Slave_Transmit_IT(I2C_HandleTypeDef *hi2c, uint8_t *pD
     /* Prepare transfer parameters */
     hi2c->pBuffPtr    = pData;
     hi2c->XferCount   = Size;
-    hi2c->XferSize    = hi2c->XferCount;
     hi2c->XferOptions = I2C_NO_OPTION_FRAME;
+    hi2c->XferSize    = hi2c->XferCount;
 
     /* Enable Address Acknowledge */
-    SET_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+    hi2c->Instance->CR1 |= I2C_CR1_ACK;
 
     /* Process Unlocked */
     __HAL_UNLOCK(hi2c);
@@ -1854,9 +1867,7 @@ HAL_StatusTypeDef HAL_I2C_Slave_Transmit_IT(I2C_HandleTypeDef *hi2c, uint8_t *pD
     __HAL_I2C_ENABLE_IT(hi2c, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR);
 
     return HAL_OK;
-  }
-  else
-  {
+  } else {
     return HAL_BUSY;
   }
 }
@@ -3423,7 +3434,6 @@ HAL_StatusTypeDef HAL_I2C_IsDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t DevAdd
     {
       return HAL_BUSY;
     }
-
     /* Process Locked */
     __HAL_LOCK(hi2c);
 
@@ -4223,6 +4233,7 @@ HAL_StatusTypeDef HAL_I2C_Slave_Seq_Transmit_IT(I2C_HandleTypeDef *hi2c, uint8_t
   }
 }
 
+/* BEGIN: B&O backported from later version, to support NOSTRETCH timing */
 /**
   * @brief  Sequential transmit in slave mode an amount of data in non-blocking mode with DMA
   * @note   This interface allow to manage repeated start condition when a direction change during transfer
@@ -4235,6 +4246,7 @@ HAL_StatusTypeDef HAL_I2C_Slave_Seq_Transmit_IT(I2C_HandleTypeDef *hi2c, uint8_t
   */
 HAL_StatusTypeDef HAL_I2C_Slave_Seq_Transmit_DMA(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size, uint32_t XferOptions)
 {
+  uint32_t count;
   HAL_StatusTypeDef dmaxferstatus;
 
   /* Check the parameters */
@@ -4246,6 +4258,16 @@ HAL_StatusTypeDef HAL_I2C_Slave_Seq_Transmit_DMA(I2C_HandleTypeDef *hi2c, uint8_
     {
       return  HAL_ERROR;
     }
+
+    /* Wait until BUSY flag is reset, otherwise we might start it too early, when preparing next transmit */
+    count = I2C_TIMEOUT_BUSY_FLAG * (SystemCoreClock /25U /1000U);
+    do
+    {
+      if (count-- == 0U)
+      {
+        return HAL_TIMEOUT; 
+      }
+    } while(__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
     /* Process Locked */
     __HAL_LOCK(hi2c);
@@ -4388,6 +4410,8 @@ HAL_StatusTypeDef HAL_I2C_Slave_Seq_Transmit_DMA(I2C_HandleTypeDef *hi2c, uint8_
       /* Process Unlocked */
       __HAL_UNLOCK(hi2c);
 
+      /* Enable EVT and ERR interrupt (otherwise all interrupts ignored) */
+      __HAL_I2C_ENABLE_IT(hi2c, I2C_IT_EVT | I2C_IT_ERR);
       return HAL_ERROR;
     }
   }
@@ -4396,6 +4420,7 @@ HAL_StatusTypeDef HAL_I2C_Slave_Seq_Transmit_DMA(I2C_HandleTypeDef *hi2c, uint8_
     return HAL_BUSY;
   }
 }
+/* END: B&O backported from later STM version */
 
 /**
   * @brief  Sequential receive in slave mode an amount of data in non-blocking mode with Interrupt
@@ -4645,7 +4670,8 @@ HAL_StatusTypeDef HAL_I2C_Slave_Seq_Receive_DMA(I2C_HandleTypeDef *hi2c, uint8_t
   */
 HAL_StatusTypeDef HAL_I2C_EnableListen_IT(I2C_HandleTypeDef *hi2c)
 {
-  if (hi2c->State == HAL_I2C_STATE_READY)
+  /* B&O Also accept if already in LISTEN because interrupts might need to be enabled (seen but not deeply investigated) */
+  if(hi2c->State == HAL_I2C_STATE_READY || hi2c->State == HAL_I2C_STATE_LISTEN)
   {
     hi2c->State = HAL_I2C_STATE_LISTEN;
 
@@ -4972,9 +4998,10 @@ void HAL_I2C_ER_IRQHandler(I2C_HandleTypeDef *hi2c)
     tmp2 = hi2c->XferCount;
     tmp3 = hi2c->State;
     tmp4 = hi2c->PreviousState;
-    if ((tmp1 == HAL_I2C_MODE_SLAVE) && (tmp2 == 0U) && \
-        ((tmp3 == HAL_I2C_STATE_BUSY_TX) || (tmp3 == HAL_I2C_STATE_BUSY_TX_LISTEN) || \
-         ((tmp3 == HAL_I2C_STATE_LISTEN) && (tmp4 == I2C_STATE_SLAVE_BUSY_TX))))
+    /* Note: With DMA HAL_I2C_STATE_BUSY_TX_LISTEN AF might arrive before DMA complete callback (tmp2>0, seen but not often) */
+    if((tmp1 == HAL_I2C_MODE_SLAVE) && (tmp2 == 0U || tmp3 == HAL_I2C_STATE_BUSY_TX_LISTEN) && \
+      ((tmp3 == HAL_I2C_STATE_BUSY_TX) || (tmp3 == HAL_I2C_STATE_BUSY_TX_LISTEN) || \
+      ((tmp3 == HAL_I2C_STATE_LISTEN) && (tmp4 == I2C_STATE_SLAVE_BUSY_TX))))
     {
       I2C_Slave_AF(hi2c);
     }
@@ -5063,7 +5090,7 @@ __weak void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
   *                the configuration information for the specified I2C.
   * @retval None
   */
-__weak void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+__weak void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size)
 {
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hi2c);
@@ -5641,10 +5668,18 @@ static void I2C_MasterReceive_BTF(I2C_HandleTypeDef *hi2c)
   else if (hi2c->XferCount == 2U)
   {
     /* Prepare next transfer or stop current transfer */
-    if ((CurrentXferOptions == I2C_FIRST_FRAME) || (CurrentXferOptions == I2C_LAST_FRAME_NO_STOP))
+/* MBED */
+    if((CurrentXferOptions != I2C_FIRST_AND_LAST_FRAME) && (CurrentXferOptions != I2C_LAST_FRAME) && (CurrentXferOptions != I2C_NO_OPTION_FRAME))
     {
       /* Disable Acknowledge */
-      CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+      hi2c->Instance->CR1 &= ~I2C_CR1_ACK;
+
+      if((CurrentXferOptions == I2C_NEXT_FRAME) || (CurrentXferOptions == I2C_FIRST_FRAME))
+      {
+        /* Generate ReStart */
+        hi2c->Instance->CR1 |= I2C_CR1_START;
+      }
+/* MBED */
     }
     else if ((CurrentXferOptions == I2C_NEXT_FRAME) || (CurrentXferOptions == I2C_FIRST_AND_NEXT_FRAME))
     {
@@ -5963,10 +5998,10 @@ static void I2C_SlaveTransmit_TXE(I2C_HandleTypeDef *hi2c)
 
     /* Update counter */
     hi2c->XferCount--;
-
-    if ((hi2c->XferCount == 0U) && (CurrentState == HAL_I2C_STATE_BUSY_TX_LISTEN))
+    if((hi2c->XferCount == 0U) && (CurrentState == HAL_I2C_STATE_BUSY_TX_LISTEN
+      || CurrentState == HAL_I2C_STATE_BUSY_TX))
     {
-      /* Last Byte is received, disable Interrupt */
+      /* Last Byte transmitted, disable Interrupt */
       __HAL_I2C_DISABLE_IT(hi2c, I2C_IT_BUF);
 
       /* Set state at HAL_I2C_STATE_LISTEN */
@@ -6039,7 +6074,7 @@ static void I2C_SlaveReceive_RXNE(I2C_HandleTypeDef *hi2c)
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
       hi2c->SlaveRxCpltCallback(hi2c);
 #else
-      HAL_I2C_SlaveRxCpltCallback(hi2c);
+      HAL_I2C_SlaveRxCpltCallback(hi2c, hi2c->pBuffPtr, hi2c->XferSize);
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
     }
   }
@@ -6118,6 +6153,7 @@ static void I2C_Slave_ADDR(I2C_HandleTypeDef *hi2c, uint32_t IT2Flags)
   }
 }
 
+/* BEGIN: B&O backported from latest version */
 /**
   * @brief  Handle STOPF flag for Slave
   * @param  hi2c Pointer to a I2C_HandleTypeDef structure that contains
@@ -6172,7 +6208,6 @@ static void I2C_Slave_STOPF(I2C_HandleTypeDef *hi2c)
     else
     {
       hi2c->XferCount = (uint16_t)(__HAL_DMA_GET_COUNTER(hi2c->hdmatx));
-
       if (hi2c->XferCount != 0U)
       {
         /* Set ErrorCode corresponding to a Non-Acknowledge */
@@ -6252,7 +6287,7 @@ static void I2C_Slave_STOPF(I2C_HandleTypeDef *hi2c)
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
       hi2c->SlaveRxCpltCallback(hi2c);
 #else
-      HAL_I2C_SlaveRxCpltCallback(hi2c);
+      HAL_I2C_SlaveRxCpltCallback(hi2c, hi2c->pBuffPtr, hi2c->XferSize);
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
     }
 
@@ -6281,12 +6316,13 @@ static void I2C_Slave_STOPF(I2C_HandleTypeDef *hi2c)
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
         hi2c->SlaveRxCpltCallback(hi2c);
 #else
-        HAL_I2C_SlaveRxCpltCallback(hi2c);
+        HAL_I2C_SlaveRxCpltCallback(hi2c, hi2c->pBuffPtr, hi2c->XferSize);
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
       }
     }
   }
 }
+/* END: B&O backported from latest version */
 
 /**
   * @param  hi2c Pointer to a I2C_HandleTypeDef structure that contains
@@ -6879,6 +6915,7 @@ static HAL_StatusTypeDef I2C_RequestMemoryRead(I2C_HandleTypeDef *hi2c, uint16_t
   return HAL_OK;
 }
 
+/* BEGIN: B&O backported and slightly modified from later version */
 /**
   * @brief  DMA I2C process complete callback.
   * @param  hdma DMA handle
@@ -6915,6 +6952,8 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
 
     if (CurrentState == HAL_I2C_STATE_BUSY_TX_LISTEN)
     {
+      /* B&O Do not change state or any callback's here, let IRQ handle that (caused problems) */
+#if 0
       /* Set state at HAL_I2C_STATE_LISTEN */
       hi2c->PreviousState = I2C_STATE_SLAVE_BUSY_TX;
       hi2c->State = HAL_I2C_STATE_LISTEN;
@@ -6925,6 +6964,7 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
 #else
       HAL_I2C_SlaveTxCpltCallback(hi2c);
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
+#endif
     }
     else if (CurrentState == HAL_I2C_STATE_BUSY_RX_LISTEN)
     {
@@ -6936,7 +6976,7 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
       hi2c->SlaveRxCpltCallback(hi2c);
 #else
-      HAL_I2C_SlaveRxCpltCallback(hi2c);
+      HAL_I2C_SlaveRxCpltCallback(hi2c, hi2c->pBuffPtr, hi2c->XferSize);
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
     }
     else
@@ -6960,7 +7000,7 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
     __HAL_I2C_DISABLE_IT(hi2c, I2C_IT_EVT | I2C_IT_ERR);
 
     /* Prepare next transfer or stop current transfer */
-    if ((CurrentXferOptions == I2C_NO_OPTION_FRAME) || (CurrentXferOptions == I2C_FIRST_AND_LAST_FRAME) || (CurrentXferOptions == I2C_OTHER_AND_LAST_FRAME) || (CurrentXferOptions == I2C_LAST_FRAME))
+    if ((CurrentXferOptions == I2C_NO_OPTION_FRAME) || (CurrentXferOptions == I2C_FIRST_AND_LAST_FRAME) || /*(CurrentXferOptions == I2C_OTHER_AND_LAST_FRAME) ||*/ (CurrentXferOptions == I2C_LAST_FRAME))
     {
       /* Generate Stop */
       SET_BIT(hi2c->Instance->CR1, I2C_CR1_STOP);
@@ -7016,6 +7056,7 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef *hdma)
     /* Do nothing */
   }
 }
+/* END: B&O backported newer version */
 
 /**
   * @brief  DMA I2C communication error callback.

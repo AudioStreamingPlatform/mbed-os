@@ -1658,7 +1658,7 @@ FRESULT dir_clear (	/* Returns FR_OK or FR_DISK_ERR */
 #if FF_USE_LFN == 3		/* Quick table clear by using multi-secter write */
 	/* Allocate a temporary buffer */
 	for (szb = ((DWORD)fs->csize * SS(fs) >= MAX_MALLOC) ? MAX_MALLOC : fs->csize * SS(fs); szb > SS(fs) && !(ibuf = (BYTE *)ff_memalloc(szb)); szb /= 2) ;
-	if (szb > SS(fs)) {		/* Buffer allocated? */
+	if (ibuf && szb > SS(fs)) {		/* Buffer allocated? */
 		mem_set(ibuf, 0, szb);
 		szb /= SS(fs);		/* Bytes -> Sectors */
 		for (n = 0; n < fs->csize && disk_write(fs->pdrv, ibuf, sect + n, szb) == RES_OK; n += szb) ;	/* Fill the cluster with 0 */

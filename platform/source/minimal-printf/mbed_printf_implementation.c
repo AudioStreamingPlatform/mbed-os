@@ -298,7 +298,7 @@ static void mbed_minimal_formatted_string_double(char *buffer, size_t length, in
         /* get decimal part */
         double precision = 1.0;
 
-        for (size_t index = 0; index < dec_precision; index++) {
+        for (int index = 0; index < dec_precision; index++) {
             precision *= 10;
         }
 

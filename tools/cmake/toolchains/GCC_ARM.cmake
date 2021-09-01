@@ -31,6 +31,7 @@ endif()
 list(APPEND common_options
     "-Wall"
     "-Wextra"
+    "-Werror"
     "-Wno-unused-parameter"
     "-Wno-missing-field-initializers"
     "-fmessage-length=0"
