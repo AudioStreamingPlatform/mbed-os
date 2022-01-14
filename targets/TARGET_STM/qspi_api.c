@@ -959,7 +959,7 @@ qspi_status_t qspi_enable_memory_mode(qspi_t *obj)
     st_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
     st_command.NbData            = 1;					
 
-    QSPI_CommandTypeDef st_memory;
+    QSPI_MemoryMappedTypeDef st_memory;
     st_memory.TimeOutPeriod = 0xFFFF;
     st_memory.TimeOutActivation = QSPI_TIMEOUT_COUNTER_DISABLE;
 
