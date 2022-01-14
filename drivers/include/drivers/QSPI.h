@@ -211,6 +211,14 @@ public:
      */
     qspi_status_t command_transfer(qspi_inst_t instruction, int address, const char *tx_buffer, size_t tx_length, const char *rx_buffer, size_t rx_length);
 
+    /** Set the qspi bus clock frequency
+     *
+     *  @param hz Enable memory mapped mode
+     *  @returns
+     *    Returns QSPI_STATUS_SUCCESS on successful, fails if the interface is already init-ed
+     */
+    qspi_status_t enable_memory_mode();
+
 #if !defined(DOXYGEN_ONLY)
 protected:
     /** Acquire exclusive access to this SPI bus

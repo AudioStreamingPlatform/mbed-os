@@ -255,6 +255,11 @@ qspi_status_t QSPI::command_transfer(qspi_inst_t instruction, int address, const
     return ret_status;
 }
 
+qspi_status_t QSPI::enable_memory_mode()
+{
+    return qspi_enable_memory_mode(&_qspi);
+}
+
 void QSPI::lock()
 {
     _mutex->lock();

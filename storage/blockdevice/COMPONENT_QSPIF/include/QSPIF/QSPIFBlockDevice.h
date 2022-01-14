@@ -248,6 +248,13 @@ public:
      */
     virtual const char *get_type() const;
 
+    /** Enable memory mapped mode
+     *
+     *  @return         QSPIF_BD_ERROR_OK(0) - success
+     *                  QSPIF_BD_ERROR_DEVICE_ERROR - device driver transaction failed
+     */
+    virtual int enable_memory_mode();
+
 private:
     /********************************/
     /*   Different Device Csel Mgmt */
