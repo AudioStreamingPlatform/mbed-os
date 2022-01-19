@@ -370,7 +370,7 @@ qspi_status_t qspi_prepare_command(const qspi_command_t *command, QSPI_CommandTy
 
     st_command->NbData = 0;
 
-    debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %x Instruction %x AddressMode %x AddressSize %x Address %x DataMode %x\n",
+    debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %lx Instruction %lx AddressMode %lx AddressSize %lx Address %lx DataMode %lx\n",
              st_command->InstructionMode, st_command->Instruction, st_command->AddressMode, st_command->AddressSize, st_command->Address, st_command->DataMode);
 
     return QSPI_STATUS_OK;
