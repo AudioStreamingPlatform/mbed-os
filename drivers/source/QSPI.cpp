@@ -63,7 +63,7 @@ QSPI::QSPI(PinName io0, PinName io1, PinName io2, PinName io3, PinName sclk, Pin
     _init_func = &QSPI::_initialize;
 
     //Go ahead init the device here with the default config
-    bool success = (this->*_init_func)();
+    [[maybe_unused]] bool success = (this->*_init_func)();
     MBED_ASSERT(success);
 }
 
@@ -89,7 +89,7 @@ QSPI::QSPI(const qspi_pinmap_t &pinmap, int mode) : _qspi()
     _init_func = &QSPI::_initialize_direct;
 
     //Go ahead init the device here with the default config
-    bool success = (this->*_init_func)();
+    [[maybe_unused]] bool success = (this->*_init_func)();
     MBED_ASSERT(success);
 }
 
@@ -253,6 +253,11 @@ qspi_status_t QSPI::command_transfer(qspi_inst_t instruction, int address, const
     }
 
     return ret_status;
+}
+
+qspi_status_t QSPI::enable_xip()
+{
+    return qspi_enable_xip(&_qspi);
 }
 
 void QSPI::lock()

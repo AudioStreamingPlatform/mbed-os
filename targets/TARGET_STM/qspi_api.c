@@ -234,7 +234,7 @@ qspi_status_t qspi_prepare_command(const qspi_command_t *command, OSPI_RegularCm
 #else /* OCTOSPI */
 qspi_status_t qspi_prepare_command(const qspi_command_t *command, QSPI_CommandTypeDef *st_command)
 {
-    debug_if(qspi_api_c_debug, "qspi_prepare_command In: instruction.value %x dummy_count %x address.bus_width %x address.disabled %x address.value %x address.size %x\n",
+    debug_if(qspi_api_c_debug, "qspi_prepare_command In: instruction.value %x dummy_count %x address.bus_width %x address.disabled %x address.value %lx address.size %x\n",
              command->instruction.value, command->dummy_count, command->address.bus_width, command->address.disabled, command->address.value, command->address.size);
 
     // TODO: shift these around to get more dynamic mapping
@@ -370,7 +370,7 @@ qspi_status_t qspi_prepare_command(const qspi_command_t *command, QSPI_CommandTy
 
     st_command->NbData = 0;
 
-    debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %x Instruction %x AddressMode %x AddressSize %x Address %x DataMode %x\n",
+    debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %lx Instruction %lx AddressMode %lx AddressSize %lx Address %lx DataMode %lx\n",
              st_command->InstructionMode, st_command->Instruction, st_command->AddressMode, st_command->AddressSize, st_command->Address, st_command->DataMode);
 
     return QSPI_STATUS_OK;
@@ -943,6 +943,32 @@ qspi_status_t qspi_command_transfer(qspi_t *obj, const qspi_command_t *command, 
 }
 #endif /* OCTOSPI */
 
+qspi_status_t qspi_enable_xip(qspi_t *obj)
+{
+    QSPI_CommandTypeDef st_command;
+    st_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
+    st_command.Instruction       = 0xEB;
+    st_command.AddressMode       = QSPI_ADDRESS_4_LINES;
+    st_command.Address           = 0;
+    st_command.AddressSize       = QSPI_ADDRESS_24_BITS;
+    st_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+    st_command.DataMode          = QSPI_DATA_4_LINES;
+    st_command.DummyCycles       = 6;
+    st_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
+    st_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
+    st_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+    st_command.NbData            = 0;
+
+    QSPI_MemoryMappedTypeDef st_memory;
+    st_memory.TimeOutPeriod = 0;
+    st_memory.TimeOutActivation = QSPI_TIMEOUT_COUNTER_DISABLE;
+
+    if (HAL_QSPI_MemoryMapped(&obj->handle, &st_command, &st_memory) != HAL_OK) {
+        return QSPI_STATUS_ERROR;
+    }
+
+    return QSPI_STATUS_OK;
+}
 
 const PinMap *qspi_master_sclk_pinmap()
 {
