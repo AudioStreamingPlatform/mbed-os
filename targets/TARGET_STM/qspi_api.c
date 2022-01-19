@@ -226,16 +226,16 @@ qspi_status_t qspi_prepare_command(const qspi_command_t *command, OSPI_RegularCm
             break;
     }
 
-    //debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %x Instruction %x AddressMode %x AddressSize %x Address %x DataMode %x\n",
-    //         st_command->InstructionMode, st_command->Instruction, st_command->AddressMode, st_command->AddressSize, st_command->Address, st_command->DataMode);
+    debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %x Instruction %x AddressMode %x AddressSize %x Address %x DataMode %x\n",
+             st_command->InstructionMode, st_command->Instruction, st_command->AddressMode, st_command->AddressSize, st_command->Address, st_command->DataMode);
 
     return QSPI_STATUS_OK;
 }
 #else /* OCTOSPI */
 qspi_status_t qspi_prepare_command(const qspi_command_t *command, QSPI_CommandTypeDef *st_command)
 {
-    //debug_if(qspi_api_c_debug, "qspi_prepare_command In: instruction.value %x dummy_count %x address.bus_width %x address.disabled %x address.value %x address.size %x\n",
-    //         command->instruction.value, command->dummy_count, command->address.bus_width, command->address.disabled, command->address.value, command->address.size);
+    debug_if(qspi_api_c_debug, "qspi_prepare_command In: instruction.value %x dummy_count %x address.bus_width %x address.disabled %x address.value %x address.size %x\n",
+             command->instruction.value, command->dummy_count, command->address.bus_width, command->address.disabled, (unsigned int)command->address.value, command->address.size);
 
     // TODO: shift these around to get more dynamic mapping
     switch (command->instruction.bus_width) {
@@ -370,8 +370,8 @@ qspi_status_t qspi_prepare_command(const qspi_command_t *command, QSPI_CommandTy
 
     st_command->NbData = 0;
 
-    //debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %x Instruction %x AddressMode %x AddressSize %x Address %x DataMode %x\n",
-    //         st_command->InstructionMode, st_command->Instruction, st_command->AddressMode, st_command->AddressSize, st_command->Address, st_command->DataMode);
+    debug_if(qspi_api_c_debug, "qspi_prepare_command Out: InstructionMode %x Instruction %x AddressMode %x AddressSize %x Address %x DataMode %x\n",
+             st_command->InstructionMode, st_command->Instruction, st_command->AddressMode, st_command->AddressSize, st_command->Address, st_command->DataMode);
 
     return QSPI_STATUS_OK;
 }

@@ -211,9 +211,8 @@ public:
      */
     qspi_status_t command_transfer(qspi_inst_t instruction, int address, const char *tx_buffer, size_t tx_length, const char *rx_buffer, size_t rx_length);
 
-    /** Set the qspi bus clock frequency
+    /** Enable XIP (memory mapped mode)
      *
-     *  @param hz Enable XIP (memory mapped mode)
      *  @returns
      *    Returns QSPI_STATUS_SUCCESS on successful and QSPI_STATUS_ERROR on failures.
      */
