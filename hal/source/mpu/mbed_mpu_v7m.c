@@ -169,7 +169,7 @@ void mbed_mpu_init()
             2,                          // Region
             0x80000000),                // Base
         ARM_MPU_RASR(
-            1,                          // DisableExec
+            0,                          // DisableExec
             ARM_MPU_AP_FULL,            // AccessPermission
             0,                          // TypeExtField
             0,                          // IsShareable
