@@ -549,9 +549,9 @@ int QSPIFBlockDevice::get_erase_value() const
     return 0xFF;
 }
 
-int QSPIFBlockDevice::enable_memory_mode()
+int QSPIFBlockDevice::enable_xip()
 {
-    return _qspi.enable_memory_mode();
+    return _qspi.enable_xip();
 }
 
 /********************************/

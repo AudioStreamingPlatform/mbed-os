@@ -213,11 +213,11 @@ public:
 
     /** Set the qspi bus clock frequency
      *
-     *  @param hz Enable memory mapped mode
+     *  @param hz Enable XIP (memory mapped mode)
      *  @returns
-     *    Returns QSPI_STATUS_SUCCESS on successful, fails if the interface is already init-ed
+     *    Returns QSPI_STATUS_SUCCESS on successful and QSPI_STATUS_ERROR on failures.
      */
-    qspi_status_t enable_memory_mode();
+    qspi_status_t enable_xip();
 
 #if !defined(DOXYGEN_ONLY)
 protected:

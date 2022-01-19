@@ -255,9 +255,9 @@ qspi_status_t QSPI::command_transfer(qspi_inst_t instruction, int address, const
     return ret_status;
 }
 
-qspi_status_t QSPI::enable_memory_mode()
+qspi_status_t QSPI::enable_xip()
 {
-    return qspi_enable_memory_mode(&_qspi);
+    return qspi_enable_xip(&_qspi);
 }
 
 void QSPI::lock()

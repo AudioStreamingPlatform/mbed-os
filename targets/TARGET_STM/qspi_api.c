@@ -943,7 +943,7 @@ qspi_status_t qspi_command_transfer(qspi_t *obj, const qspi_command_t *command, 
 }
 #endif /* OCTOSPI */
 
-qspi_status_t qspi_enable_memory_mode(qspi_t *obj)
+qspi_status_t qspi_enable_xip(qspi_t *obj)
 {
     QSPI_CommandTypeDef st_command;
     st_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
@@ -953,14 +953,14 @@ qspi_status_t qspi_enable_memory_mode(qspi_t *obj)
     st_command.AddressSize       = QSPI_ADDRESS_24_BITS;
     st_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
     st_command.DataMode          = QSPI_DATA_4_LINES;
-    st_command.DummyCycles       = 10;
+    st_command.DummyCycles       = 6;
     st_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
     st_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
     st_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
-    st_command.NbData            = 1;					
+    st_command.NbData            = 0;
 
     QSPI_MemoryMappedTypeDef st_memory;
-    st_memory.TimeOutPeriod = 0xFFFF;
+    st_memory.TimeOutPeriod = 0;
     st_memory.TimeOutActivation = QSPI_TIMEOUT_COUNTER_DISABLE;
 
     if (HAL_QSPI_MemoryMapped(&obj->handle, &st_command, &st_memory) != HAL_OK) {

@@ -203,13 +203,13 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
  */
 qspi_status_t qspi_command_transfer(qspi_t *obj, const qspi_command_t *command, const void *tx_data, size_t tx_size, void *rx_data, size_t rx_size);
 
-/** Enable memory mapped mode
+/** Enable XIP (memory mapped mode)
  *
  * @param obj The SPI object to configure
  * @return QSPI_STATUS_OK if memory mapped mode is enabled
            QSPI_STATUS_ERROR otherwise
  */
-qspi_status_t qspi_enable_memory_mode(qspi_t *obj);
+qspi_status_t qspi_enable_xip(qspi_t *obj);
 
 /** Receive a command and block of data
  *
