@@ -1239,6 +1239,7 @@ static ret_code_t write_execute(uint32_t prev_ret, fds_op_t * const p_op)
                 return FDS_ERR_NOT_FOUND;
             }
             // Setting the step is redundant since we are falling through.
+            [[fallthrough]];
         }
         // Fallthrough to FDS_OP_WRITE_HEADER_BEGIN.
 
