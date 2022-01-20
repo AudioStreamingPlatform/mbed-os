@@ -6,13 +6,17 @@ target_include_directories(mbed-core
         .
         nrfx
         nrfx/legacy
-        nrfx/legacy/ble_flash
 )
 
 target_sources(mbed-core
     INTERFACE
+        nrfx/legacy/nrf_drv_clock.c
+        nrfx/legacy/nrf_drv_power.c
+        nrfx/legacy/nrf_drv_ppi.c
         nrfx/legacy/nrf_drv_rng.c
-        nrfx/legacy/nrf_drv_usbd.c
-
-        nrfx/legacy/ble_flash/ble_flash.c
+        nrfx/legacy/nrf_drv_spi.c
+        nrfx/legacy/nrf_drv_spis.c
+        nrfx/legacy/nrf_drv_swi.c
+        nrfx/legacy/nrf_drv_twi.c
+        nrfx/legacy/nrf_drv_uart.c
 )

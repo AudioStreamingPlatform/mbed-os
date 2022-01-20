@@ -25,35 +25,16 @@ target_include_directories(mbed-core
 target_sources(mbed-core
     INTERFACE
         libraries/atomic/nrf_atomic.c
-
         libraries/atomic_fifo/nrf_atfifo.c
-
         libraries/balloc/nrf_balloc.c
-
-        libraries/experimental_log/src/nrf_log_backend_flash.c
-        libraries/experimental_log/src/nrf_log_backend_rtt.c
-        libraries/experimental_log/src/nrf_log_backend_serial.c
-        libraries/experimental_log/src/nrf_log_backend_uart.c
-        libraries/experimental_log/src/nrf_log_default_backends.c
-        libraries/experimental_log/src/nrf_log_frontend.c
-        libraries/experimental_log/src/nrf_log_str_formatter.c
-
-        libraries/experimental_memobj/nrf_memobj.c
-
+        libraries/memobj/nrf_memobj.c
         libraries/experimental_section_vars/nrf_section_iter.c
-
         libraries/fds/fds.c
-
         libraries/fstorage/nrf_fstorage.c
-
         libraries/queue/nrf_queue.c
-
         libraries/spi_mngr/nrf_spi_mngr.c
-
         libraries/strerror/nrf_strerror.c
-
         libraries/twi_mngr/nrf_twi_mngr.c
-
         libraries/util/app_error.c
         libraries/util/app_error_handler_gcc.c
         libraries/util/app_error_handler_iar.c

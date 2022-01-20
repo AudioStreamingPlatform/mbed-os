@@ -12,8 +12,6 @@ target_include_directories(mbed-core
         nrfx/hal
         nrfx/mdk
         nrfx/soc
-        softdevice
-        softdevice/common
 )
 
 target_sources(mbed-core
@@ -21,12 +19,14 @@ target_sources(mbed-core
         nrfx/drivers/src/nrfx_adc.c
         nrfx/drivers/src/nrfx_clock.c
         nrfx/drivers/src/nrfx_comp.c
+        nrfx/drivers/src/nrfx_dppi.c
         nrfx/drivers/src/nrfx_gpiote.c
         nrfx/drivers/src/nrfx_i2s.c
         nrfx/drivers/src/nrfx_lpcomp.c
+        nrfx/drivers/src/nrfx_nfct.c
+        nrfx/drivers/src/nrfx_nvmc.c
         nrfx/drivers/src/nrfx_pdm.c
         nrfx/drivers/src/nrfx_power.c
-        nrfx/drivers/src/nrfx_power_clock.c
         nrfx/drivers/src/nrfx_ppi.c
         nrfx/drivers/src/nrfx_pwm.c
         nrfx/drivers/src/nrfx_qdec.c
@@ -39,21 +39,17 @@ target_sources(mbed-core
         nrfx/drivers/src/nrfx_spis.c
         nrfx/drivers/src/nrfx_swi.c
         nrfx/drivers/src/nrfx_systick.c
+        nrfx/drivers/src/nrfx_temp.c
         nrfx/drivers/src/nrfx_timer.c
         nrfx/drivers/src/nrfx_twi.c
-        nrfx/drivers/src/nrfx_twim.c
+        nrfx/drivers/src/nrfx_twi_twim.c
+        nrfx/drivers/src/nrfx_twi.c
         nrfx/drivers/src/nrfx_twis.c
         nrfx/drivers/src/nrfx_uart.c
         nrfx/drivers/src/nrfx_uarte.c
+        nrfx/drivers/src/nrfx_usbd.c
         nrfx/drivers/src/nrfx_wdt.c
-
         nrfx/drivers/src/prs/nrfx_prs.c
-
         nrfx/hal/nrf_ecb.c
         nrfx/hal/nrf_nvmc.c
-
-        softdevice/common/nrf_sdh.c
-        softdevice/common/nrf_sdh_ant.c
-        softdevice/common/nrf_sdh_ble.c
-        softdevice/common/nrf_sdh_soc.c
 )
