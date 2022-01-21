@@ -55,7 +55,7 @@
 #include "pinmap_ex.h"
 #include "PeripheralPins.h"
 
-#include "nrfx_twi.h"
+#include "nrfx_twim.h"
 #include "app_util_platform.h"
 #include "prs/nrfx_prs.h"
 
@@ -129,7 +129,7 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
     config->instance = instance;
     config->sda = sda;
     config->scl = scl;
-    config->frequency = NRF_TWI_FREQ_100K;
+    config->frequency = NRF_TWIM_FREQ_100K;
     config->state = NORDIC_TWI_STATE_IDLE;
     config->mode = NORDIC_I2C_MODE_NONE;
 

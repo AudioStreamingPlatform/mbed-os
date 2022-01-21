@@ -82,7 +82,7 @@ void app_error_handler(ret_code_t error_code, uint32_t line_num, const uint8_t *
     "r0", "r1", "r2"
     );
 }
-#elif defined(__CORTEX_M) && (__CORTEX_M == 0x00)
+#else
 /* NRF51 implementation is currently not supporting PC readout */
 void app_error_handler(ret_code_t error_code, uint32_t line_num, const uint8_t * p_file_name)
 {
@@ -95,7 +95,5 @@ void app_error_handler(ret_code_t error_code, uint32_t line_num, const uint8_t *
 
     UNUSED_VARIABLE(error_info);
 }
-#else
-#error Architecture not supported
 #endif
 

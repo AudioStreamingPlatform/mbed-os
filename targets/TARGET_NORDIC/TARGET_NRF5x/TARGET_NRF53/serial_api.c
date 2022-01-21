@@ -46,7 +46,7 @@
 #include "app_util_platform.h"
 #include "pinmap_ex.h"
 #include "nrfx_gpiote.h"
-#include "nrfx_ppi.h"
+#include "nrfx_dppi.h"
 #include "PeripheralPins.h"
 
 #include "platform/mbed_atomic.h"
@@ -130,7 +130,7 @@ typedef struct {
     uint8_t active_bank;
     nrf_atfifo_t *fifo;
     uint32_t fifo_free_count;
-    nrf_ppi_channel_t ppi_rts;
+    nrf_dppi_channel_t ppi_rts;
     nrfx_gpiote_pin_t rts;
     bool rx_suspended;
 } nordic_uart_state_t;

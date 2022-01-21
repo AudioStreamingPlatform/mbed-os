@@ -21,15 +21,11 @@
 #include "nrfx_gpiote.h"
 #include <string.h>
 
-
-#if defined(TARGET_MCU_NRF51822)
-#define GPIO_PIN_COUNT 31
-#elif defined(TARGET_MCU_NRF52832)
-#define GPIO_PIN_COUNT 32
-#elif defined(TARGET_MCU_NRF52840)
+#if defined(TARGET_MCU_NRF5340_APPLICATION) || defined(TARGET_MCU_NRF5340_NETWORK)
 #define GPIO_PIN_COUNT 48
-#else
-#error not recognized gpio count for mcu
+#if !defined(GPIOTE_IRQn)
+#define GPIOTE_IRQn GPIOTE0_IRQn
+#endif
 #endif
 
 typedef struct {
@@ -85,7 +81,7 @@ void gpio_init(gpio_t *obj, PinName pin)
 
     NVIC_SetVector(GPIOTE_IRQn, (uint32_t) GPIOTE_IRQHandler);
 
-    (void) nrfx_gpiote_init();
+    (void) nrfx_gpiote_init(NRFX_GPIOTE_DEFAULT_CONFIG_IRQ_PRIORITY);
 
     m_gpio_cfg[obj->pin].used_as_gpio = true;
 }
@@ -199,7 +195,7 @@ int gpio_irq_init(gpio_irq_t *obj, PinName pin, gpio_irq_handler handler, uint32
         return -1;
     }
     MBED_ASSERT((uint32_t)pin < GPIO_PIN_COUNT);
-    (void) nrfx_gpiote_init();
+    (void) nrfx_gpiote_init(NRFX_GPIOTE_DEFAULT_CONFIG_IRQ_PRIORITY);
 
     gpiote_pin_uninit(pin); // try to uninitialize gpio before a change.
 

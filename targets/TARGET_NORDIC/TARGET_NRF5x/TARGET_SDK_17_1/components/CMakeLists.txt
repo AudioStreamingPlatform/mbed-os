@@ -7,12 +7,12 @@ target_include_directories(mbed-core
         drivers_nrf/nrf_soc_nosd
         libraries
         libraries/atomic
-        libraries/atomic_fifo
+        #libraries/atomic_fifo
         libraries/balloc
         libraries/delay
-        libraries/experimental_log
-        libraries/experimental_log/src
-        libraries/experimental_memobj
+        libraries/log
+        libraries/log/src
+        libraries/memobj
         libraries/experimental_section_vars
         libraries/fds
         libraries/fstorage
@@ -28,20 +28,25 @@ target_sources(mbed-core
         drivers_nrf/nrf_soc_nosd/nrf_nvic.c
         drivers_nrf/nrf_soc_nosd/nrf_soc.c
         libraries/atomic/nrf_atomic.c
-        libraries/atomic_fifo/nrf_atfifo.c
+        #libraries/atomic_fifo/nrf_atfifo.c
         libraries/balloc/nrf_balloc.c
         libraries/memobj/nrf_memobj.c
         libraries/experimental_section_vars/nrf_section_iter.c
         libraries/fds/fds.c
         libraries/fstorage/nrf_fstorage.c
+        libraries/log/src/nrf_log_backend_flash.c
+        libraries/log/src/nrf_log_backend_rtt.c
+        libraries/log/src/nrf_log_backend_serial.c
+        libraries/log/src/nrf_log_backend_uart.c
+        libraries/log/src/nrf_log_default_backends.c
+        libraries/log/src/nrf_log_frontend.c
+        libraries/log/src/nrf_log_str_formatter.c
         libraries/queue/nrf_queue.c
         libraries/spi_mngr/nrf_spi_mngr.c
         libraries/strerror/nrf_strerror.c
         libraries/twi_mngr/nrf_twi_mngr.c
         libraries/util/app_error.c
         libraries/util/app_error_handler_gcc.c
-        libraries/util/app_error_handler_iar.c
-        libraries/util/app_error_handler_keil.c
         libraries/util/app_error_weak.c
         libraries/util/app_util_platform.c
         libraries/util/nrf_assert.c

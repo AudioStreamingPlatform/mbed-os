@@ -14,7 +14,7 @@ target_sources(mbed-core
     INTERFACE
         PeripheralPinsDefault.c
         analogin_api.c
-        common_rtc.c
+        #common_rtc.c
         critical_section_api.c
         flash_api.c
         gpio_api.c
