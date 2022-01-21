@@ -7,7 +7,6 @@ target_include_directories(mbed-core
         drivers_nrf/nrf_soc_nosd
         libraries
         libraries/atomic
-        #libraries/atomic_fifo
         libraries/balloc
         libraries/delay
         libraries/log
@@ -28,7 +27,6 @@ target_sources(mbed-core
         drivers_nrf/nrf_soc_nosd/nrf_nvic.c
         drivers_nrf/nrf_soc_nosd/nrf_soc.c
         libraries/atomic/nrf_atomic.c
-        #libraries/atomic_fifo/nrf_atfifo.c
         libraries/balloc/nrf_balloc.c
         libraries/memobj/nrf_memobj.c
         libraries/experimental_section_vars/nrf_section_iter.c
