@@ -1,41 +1,34 @@
-/**
+/*
  * Copyright (c) 2018 - 2021, Nordic Semiconductor ASA
- *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
- * 4. This software, with or without modification, must only be used with a
- *    Nordic Semiconductor ASA integrated circuit.
- *
- * 5. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef NRFX_DPPI_H__
@@ -62,6 +55,8 @@ void nrfx_dppi_free(void);
  * @brief Function for allocating a DPPI channel.
  * @details This function allocates the first unused DPPI channel.
  *
+ * @note Function is thread safe as it uses @ref nrfx_flag32_alloc.
+ *
  * @param[out] p_channel Pointer to the DPPI channel number that has been allocated.
  *
  * @retval NRFX_SUCCESS      The channel was successfully allocated.
@@ -71,7 +66,10 @@ nrfx_err_t nrfx_dppi_channel_alloc(uint8_t * p_channel);
 
 /**
  * @brief Function for freeing a DPPI channel.
- * @details This function also disables the chosen channel.
+ * @details This function also disables the chosen channel. Configuration in
+ *          PUBLISH/SUBSCRIBE registers used for the channel is not cleared.
+ *
+ * @note Function is thread safe as it uses @ref nrfx_flag32_free.
  *
  * @param[in] channel DPPI channel to be freed.
  *
@@ -93,6 +91,9 @@ nrfx_err_t nrfx_dppi_channel_enable(uint8_t channel);
 /**
  * @brief Function for disabling a DPPI channel.
  *
+ * @note Disabling channel does not modify PUBLISH/SUBSCRIBE registers configured to use
+ *       that channel.
+ *
  * @param[in] channel DPPI channel to be disabled.
  *
  * @retval NRFX_SUCCESS             The channel was successfully disabled.
@@ -104,6 +105,8 @@ nrfx_err_t nrfx_dppi_channel_disable(uint8_t channel);
  * @brief Function for allocating a DPPI channel group.
  * @details This function allocates the first unused DPPI group.
  *
+ * @note Function is thread safe as it uses @ref nrfx_flag32_alloc.
+ *
  * @param[out] p_group Pointer to the DPPI channel group that has been allocated.
  *
  * @retval NRFX_SUCCESS      The channel group was successfully allocated.
@@ -114,6 +117,8 @@ nrfx_err_t nrfx_dppi_group_alloc(nrf_dppi_channel_group_t * p_group);
 /**
  * @brief Function for freeing a DPPI channel group.
  * @details This function also disables the chosen group.
+ *
+ * @note Function is thread safe as it uses @ref nrfx_flag32_free.
  *
  * @param[in] group DPPI channel group to be freed.
  *
@@ -128,6 +133,9 @@ nrfx_err_t nrfx_dppi_group_free(nrf_dppi_channel_group_t group);
  * @param[in] channel DPPI channel to be added.
  * @param[in] group   Channel group in which to include the channel.
  *
+ * @warning Channel group configuration can be modified only if subscriptions for tasks
+ *          associated with this group are disabled.
+ *
  * @retval NRFX_SUCCESS             The channel was successfully included.
  * @retval NRFX_ERROR_INVALID_PARAM The specified group or channel is not allocated.
  */
@@ -140,6 +148,9 @@ nrfx_err_t nrfx_dppi_channel_include_in_group(uint8_t                  channel,
  * @param[in] channel DPPI channel to be removed.
  * @param[in] group   Channel group from which to remove the channel.
  *
+ * @warning Channel group configuration can be modified only if subscriptions for tasks
+ *          associated with this group are disabled.
+ *
  * @retval NRFX_SUCCESS             The channel was successfully removed.
  * @retval NRFX_ERROR_INVALID_PARAM The specified group or channel is not allocated.
  */
@@ -150,6 +161,9 @@ nrfx_err_t nrfx_dppi_channel_remove_from_group(uint8_t                  channel,
  * @brief Function for clearing a DPPI channel group.
  *
  * @param[in] group Channel group to be cleared.
+ *
+ * @warning Channel group configuration can be modified only if subscriptions for tasks
+ *          associated with this group are disabled.
  *
  * @retval NRFX_SUCCESS             The group was successfully cleared.
  * @retval NRFX_ERROR_INVALID_PARAM The specified group is not allocated.

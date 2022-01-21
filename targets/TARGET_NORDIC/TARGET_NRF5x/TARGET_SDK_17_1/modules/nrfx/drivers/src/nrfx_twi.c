@@ -1,41 +1,34 @@
-/**
+/*
  * Copyright (c) 2015 - 2021, Nordic Semiconductor ASA
- *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
- * 4. This software, with or without modification, must only be used with a
- *    Nordic Semiconductor ASA integrated circuit.
- *
- * 5. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <nrfx.h>
@@ -116,6 +109,7 @@ typedef struct
     bool                    repeated;
     size_t                  bytes_transferred;
     bool                    hold_bus_uninit;
+    bool                    skip_gpio_cfg;
 } twi_control_block_t;
 
 static twi_control_block_t m_cb[NRFX_TWI_ENABLED_COUNT];
@@ -168,8 +162,8 @@ nrfx_err_t nrfx_twi_init(nrfx_twi_t const *        p_instance,
                          void *                    p_context)
 {
     NRFX_ASSERT(p_config);
-    NRFX_ASSERT(p_config->scl != p_config->sda);
     twi_control_block_t * p_cb  = &m_cb[p_instance->drv_inst_idx];
+    NRF_TWI_Type * p_twi = p_instance->p_twi;
     nrfx_err_t err_code;
 
     if (p_cb->state != NRFX_DRV_STATE_UNINITIALIZED)
@@ -208,16 +202,23 @@ nrfx_err_t nrfx_twi_init(nrfx_twi_t const *        p_instance,
     p_cb->repeated        = false;
     p_cb->busy            = false;
     p_cb->hold_bus_uninit = p_config->hold_bus_uninit;
+    p_cb->skip_gpio_cfg   = p_config->skip_gpio_cfg;
 
     /* To secure correct signal levels on the pins used by the TWI
        master when the system is in OFF mode, and when the TWI master is
        disabled, these pins must be configured in the GPIO peripheral.
     */
-    TWI_PIN_INIT(p_config->scl);
-    TWI_PIN_INIT(p_config->sda);
+    if (!p_config->skip_gpio_cfg)
+    {
+        TWI_PIN_INIT(p_config->scl);
+        TWI_PIN_INIT(p_config->sda);
+    }
 
-    NRF_TWI_Type * p_twi = p_instance->p_twi;
-    nrf_twi_pins_set(p_twi, p_config->scl, p_config->sda);
+    if (!p_config->skip_psel_cfg)
+    {
+        nrf_twi_pins_set(p_twi, p_config->scl, p_config->sda);
+    }
+
     nrf_twi_frequency_set(p_twi,
         (nrf_twi_frequency_t)p_config->frequency);
 
@@ -250,7 +251,7 @@ void nrfx_twi_uninit(nrfx_twi_t const * p_instance)
     nrfx_prs_release(p_instance->p_twi);
 #endif
 
-    if (!p_cb->hold_bus_uninit)
+    if (!p_cb->skip_gpio_cfg && !p_cb->hold_bus_uninit)
     {
         nrf_gpio_cfg_default(nrf_twi_scl_pin_get(p_instance->p_twi));
         nrf_gpio_cfg_default(nrf_twi_sda_pin_get(p_instance->p_twi));
@@ -283,6 +284,7 @@ void nrfx_twi_disable(nrfx_twi_t const * p_instance)
     nrf_twi_disable(p_twi);
 
     p_cb->state = NRFX_DRV_STATE_INITIALIZED;
+    p_cb->busy = false;
     NRFX_LOG_INFO("Instance disabled: %d.", p_instance->drv_inst_idx);
 }
 
@@ -568,10 +570,10 @@ static nrfx_err_t twi_rx_start_transfer(NRF_TWI_Type        * p_twi,
     return ret_code;
 }
 
-__STATIC_INLINE nrfx_err_t twi_xfer(NRF_TWI_Type               * p_twi,
-                                    twi_control_block_t        * p_cb,
-                                    nrfx_twi_xfer_desc_t const * p_xfer_desc,
-                                    uint32_t                     flags)
+static nrfx_err_t twi_xfer(NRF_TWI_Type               * p_twi,
+                           twi_control_block_t        * p_cb,
+                           nrfx_twi_xfer_desc_t const * p_xfer_desc,
+                           uint32_t                     flags)
 {
 
     nrfx_err_t err_code = NRFX_SUCCESS;
@@ -634,7 +636,7 @@ bool nrfx_twi_is_busy(nrfx_twi_t const * p_instance)
     return p_cb->busy;
 }
 
-nrfx_err_t nrfx_twi_xfer(nrfx_twi_t           const * p_instance,
+nrfx_err_t nrfx_twi_xfer(nrfx_twi_t const *           p_instance,
                          nrfx_twi_xfer_desc_t const * p_xfer_desc,
                          uint32_t                     flags)
 {
@@ -664,33 +666,14 @@ nrfx_err_t nrfx_twi_xfer(nrfx_twi_t           const * p_instance,
     return err_code;
 }
 
-nrfx_err_t nrfx_twi_tx(nrfx_twi_t const * p_instance,
-                       uint8_t            address,
-                       uint8_t    const * p_data,
-                       size_t             length,
-                       bool               no_stop)
-{
-    nrfx_twi_xfer_desc_t xfer = NRFX_TWI_XFER_DESC_TX(address, (uint8_t*)p_data, length);
-    return nrfx_twi_xfer(p_instance, &xfer, no_stop ? NRFX_TWI_FLAG_TX_NO_STOP : 0);
-}
-
-nrfx_err_t nrfx_twi_rx(nrfx_twi_t const * p_instance,
-                       uint8_t            address,
-                       uint8_t *          p_data,
-                       size_t             length)
-{
-    nrfx_twi_xfer_desc_t xfer = NRFX_TWI_XFER_DESC_RX(address, p_data, length);
-    return nrfx_twi_xfer(p_instance, &xfer, 0);
-}
-
-size_t nrfx_twi_data_count_get(nrfx_twi_t const * const p_instance)
+size_t nrfx_twi_data_count_get(nrfx_twi_t const * p_instance)
 {
     return m_cb[p_instance->drv_inst_idx].bytes_transferred;
 }
 
 uint32_t nrfx_twi_stopped_event_get(nrfx_twi_t const * p_instance)
 {
-    return (uint32_t)nrf_twi_event_address_get(p_instance->p_twi, NRF_TWI_EVENT_STOPPED);
+    return nrf_twi_event_address_get(p_instance->p_twi, NRF_TWI_EVENT_STOPPED);
 }
 
 static void twi_irq_handler(NRF_TWI_Type * p_twi, twi_control_block_t * p_cb)

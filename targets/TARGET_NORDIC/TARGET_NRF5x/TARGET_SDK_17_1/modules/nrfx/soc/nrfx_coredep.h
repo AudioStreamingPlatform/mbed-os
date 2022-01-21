@@ -1,41 +1,34 @@
-/**
+/*
  * Copyright (c) 2018 - 2021, Nordic Semiconductor ASA
- *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
- * 4. This software, with or without modification, must only be used with a
- *    Nordic Semiconductor ASA integrated circuit.
- *
- * 5. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef NRFX_COREDEP_H__
@@ -65,7 +58,8 @@
 #elif defined(NRF51)
     #define NRFX_DELAY_CPU_FREQ_MHZ 16
     #define NRFX_DELAY_DWT_PRESENT  0
-#elif defined(NRF52810_XXAA) || defined(NRF52811_XXAA) || defined(NRF52820_XXAA)
+#elif defined(NRF52805_XXAA) || defined(NRF52810_XXAA) || \
+      defined(NRF52811_XXAA) || defined(NRF52820_XXAA)
     #define NRFX_DELAY_CPU_FREQ_MHZ 64
     #define NRFX_DELAY_DWT_PRESENT  0
 #elif defined(NRF52832_XXAA) || defined(NRF52832_XXAB) || \
@@ -73,27 +67,31 @@
       defined(NRF9160_XXAA)
     #define NRFX_DELAY_CPU_FREQ_MHZ 64
     #define NRFX_DELAY_DWT_PRESENT  1
+#elif defined(NRF5340_XXAA_APPLICATION)
+    #define NRFX_DELAY_CPU_FREQ_MHZ (SystemCoreClock / 1000000)
+    #define NRFX_DELAY_DWT_PRESENT  1
+#elif defined(NRF5340_XXAA_NETWORK)
+    #define NRFX_DELAY_CPU_FREQ_MHZ 64
+    #define NRFX_DELAY_DWT_PRESENT  1
 #else
-    #error "Unknown device."
+    #define NRFX_DELAY_CPU_FREQ_MHZ (SystemCoreClock / 1000000)
+    #define NRFX_DELAY_DWT_PRESENT  0
 #endif
 
 /**
  * @brief Function for delaying execution for a number of microseconds.
  *
- * The value of @p time_us is multiplied by the frequency in MHz. Therefore, the delay is limited to
- * maximum uint32_t capacity divided by frequency. For example:
- * - For SoCs working at 64MHz: 0xFFFFFFFF/64 = 0x03FFFFFF (67108863 microseconds)
- * - For SoCs working at 16MHz: 0xFFFFFFFF/16 = 0x0FFFFFFF (268435455 microseconds)
- *
+ * The value of @p time_us is multiplied by the CPU frequency in MHz. Therefore, the delay
+ * is limited to the maximum value of the uint32_t type divided by the frequency.
  * @sa NRFX_COREDEP_DELAY_US_LOOP_CYCLES
  *
  * @param time_us Number of microseconds to wait.
  */
-__STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us);
+NRF_STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us);
 
 /** @} */
 
-#ifndef SUPPRESS_INLINE_IMPLEMENTATION
+#ifndef NRF_DECLARE_ONLY
 
 #if NRFX_CHECK(NRFX_DELAY_DWT_BASED)
 
@@ -101,7 +99,7 @@ __STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us);
 #error "DWT unit not present in the SoC that is used."
 #endif
 
-__STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us)
+NRF_STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us)
 {
     if (time_us == 0)
     {
@@ -133,7 +131,7 @@ __STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us)
 
 #else // NRFX_CHECK(NRFX_DELAY_DWT_BASED)
 
-__STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us)
+NRF_STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us)
 {
     if (time_us == 0)
     {
@@ -147,7 +145,8 @@ __STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us)
         #if defined(NRF51)
             // The loop takes 4 cycles: 1 for SUBS, 3 for BHI.
             #define NRFX_COREDEP_DELAY_US_LOOP_CYCLES  4
-        #elif defined(NRF52810_XXAA) || defined(NRF52811_XXAA) || defined(NRF52820_XXAA)
+        #elif defined(NRF52805_XXAA) || defined(NRF52810_XXAA) || \
+              defined(NRF52811_XXAA) || defined(NRF52820_XXAA)
             // The loop takes 7 cycles: 1 for SUBS, 2 for BHI, 2 wait states
             // for each instruction.
             #define NRFX_COREDEP_DELAY_US_LOOP_CYCLES  7
@@ -175,6 +174,6 @@ __STATIC_INLINE void nrfx_coredep_delay_us(uint32_t time_us)
 
 #endif // !NRFX_CHECK(NRFX_DELAY_DWT_BASED_DELAY)
 
-#endif // SUPPRESS_INLINE_IMPLEMENTATION
+#endif // NRF_DECLARE_ONLY
 
 #endif // NRFX_COREDEP_H__

@@ -47,15 +47,15 @@ extern "C" {
 
 typedef enum
 {
-    UART_0 = (int)NRF_UART0_BASE
+    UART_0 = (int)NRF_UARTE0_NS_BASE
 } UARTName;
 
 
 typedef enum
 {
-    SPI_0 = (int)NRF_SPI0_BASE,
-    SPI_1 = (int)NRF_SPI1_BASE,
-    SPIS = (int)NRF_SPIS1_BASE
+    SPI_0 = (int)NRF_QSPI_NS_BASE,
+    SPI_1 = (int)NRF_SPIM1_NS_BASE,
+    SPIS = (int)NRF_SPIS1_NS_BASE
 } SPIName;
 
 typedef enum
@@ -66,8 +66,8 @@ typedef enum
 
 typedef enum
 {
-    I2C_0 = (int)NRF_TWI0_BASE,
-    I2C_1 = (int)NRF_TWI1_BASE
+    I2C_0 = (int)NRF_TWIM0_NS_BASE,
+    I2C_1 = (int)NRF_TWIM1_NS_BASE
 } I2CName;
 
 typedef enum

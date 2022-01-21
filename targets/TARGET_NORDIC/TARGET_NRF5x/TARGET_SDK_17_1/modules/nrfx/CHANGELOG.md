@@ -1,66 +1,198 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
-## [1.9.0] - 2021-07-15
+## [2.7.0] - 2021-12-16
 ### Added
-- Added high-drive pin configuration in the QSPI driver.
-- Added report period setting of 1 sample in the QDEC HAL.
+- Added new fields in the driver configuration structures to allow skipping GPIO and/or PSEL register configuration. Affected drivers: I2S, PDM, PWM, QDEC, QSPI, SPI, SPIM, SPIS, TWI, TWIM, TWIS, UART, UARTE.
 
 ### Changed
-- Updated MDK to version 8.40.3.
+- Updated MDK to version 8.44.2.
+
+### Fixed
+- Fixed the inability to start subsequent simple mode conversion from the user callback context in the SAADC driver.
+
+## [2.6.0] - 2021-11-22
+### Added
+- Added new functions for the GPIOTE peripheral management in the GPIOTE driver. Legacy API is now deprecated.
+- Added support for the TIMER CC channels 6 and 7.
+- Added the nrfx_flag32_allocator helper layer to unify resource allocation mechanism across several drivers.
+- Added functions for getting shortcut bitmask associated with specified channel in the TIMER HAL.
+- Added functions for channel allocation and deallocation in the nrfx_gppi helper layer.
+- Added the nrf_gpio_reconfigure() function for selective reconfiguration of the specified pin.
+- Introduced the NRFX_CLOCK_CONFIG_CT_ENABLED symbol for enabling the calibration timer support in the CLOCK driver. The symbol is enabled by default on supported SoCs.
+- Introduced the NRFX_CTZ and NRFX_CLZ macros to allow providing custom implementation for these functionalities. By default `__RBIT()` and `__CLZ()` CMSIS macros are used.
+- Introduced the NRFX_ATOMIC_CAS macro to allow providing custom implementation for atomic compare-and-swap functionality.
+- Implemented workaround for the nRF9160 anomaly 7 in the NVMC driver.
+
+### Changed
+- Updated MDK to version 8.44.1.
+
+### Fixed
+- Fixed missing disabling of interrupts in the nrfx_qspi_lfm_start() and nrfx_qspi_lfm_xfer() functions.
+- Fixed manual sample fetching when REPORTPER is disabled in the QDEC driver.
+- Fixed a race condition in the NFCT driver when starting the transfer.
+
+## [2.5.0] - 2021-05-05
+### Added
+- Added support for double-buffered transfers in the QSPI driver.
+- Added support for one-by-one channel configuration in the SAADC driver.
+- Added critical sections for channel allocation and deallocation in the DPPI driver.
+- Added support for generating documentation in the RST format using Sphinx tool.
+- Added high-drive pin configuration in the QSPI, TWIM, and SPIM drivers.
+- Added report period setting of 1 sample in the QDEC HAL.
+- Implemented workaround for nRF53 Series anomaly 121 in the QSPI driver.
+
+### Changed
+- Updated MDK to version 8.40.2.
+- Removed implicit channel deallocation during initialization in the GPIOTE driver.
+- Restricted pins that are supported for specific configuration on nRF5340 in the QSPI, TWIM, and SPIM drivers.
+- Aligned IRQ handler symbols to new naming scheme for nRF53 Series.
 
 ### Fixed
 - Fixed register access sequence in the COMP driver.
 - Fixed memory corruption when uninitialized channel was freed in the GPIOTE driver.
-- Fixed a race condition in the NFCT driver when starting the transfer.
+- Fixed spurious access of DCX pin for every instance of the peripheral when extended features were enabled in the SPIM driver.
+- Fixed overwrite of MCUSEL configuration in the nrf_gpio_cfg() function.
+- Fixed driver behavior for zero-length transfer in the TWIM driver.
+- Fixed internal state handling when transfer is aborted before finishing in the TWI and TWIM drivers.
+- Corrected assertions for MPS requirements in the USBD driver.
+- Corrected symbol describing maximum data payload for a full-speed isochronous endpoint in the USBD driver.
 
-## [1.8.6] - 2020-08-31
+## [2.4.0] - 2020-11-13
 ### Added
-- Implemented workaround for anomaly 223 in the USBD driver.
+- Added the channel allocator feature in the GPIOTE driver.
+- Added support for registers associated with the Direction Finding feature in the RADIO HAL.
+- Added support for the SUBSCRIBE and PUBLISH registers in the following HALs: AAR, CCM, ECB, RADIO, and RNG.
+- Added support for the LATENCY register present on nRF5340 in the GPIOTE driver and the GPIOTE HAL.
+- Implemented workaround for nRF53 Series anomaly 53 in the POWER driver.
 
 ### Changed
-- Updated MDK to version 8.35.0.
-
-## [1.8.5] - 2020-07-09
-### Added
-- Implemented workaround for anomaly 211 in the USBD driver.
-
-### Changed
-- Updated MDK to version 8.32.3.
-
-## [1.8.4] - 2020-04-27
-- Fixed an issue in the NFCT driver where the FIELDDETECTED event would be ignored and the FIELDLOST event would be processed twice. The driver now properly handles FIELDDETECTED and FIELDLOST events.
-
-## [1.8.3] - 2020-03-20
-### Added
-- Added documentation pages for nRF52820.
-- Added possibility to use the nRF52833 DK in development for nRF52820. LEDs and buttons in this DK use GPIOs that are not present in the actual nRF52820 device, so accesses to these need special handling in the GPIO HAL.
+- Updated MDK to 8.37.0.
 
 ### Fixed
-- Fixed assertions that check input pin selections in the legacy SAADC driver. Now the VDDHDIV5 setting is handled properly.
-- Fixed the number of machine cycles per single delay loop for nRF52820 in the nrfx_coredep module.
+- Fixed unused parameters in the PPI, CLOCK, SPIM and POWER drivers to resolve compilation warnings, such as 'flags' in the SPIM driver.
+- Fixed a race condition in the COMP driver when interrupt occured before update of the driver internal state.
+- Fixed minor C++ compilation warnings in the drivers.
+- Fixed implementation of workaround for nRF52 Series anomaly 197 in the POWER HAL, which was applied in incorrect configuration.
+- Fixed implementation of workaround for nRF53 Series anomaly 4 in the CLOCK driver, which was applied in incorrect configuration.
+- Fixed the incorrect signature of the nrf_clock_alwaysrun_set() function.
 
-## [1.8.2] - 2020-03-05
+## [2.3.0] - 2020-08-19
 ### Added
-- Added support for nRF52820.
-- Added new implementation of the SAADC driver. The new version is enabled when the NRFX_SAADC_API_V2 symbol is defined, otherwise the legacy one is used.
-- Introduced the NRFX_TWIM_NO_SPURIOUS_STOP_CHECK flag in the TWIM driver.
-- Added function for getting the configuration of shortcuts in the TWIM HAL.
-- Implemented workaround for nRF9160 anomaly 23 in the UARTE driver.
+- Added support for nRF52805.
+- Implemented workaround for nRF52 Series anomaly 197 in the POWER HAL.
+- Implemented workaround for nRF52 Series anomalies 211 and 223 in the USBD driver.
+- Added support for the nRF53 Series in the QSPI HAL.
+- Added function in the GPIO HAL that returns port index.
+- Introduced a QSPI HAL symbol that indicates the availability of the QSPI mode 1.
+- Introduced shortcut functionality in the CCM HAL.
+- Added function in the TIMER HAL for setting the specified shortcuts.
+- Added optional two-stage start procedure of the LFXO in the CLOCK driver.
 
 ### Changed
-- Updated MDK to version 8.32.1.
-- Improved the UARTE driver to consume less current after the driver uninitialization. Now all clocks are disabled properly.
-- Improved the GPIOTE driver robustness by setting the LATCH functionality to be used by default.
-- Improved handling of spurious STOP condition in the TWIM driver.
+- Updated MDK to 8.35.0.
+- Divided network and application core-specific functionalities for nRF5340 in the RESET HAL and the reset reason helper.
+
+### Fixed
+- Corrected assertions in the NVMC driver.
+- Corrected return types in the CCM HAL.
+- Fixed setting of program memory access mode for secure code in the NVMC driver.
+- Removed usage of the NRF_UICR symbol on non-secure targets in address validity checks in the NVMC driver.
+- Fixed an error message in the SPIM driver that prevented successful compilation with logging enabled.
+- Fixed unused parameters in the PPI HAL.
+
+## [2.2.0] - 2020-04-28
+### Added
+- Added support for nRF52820.
+- Added possibility to use the nRF52833 DK in development for nRF52820. LEDs and buttons in this DK use GPIOs that are not present in the actual nRF52820 device, so accesses to these need special handling in the GPIO HAL.
+- Added the nrfx_reset_reason helper layer, to facilitate developing generic code that uses the RESETREAS register.
+- Implemented workarounds for nRF52 Series anomalies 170 and 196 in the I2S driver.
+- Added implicit casting of uint32_t to unsigned long in log messages, to prevent compiler warnings.
+- Added missing secure and non-secure peripheral symbol translations for nRF5340 and nRF9160.
+- Added functions in the NVMC driver for reading and writing halfword data from the OTP region of the UICR.
+
+### Changed
+- Updated MDK to 8.32.1.
+- Improved documentation regarding double-buffered reception in the UARTE driver.
+- Unified policy of pin cleanup procedure during uninitialization of the drivers. Now every driver restores utilized pins to default setting.
 - Removed support for revision Engineering A of nRF52840 in the USBD driver.
+- Changed selected while() loops to NRFX_WAIT_FOR() macro in the SPIM, UARTE and CLOCK drivers to improve robustness.
 
 ### Fixed
 - Fixed assertions that check write addresses in the NVMC driver. Now the UICR memory region is handled properly.
-- Fixed an issue in the TWI driver that would make the driver stuck when a premature STOP condition was generated by a slave device. The driver now handles this situation properly and signals that a bus error occurred.
-- Fixed the stopping procedure in the PWM driver. Previously in very specific circumstances the PWM output might be not stopped at all or might be immediately restarted.
 - Fixed a race condition in the CLOCK driver when requested clock was stopped during ramp-up from high priority interrupt.
 - Fixed assertions that check pin numbers in the GPIO HAL and GPIOTE driver. Now noncontiguous groups of available pin numbers are handled properly.
+- Fixed assertion that checks correctness of limit setting in the SAADC driver.
+- Fixed spurious callback invocation when the SPIM driver was reinitialized to blocking mode from non-blocking mode.
+- Fixed missing workaround for I2S STOP anomaly for nRF52833.
+- Fixed handling of NRFX_SPIM_FLAG_HOLD_XFER setting in the blocking mode of the SPIM driver.
+- Fixed void pointer cast in the CLOCK HAL, which could cause memory corruption with specific compiler settings.
+- Fixed definition of the NRF_CLOCK_LFCLK_Synth value, to make it available also in builds for nRF5340.
+
+## [2.1.0] - 2020-01-24
+### Added
+- Added HALs for DCNF, OSCILLATORS, USBREG, and VREQCTRL.
+- Added support for 1-MHz clock frequency in TWIM.
+- Introduced the NRFX_I2S_STATUS_TRANSFER_STOPPED flag in the I2S driver.
+- Introduced the nrfx_power_compat layer that allows use of the nrfx_power API with new SoC.
+- Added encryption support in the QSPI driver.
+- Added support for USBD in nRF5340.
+- Expanded HALs to cover new functions in nRF5340: GPIO, I2S, PDM, POWER, QSPI, and REGULATORS.
+- Introduced new clock management system in the CLOCK driver.
+- Introduced new audio clock configuration settings in the I2S and PDM drivers for nRF5340.
+- Implemented workaround for nRF5340 anomaly 4 in the CLOCK driver.
+- Implemented workaround for nRF5340 anomaly 10 in the CCM HAL.
+- Implemented workaround for nRF9160 anomaly 21 and nRF5340 anomaly 6 in the NVMC HAL.
+- Implemented workaround for nRF9160 anomaly 23 and nRF5340 anomaly 44 in the UARTE driver.
+- Introduced the NRFX_TWIM_NO_SPURIOUS_STOP_CHECK flag in the TWIM driver.
+- Added functions for getting shortcut configuration in the TWIM HAL.
+
+### Changed
+- Updated MDK to 8.30.2.
+- Reorganized templates of nrfx_config header files for different SoCs. Now they are included through one common file according to the selected SoC.
+- Improved the UARTE driver to consume less current after the driver uninitialization. Now all clocks are disabled properly after uninitialization.
+- Improved the GPIOTE driver robustness by setting the LATCH functionality to be used by default.
+- Changed names of the frequency divider symbols in the QSPI HAL to reflect the new frequencies in nRF5340. Old API names were preserved and are still supported.
+- Improved spurious STOP condition handling in the TWIM driver.
+- Improved sampling procedure in the advanced blocking mode in the SAADC driver.
+- Improved calibration procedure in the SAADC driver for nRF5340 and nRF9160.
+
+### Fixed
+- Fixed address assertions in NVMC driver for the nRF5340 network core.
+- Fixed an issue in the TWI driver that would make the driver stuck when a premature STOP condition was generated by a slave device. The driver now handles this situation properly and signals that a bus error occurred.
+- Fixed the stopping procedure in the PWM driver. Previously in very specific circumstances the PWM output might be not stopped at all or might be immediately restarted.
+
+## [2.0.0] - 2019-11-06
+### Added
+- Added support for nRF5340.
+- Added HALs for: CACHE, FPU, MUTEX, and RESET.
+- Added driver and HAL for IPC.
+- Added possibility to configure in UART and UARTE the number of stop bits and the type of parity, when a given SoC allows it.
+- Added function in the GPIO HAL for selecting the MCU to control the specified pin.
+- Added support for ONESHOT register in the TIMER HAL.
+- Added support for LIST feature in HALs for SPIS and TWIS.
+- Added possibility to choose TIMER instance used for workarounds in the NFCT driver.
+
+### Changed
+- Updated MDK to 8.29.0.
+- Enhanced PWM driver API: added the "p_context" parameter to the event handler.
+- Updated address and task getters in all HALs to return values as uint32_t type.
+- Updated all HAL functions to take the pointer to the structure of registers of the peripheral as their first argument.
+- Changed __STATIC_INLINE symbol to NRF_STATIC_INLINE for HALs and NRFX_STATIC_INLINE for drivers.
+- Refactored the SAADC driver and HAL.
+- Refactored the WDT driver and HAL to support multiple instances.
+- Changed nrfx_gpiote_init() function to take the interrupt priority as its parameter. Previously this priority was an nrfx_config option.
+- Changed nrf_usbd_ep_all_disable() function to disable really all endpoints. Use nrf_usbd_ep_default_config() to restore the default endpoint configuration.
+- Updated nrfx_gpiote_out_init() and nrfx_gpiote_in_init() return codes. Now NRFX_ERROR_INVALID_STATE is changed to NRFX_ERROR_BUSY.
+- Replaced the SWI/EGU driver with one for EGU only.
+- Aligned symbol names for default IRQ priority in nrfx_config. These symbols are now adhering to the following standard: NRFX_xxx_DEFAULT_CONFIG_IRQ_PRIORITY.
+- Changed the way of configuring the MISO pin pull setting in SPI and SPIM drivers. Now it can be set separately for each instance.
+
+### Removed
+- Removed deprecated functions from drivers: TWI and TWIM. See migration guide for details.
+- Removed deprecated functions from HALs: ECB, NVMC, and TEMP. See migration guide for details.
+- Removed redundant bariers in the nrfx_usbd driver.
+- Removed the default configuration values for drivers from the nrfx_config header files.
 
 ## [1.8.1] - 2019-10-21
 ### Added

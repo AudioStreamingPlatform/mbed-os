@@ -1,10 +1,8 @@
 # Copyright (c) 2020 ARM Limited. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-if("MCU_NRF52832" IN_LIST MBED_TARGET_LABELS)
-    add_subdirectory(TARGET_MCU_NRF52832)
-elseif("MCU_NRF52840" IN_LIST MBED_TARGET_LABELS)
-    add_subdirectory(TARGET_MCU_NRF52840)
+if("MCU_NRF5340_APPLICATION" IN_LIST MBED_TARGET_LABELS)
+    add_subdirectory(TARGET_MCU_NRF5340_APPLICATION)
 endif()
 
 target_include_directories(mbed-core
