@@ -4,6 +4,7 @@
 
 target_include_directories(mbed-core
     INTERFACE
+        drivers_nrf/nrf_soc_nosd
         libraries
         libraries/atomic
         libraries/atomic_fifo
@@ -24,6 +25,8 @@ target_include_directories(mbed-core
 
 target_sources(mbed-core
     INTERFACE
+        drivers_nrf/nrf_soc_nosd/nrf_nvic.c
+        drivers_nrf/nrf_soc_nosd/nrf_soc.c
         libraries/atomic/nrf_atomic.c
         libraries/atomic_fifo/nrf_atfifo.c
         libraries/balloc/nrf_balloc.c

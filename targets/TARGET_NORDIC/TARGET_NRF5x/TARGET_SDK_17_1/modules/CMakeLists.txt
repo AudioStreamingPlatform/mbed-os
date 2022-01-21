@@ -12,6 +12,7 @@ target_include_directories(mbed-core
         nrfx/hal
         nrfx/mdk
         nrfx/soc
+        nrfx/templates
 )
 
 target_sources(mbed-core

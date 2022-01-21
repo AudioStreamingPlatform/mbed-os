@@ -25,7 +25,6 @@ target_include_directories(mbed-core
 target_sources(mbed-core
     INTERFACE
         PeripheralPins.c
-        USBPhy_Nordic.cpp
         device/cmsis_nvic.c
         device/system_nrf5340_application.c
         ${STARTUP_FILE}

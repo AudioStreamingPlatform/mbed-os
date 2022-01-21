@@ -48,7 +48,7 @@
 #elif DEVICE_SPI
 #include "nrfx_spi.h"
 #endif
-#include "nrf_twi.h"
+#include "nrf_twim.h"
 
 #include "nrf_pwm.h"
 
@@ -126,7 +126,7 @@ struct i2c_s {
     int instance;
     PinName sda;
     PinName scl;
-    nrf_twi_frequency_t frequency;
+    nrf_twim_frequency_t frequency;
     int state;
     int mode;
     bool update;

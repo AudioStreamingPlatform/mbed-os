@@ -4,7 +4,6 @@
 target_include_directories(mbed-core
     INTERFACE
         .
-        nrfx
         nrfx/legacy
 )
 

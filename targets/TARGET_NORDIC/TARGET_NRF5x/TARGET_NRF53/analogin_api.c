@@ -69,7 +69,7 @@ static void _analogin_init_direct(analogin_t *obj, const PinMap *pinmap)
          *  - Priority 7 (lowest).
          *  - No low power mode.
          */
-        nrfx_saadc_config_t adc_config = {
+        nrf_saadc_config_t adc_config = {
             .resolution         = (nrf_saadc_resolution_t)SAADC_CONFIG_RESOLUTION,
             .oversample         = (nrf_saadc_oversample_t)SAADC_CONFIG_OVERSAMPLE,
             .interrupt_priority = SAADC_CONFIG_IRQ_PRIORITY,

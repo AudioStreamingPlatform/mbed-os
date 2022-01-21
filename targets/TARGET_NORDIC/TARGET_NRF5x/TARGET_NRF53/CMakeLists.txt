@@ -20,7 +20,7 @@ target_sources(mbed-core
         gpio_api.c
         i2c_api.c
         itm_api.c
-        object_owners.c
+        #object_owners.c
         pinmap_ex.c
         pwmout_api.c
         reloc_vector_table.c
