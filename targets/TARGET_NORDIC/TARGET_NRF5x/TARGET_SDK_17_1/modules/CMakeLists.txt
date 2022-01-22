@@ -10,6 +10,7 @@ target_include_directories(mbed-core
         nrfx/drivers/src
         nrfx/drivers/src/prs
         nrfx/hal
+        nrfx/helpers
         nrfx/mdk
         nrfx/soc
         nrfx/templates
@@ -51,6 +52,5 @@ target_sources(mbed-core
         nrfx/drivers/src/nrfx_usbd.c
         nrfx/drivers/src/nrfx_wdt.c
         nrfx/drivers/src/prs/nrfx_prs.c
-        #nrfx/hal/nrf_ecb.c
-        #nrfx/hal/nrf_nvmc.c
+        nrfx/helpers/nrfx_flag32_allocator.c
 )

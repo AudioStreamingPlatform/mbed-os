@@ -452,7 +452,7 @@
 // <e> NRFX_GPIOTE_ENABLED - nrfx_gpiote - GPIOTE peripheral driver.
 //==========================================================
 #ifndef NRFX_GPIOTE_ENABLED
-#define NRFX_GPIOTE_ENABLED 0
+#define NRFX_GPIOTE_ENABLED 1
 #endif
 
 // <o> NRFX_GPIOTE_CONFIG_NUM_OF_EVT_HANDLERS - Number of dedicated handlers
