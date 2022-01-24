@@ -14,13 +14,11 @@ target_sources(mbed-core
     INTERFACE
         PeripheralPinsDefault.c
         analogin_api.c
-        #common_rtc.c
         critical_section_api.c
         flash_api.c
         gpio_api.c
         i2c_api.c
         itm_api.c
-        #object_owners.c
         pinmap_ex.c
         pwmout_api.c
         reloc_vector_table.c
