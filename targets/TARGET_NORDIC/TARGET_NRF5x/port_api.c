@@ -53,6 +53,8 @@ static NRF_GPIO_Type * const m_ports[] = GPIO_REG_LIST;
     static const uint32_t m_gpio_pin_count[] = {32};
 #elif defined(TARGET_MCU_NRF52840)
     static const uint32_t m_gpio_pin_count[] = {32, 16};
+#elif defined(TARGET_MCU_NRF5340_APPLICATION) || defined(TARGET_MCU_NRF5340_NETWORK)
+    static const uint32_t m_gpio_pin_count[] = {48};
 #else
     #error not recognized gpio count for mcu
 #endif

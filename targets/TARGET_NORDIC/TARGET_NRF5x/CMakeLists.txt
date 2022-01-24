@@ -3,10 +3,14 @@
 
 if("NRF52" IN_LIST MBED_TARGET_LABELS)
     add_subdirectory(TARGET_NRF52)
+elseif("NRF53" IN_LIST MBED_TARGET_LABELS)
+    add_subdirectory(TARGET_NRF53)
 endif()
 
 if("SDK_15_0" IN_LIST MBED_TARGET_LABELS)
     add_subdirectory(TARGET_SDK_15_0)
+elseif("SDK_17_1" IN_LIST MBED_TARGET_LABELS)
+    add_subdirectory(TARGET_SDK_17_1)
 endif()
 
 target_include_directories(mbed-core

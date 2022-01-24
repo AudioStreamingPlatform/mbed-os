@@ -710,7 +710,7 @@ static osThreadId_t svcRtxThreadNew (osThreadFunc_t func, void *argument, const 
     flags |= osRtxFlagSystemMemory;
   }
 
-#if (DOMAIN_NS == 1)
+#if (DOMAIN_NS == 1 && __ARM_FEATURE_CMSE == 3)
   // Allocate secure process stack
   if ((thread != NULL) && (tz_module != 0U)) {
     tz_memory = TZ_AllocModuleContext_S(tz_module);
@@ -767,7 +767,7 @@ static osThreadId_t svcRtxThreadNew (osThreadFunc_t func, void *argument, const 
     thread->stack_size    = stack_size;
     thread->sp            = (uint32_t)stack_mem + stack_size - 64U;
     thread->thread_addr   = (uint32_t)func;
-  #if (DOMAIN_NS == 1)
+  #if (DOMAIN_NS == 1 && __ARM_FEATURE_CMSE == 3)
     thread->tz_memory     = tz_memory;
   #ifdef RTX_TF_M_EXTENSION
     thread->tz_module     = tz_module;
@@ -1087,7 +1087,7 @@ static void osRtxThreadFree (os_thread_t *thread) {
   thread->state = osRtxThreadInactive;
   thread->id    = osRtxIdInvalid;
 
-#if (DOMAIN_NS == 1)
+#if (DOMAIN_NS == 1 && __ARM_FEATURE_CMSE == 3)
   // Free secure process stack
   if (thread->tz_memory != 0U) {
     (void)TZ_FreeModuleContext_S(thread->tz_memory);

@@ -42,7 +42,8 @@
 
 #include <string.h>
 #include "PeripheralPins.h"
-#include "nrfx_qspi.h"
+#include "nrf_qspi.h"
+#include "sdk_errors.h"
 
 /* 
 TODO
@@ -221,7 +222,7 @@ qspi_status_t qspi_init(qspi_t *obj, PinName io0, PinName io1, PinName io2, PinN
     config.pins.io1_pin = (uint32_t)io1;
     config.pins.io2_pin = (uint32_t)io2;
     config.pins.io3_pin = (uint32_t)io3;
-    config.irq_priority = SPI_DEFAULT_CONFIG_IRQ_PRIORITY;
+    config.irq_priority = NRFX_QSPI_DEFAULT_CONFIG_IRQ_PRIORITY;
 
     config.phy_if.sck_freq  = nrf_frequency(hz);
     config.phy_if.sck_delay = SCK_DELAY;
@@ -274,7 +275,7 @@ qspi_status_t qspi_write(qspi_t *obj, const qspi_command_t *command, const void 
         return status;
     }
 
-    if (is_word_aligned(data) &&
+    if (nrfx_is_word_aligned(data) &&
         nrfx_is_in_ram(data)) {
         // write here does not return how much it transfered, we return transfered all
         ret_code_t ret = nrfx_qspi_write(data, *length, command->address.value);
@@ -326,7 +327,7 @@ qspi_status_t qspi_read(qspi_t *obj, const qspi_command_t *command, void *data, 
         return status;
     }
 
-    if (is_word_aligned(data) &&
+    if (nrfx_is_word_aligned(data) &&
         nrfx_is_in_ram(data)) {
         ret_code_t ret = nrfx_qspi_read(data, *length, command->address.value);
         if (ret == NRF_SUCCESS ) {
@@ -432,41 +433,41 @@ static ret_code_t _qspi_drv_init(void)
 // Private helper to set NRF frequency divider
 nrf_qspi_frequency_t nrf_frequency(int hz)
 {
-    nrf_qspi_frequency_t freq = NRF_QSPI_FREQ_32MDIV16;
+    nrf_qspi_frequency_t freq = NRF_QSPI_FREQ_DIV16;
 
     // Convert hz to closest NRF frequency divider
     if (hz < 2130000)
-        freq = NRF_QSPI_FREQ_32MDIV16; // 2.0 MHz, minimum supported frequency
+        freq = NRF_QSPI_FREQ_DIV16; // 2.0 MHz, minimum supported frequency
     else if (hz < 2290000)
-        freq = NRF_QSPI_FREQ_32MDIV15; // 2.13 MHz
+        freq = NRF_QSPI_FREQ_DIV15; // 2.13 MHz
     else if (hz < 2460000)
-        freq = NRF_QSPI_FREQ_32MDIV14; // 2.29 MHz
+        freq = NRF_QSPI_FREQ_DIV14; // 2.29 MHz
     else if (hz < 2660000)
-        freq = NRF_QSPI_FREQ_32MDIV13; // 2.46 Mhz
+        freq = NRF_QSPI_FREQ_DIV13; // 2.46 Mhz
     else if (hz < 2900000)
-        freq = NRF_QSPI_FREQ_32MDIV12; // 2.66 MHz
+        freq = NRF_QSPI_FREQ_DIV12; // 2.66 MHz
     else if (hz < 3200000)
-        freq = NRF_QSPI_FREQ_32MDIV11; // 2.9 MHz
+        freq = NRF_QSPI_FREQ_DIV11; // 2.9 MHz
     else if (hz < 3550000)
-        freq = NRF_QSPI_FREQ_32MDIV10; // 3.2 MHz
+        freq = NRF_QSPI_FREQ_DIV10; // 3.2 MHz
     else if (hz < 4000000)
-        freq = NRF_QSPI_FREQ_32MDIV9; // 3.55 MHz
+        freq = NRF_QSPI_FREQ_DIV9; // 3.55 MHz
     else if (hz < 4570000)
-        freq = NRF_QSPI_FREQ_32MDIV8; // 4.0 MHz
+        freq = NRF_QSPI_FREQ_DIV8; // 4.0 MHz
     else if (hz < 5330000)
-        freq = NRF_QSPI_FREQ_32MDIV7; // 4.57 MHz
+        freq = NRF_QSPI_FREQ_DIV7; // 4.57 MHz
     else if (hz < 6400000)
-        freq = NRF_QSPI_FREQ_32MDIV6; // 5.33 MHz
+        freq = NRF_QSPI_FREQ_DIV6; // 5.33 MHz
     else if (hz < 8000000)
-        freq = NRF_QSPI_FREQ_32MDIV5; // 6.4 MHz
+        freq = NRF_QSPI_FREQ_DIV5; // 6.4 MHz
     else if (hz < 10600000)
-        freq = NRF_QSPI_FREQ_32MDIV4; // 8.0 MHz
+        freq = NRF_QSPI_FREQ_DIV4; // 8.0 MHz
     else if (hz < 16000000)
-        freq = NRF_QSPI_FREQ_32MDIV3; // 10.6 MHz
+        freq = NRF_QSPI_FREQ_DIV3; // 10.6 MHz
     else if (hz < 32000000)
-        freq = NRF_QSPI_FREQ_32MDIV2; // 16 MHz
+        freq = NRF_QSPI_FREQ_DIV2; // 16 MHz
     else
-        freq = NRF_QSPI_FREQ_32MDIV1; // 32 MHz
+        freq = NRF_QSPI_FREQ_DIV1; // 32 MHz
 
     return freq;
 }
