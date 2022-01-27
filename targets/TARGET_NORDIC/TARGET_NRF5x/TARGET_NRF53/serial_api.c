@@ -20,18 +20,27 @@
 #include "pinmap.h"
 #include "nrfx_uarte.h"
 
-nrfx_err_t nrfx_error;
-
 int stdio_uart_inited = 0;
 serial_t stdio_uart = { 0 };
 
-#if 0
-uint32_t nrfx_counter = 0;
-static void serial_evt_handler(const nrfx_uarte_event_t* p_event, void* p_context)
+uint32_t nrfx_tx_done = 0;
+uint32_t nrfx_rx_done = 0;
+uint32_t nrfx_error = 0;
+
+static void serial_event_handler(const nrfx_uarte_event_t* event, void* context)
 {
-    nrfx_counter++;
+    switch (event->type) {
+        case NRFX_UARTE_EVT_TX_DONE:
+            nrfx_tx_done++;
+            break;
+        case NRFX_UARTE_EVT_RX_DONE:
+            nrfx_rx_done++;
+            break;
+        case NRFX_UARTE_EVT_ERROR:
+            nrfx_error++;
+            break;
+    }
 }
-#endif
 
 void serial_init(serial_t *obj, PinName tx, PinName rx) {
 #if NRFX_CHECK(NRFX_UARTE0_ENABLED)
@@ -51,8 +60,7 @@ void serial_init(serial_t *obj, PinName tx, PinName rx) {
         stdio_uart_inited = 1;
     }
 
-    nrfx_err_t error = nrfx_uarte_init(&obj->instance, &obj->config, NULL);
-    nrfx_error = error;
+    nrfx_uarte_init(&obj->instance, &obj->config, serial_event_handler);
 }
 
 void serial_free(serial_t *obj) {
