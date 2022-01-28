@@ -56,7 +56,7 @@
 extern "C" {
 #endif
 
-#include "nrf_uarte.h"
+#include "nrfx_uarte.h"
 
 #if MBED_CONF_CRYPTOCELL310_PRESENT
 #include "objects_cryptocell.h"
@@ -67,28 +67,8 @@ struct trng_s {
 #endif
 
 struct serial_s {
-    int                 instance;
-    uint32_t            tx;
-    uint32_t            rx;
-    uint32_t            cts;
-    uint32_t            rts;
-    nrf_uarte_hwfc_t     hwfc;
-    nrf_uarte_parity_t   parity;
-    nrf_uarte_baudrate_t baudrate;
-    uint32_t            context;
-    uint32_t            handler;
-    uint32_t            mask;
-    uint32_t            event;
-    bool                update;
-#if DEVICE_SERIAL_ASYNCH
-    bool                rx_asynch;
-    uint32_t            tx_handler;
-    uint32_t            tx_mask;
-    uint32_t            tx_event;
-    uint32_t            rx_handler;
-    uint32_t            rx_mask;
-    uint32_t            rx_event;
-#endif
+    nrfx_uarte_t instance;
+    nrfx_uarte_config_t config;
 };
 
 struct spi_s {

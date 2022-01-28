@@ -1,77 +1,54 @@
+/* 
+ * Copyright (c) 2013 Nordic Semiconductor ASA
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ *   1. Redistributions of source code must retain the above copyright notice, this list 
+ *      of conditions and the following disclaimer.
+ *
+ *   2. Redistributions in binary form, except as embedded into a Nordic Semiconductor ASA 
+ *      integrated circuit in a product or a software update for such product, must reproduce 
+ *      the above copyright notice, this list of conditions and the following disclaimer in 
+ *      the documentation and/or other materials provided with the distribution.
+ *
+ *   3. Neither the name of Nordic Semiconductor ASA nor the names of its contributors may be 
+ *      used to endorse or promote products derived from this software without specific prior 
+ *      written permission.
+ *
+ *   4. This software, with or without modification, must only be used with a 
+ *      Nordic Semiconductor ASA integrated circuit.
+ *
+ *   5. Any software provided in binary or object form under this license must not be reverse 
+ *      engineered, decompiled, modified and/or disassembled. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
+
 /*
- 
-Copyright (c) 2009-2021 ARM Limited. All rights reserved.
-
-    SPDX-License-Identifier: Apache-2.0
-
-Licensed under the Apache License, Version 2.0 (the License); you may
-not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an AS IS BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-NOTICE: This file has been modified by Nordic Semiconductor ASA.
-
+NOTE: Template files (including this one) are application specific and therefore
+expected to be copied into the application project folder prior to its use!
 */
 
     .syntax unified
-    .arch armv8-m.main
+    .arch armv7e-m
 
-#ifdef __STARTUP_CONFIG
-#include "startup_config.h"
-#ifndef __STARTUP_CONFIG_STACK_ALIGNEMENT
-#define __STARTUP_CONFIG_STACK_ALIGNEMENT 3
-#endif
-#endif
-
-    .section .stack
-#if defined(__STARTUP_CONFIG)
-    .align __STARTUP_CONFIG_STACK_ALIGNEMENT
-    .equ    Stack_Size, __STARTUP_CONFIG_STACK_SIZE
-#elif defined(__STACK_SIZE)
-    .align 3
-    .equ    Stack_Size, __STACK_SIZE
-#else
-    .align 3
-    .equ    Stack_Size, 16384
-#endif
-    .globl __StackTop
-    .globl __StackLimit
-__StackLimit:
-    .space Stack_Size
-    .size __StackLimit, . - __StackLimit
-__StackTop:
-    .size __StackTop, . - __StackTop
-
-    .section .heap
-    .align 3
-#if defined(__STARTUP_CONFIG)
-    .equ Heap_Size, __STARTUP_CONFIG_HEAP_SIZE
-#elif defined(__HEAP_SIZE)
-    .equ Heap_Size, __HEAP_SIZE
-#else
-    .equ Heap_Size, 16384
-#endif
-    .globl __HeapBase
-    .globl __HeapLimit
-__HeapBase:
-    .if Heap_Size
-    .space Heap_Size
-    .endif
-    .size __HeapBase, . - __HeapBase
-__HeapLimit:
-    .size __HeapLimit, . - __HeapLimit
-
-    .section .isr_vector, "ax"
+    .section .Vectors
     .align 2
-    .globl __isr_vector
-__isr_vector:
+    .globl __Vectors
+__Vectors:
     .long   __StackTop                  /* Top of Stack */
     .long   Reset_Handler
     .long   NMI_Handler
@@ -331,85 +308,51 @@ __isr_vector:
     .long   0                           /*Reserved */
     .long   0                           /*Reserved */
 
-    .size __isr_vector, . - __isr_vector
+    .size    __Vectors, . - __Vectors
 
 /* Reset Handler */
-
 
     .text
     .thumb
     .thumb_func
     .align 1
-    .globl Reset_Handler
-    .type Reset_Handler, %function
+    .globl    Reset_Handler
+    .type    Reset_Handler, %function
 Reset_Handler:
+    .fnstart
 
 
-/* Loop to copy data from read only memory to RAM.
- * The ranges of copy from/to are specified by following symbols:
- *      __etext: LMA of start of the section to copy from. Usually end of text
- *      __data_start__: VMA of start of the section to copy to.
- *      __bss_start__: VMA of end of the section to copy to. Normally __data_end__ is used, but by using __bss_start__
- *                    the user can add their own initialized data section before BSS section with the INSERT AFTER command.
- *
- * All addresses must be aligned to 4 bytes boundary.
- */
-#ifndef __STARTUP_SKIP_ETEXT
-    ldr r1, =__etext
-    ldr r2, =__data_start__
-    ldr r3, =__bss_start__
+/*     Loop to copy data from read only memory to RAM. The ranges
+ *      of copy from/to are specified by following symbols evaluated in
+ *      linker script.
+ *      __etext: End of code section, i.e., begin of data sections to copy from.
+ *      __data_start__/__data_end__: RAM address range that data should be
+ *      copied to. Both must be aligned to 4 bytes boundary.  */
 
-    subs r3, r3, r2
-    ble .L_loop1_done
+    ldr    r1, =__etext
+    ldr    r2, =__data_start__
+    ldr    r3, =__data_end__
 
-.L_loop1:
-    subs r3, r3, #4
-    ldr r0, [r1,r3]
-    str r0, [r2,r3]
-    bgt .L_loop1
+    subs    r3, r2
+    ble     .LC0
 
-.L_loop1_done:
-#endif
+.LC1:
+    subs    r3, 4
+    ldr    r0, [r1,r3]
+    str    r0, [r2,r3]
+    bgt    .LC1
+.LC0:
 
-/* This part of work usually is done in C library startup code. Otherwise,
- * define __STARTUP_CLEAR_BSS to enable it in this startup. This section
- * clears the RAM where BSS data is located.
- *
- * The BSS section is specified by following symbols
- *    __bss_start__: start of the BSS section.
- *    __bss_end__: end of the BSS section.
- *
- * All addresses must be aligned to 4 bytes boundary.
- */
-#ifdef __STARTUP_CLEAR_BSS
-    ldr r1, =__bss_start__
-    ldr r2, =__bss_end__
-
-    movs r0, 0
-
-    subs r2, r2, r1
-    ble .L_loop3_done
-
-.L_loop3:
-    subs r2, r2, #4
-    str r0, [r1, r2]
-    bgt .L_loop3
-
-.L_loop3_done:
-#endif /* __STARTUP_CLEAR_BSS */
-
-/* Execute SystemInit function. */
-    bl SystemInit
-
-/* Call _start function provided by libraries.
- * If those libraries are not accessible, define __START as your entry point.
- */
-#ifndef __START
-#define __START _start
-#endif
-    bl __START
+    LDR     R0, =SystemInit
+    BLX     R0
+    LDR     R0, =nrf_reloc_vector_table
+    BLX     R0
+    LDR     R0, =_start
+    BX      R0
 
     .pool
+    .cantunwind
+    .fnend
     .size   Reset_Handler,.-Reset_Handler
 
     .section ".text"
@@ -420,35 +363,35 @@ Reset_Handler:
     .weak   NMI_Handler
     .type   NMI_Handler, %function
 NMI_Handler:
-    b       .
+    B       .
     .size   NMI_Handler, . - NMI_Handler
 
 
     .weak   HardFault_Handler
     .type   HardFault_Handler, %function
 HardFault_Handler:
-    b       .
+    B       .
     .size   HardFault_Handler, . - HardFault_Handler
 
 
     .weak   MemoryManagement_Handler
     .type   MemoryManagement_Handler, %function
 MemoryManagement_Handler:
-    b       .
+    B       .
     .size   MemoryManagement_Handler, . - MemoryManagement_Handler
 
 
     .weak   BusFault_Handler
     .type   BusFault_Handler, %function
 BusFault_Handler:
-    b       .
+    B       .
     .size   BusFault_Handler, . - BusFault_Handler
 
 
     .weak   UsageFault_Handler
     .type   UsageFault_Handler, %function
 UsageFault_Handler:
-    b       .
+    B       .
     .size   UsageFault_Handler, . - UsageFault_Handler
 
 
@@ -462,7 +405,7 @@ SecureFault_Handler:
     .weak   SVC_Handler
     .type   SVC_Handler, %function
 SVC_Handler:
-    b       .
+    B       .
     .size   SVC_Handler, . - SVC_Handler
 
 
@@ -476,14 +419,14 @@ DebugMon_Handler:
     .weak   PendSV_Handler
     .type   PendSV_Handler, %function
 PendSV_Handler:
-    b       .
+    B       .
     .size   PendSV_Handler, . - PendSV_Handler
 
 
     .weak   SysTick_Handler
     .type   SysTick_Handler, %function
 SysTick_Handler:
-    b       .
+    B       .
     .size   SysTick_Handler, . - SysTick_Handler
 
 
@@ -492,7 +435,7 @@ SysTick_Handler:
     .globl  Default_Handler
     .type   Default_Handler, %function
 Default_Handler:
-    b       .
+    B       .
     .size   Default_Handler, . - Default_Handler
 
     .macro  IRQ handler
@@ -541,5 +484,5 @@ Default_Handler:
     IRQ  USBREGULATOR_IRQHandler
     IRQ  KMU_IRQHandler
     IRQ  CRYPTOCELL_IRQHandler
-
+    
   .end

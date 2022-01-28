@@ -112,14 +112,3 @@ void nrf_reloc_vector_table(void)
     SCB->VTOR = (uint32_t) nrf_dispatch_vector;    
 #endif
 }
-
-
-void mbed_sdk_init(void)
-{
-	if (STDIO_UART_RTS != NC) {
-		gpio_t rts;
-		gpio_init_out(&rts, STDIO_UART_RTS);
-		/* Set STDIO_UART_RTS as gpio driven low */
-		gpio_write(&rts, 0);
-	}
-}
