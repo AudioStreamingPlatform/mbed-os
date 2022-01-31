@@ -1868,7 +1868,7 @@
 
 // <o> NRFX_UARTE1_ENABLED - Enables UARTE1 instance.
 #ifndef NRFX_UARTE1_ENABLED
-#define NRFX_UARTE1_ENABLED 0
+#define NRFX_UARTE1_ENABLED 1
 #endif
 
 // <o> NRFX_UARTE2_ENABLED - Enables UARTE2 instance.

@@ -69,6 +69,13 @@ struct trng_s {
 struct serial_s {
     nrfx_uarte_t instance;
     nrfx_uarte_config_t config;
+    uint8_t rx_buffer_primary[1];
+    uint8_t rx_buffer_secondary[1];
+    volatile bool rx_buffer_primary_set;
+    volatile bool rx_buffer_secondary_set;
+    bool rx_buffer_secondary_in_use;
+    volatile bool rx_irq_enable;
+    volatile bool tx_irq_enable;
 };
 
 struct spi_s {
