@@ -17,12 +17,12 @@
 #include <string.h>
 
 #include "serial_api.h"
-#include "pinmap.h"
 #include "nrfx_uarte.h"
 #include "mbed_error.h"
 
 static uint32_t serial_irq_ids[NRFX_UARTE_ENABLED_COUNT] = {0};
-static uart_irq_handler irq_handler;
+static uart_irq_handler irq_handler = NULL;
+static bool nrfx_uarte_in_use[NRFX_UARTE_ENABLED_COUNT] = {false};
 
 int stdio_uart_inited = 0;
 serial_t stdio_uart;
@@ -30,10 +30,12 @@ serial_t stdio_uart;
 static void serial_event_handler(const nrfx_uarte_event_t* event, void* context)
 {
     serial_t *obj = (serial_t *)context;
+
     switch (event->type) {
         case NRFX_UARTE_EVT_TX_DONE:
-            if (obj && obj->tx_irq_enable)
+            if (obj && irq_handler) {
                 irq_handler(serial_irq_ids[obj->instance.drv_inst_idx], TxIrq);
+            }
             break;
         case NRFX_UARTE_EVT_RX_DONE:
             if (obj && obj->rx_irq_enable) {
@@ -41,14 +43,20 @@ static void serial_event_handler(const nrfx_uarte_event_t* event, void* context)
                     memcpy(&obj->rx_buffer_secondary[0], event->data.rxtx.p_data, sizeof(obj->rx_buffer_secondary));
                     obj->rx_buffer_secondary_set = true;
                     obj->rx_buffer_secondary_in_use = false;
-                    nrfx_uarte_rx(&obj->instance, &obj->rx_buffer_primary[0], sizeof(obj->rx_buffer_primary));
+                    if (!obj->rx_buffer_primary_set) {
+                        nrfx_uarte_rx(&obj->instance, &obj->rx_buffer_primary[0], sizeof(obj->rx_buffer_primary));
+                    }
                 } else {
                     memcpy(&obj->rx_buffer_primary[0], event->data.rxtx.p_data, sizeof(obj->rx_buffer_primary));
                     obj->rx_buffer_primary_set = true;
                     obj->rx_buffer_secondary_in_use = true;
-                    nrfx_uarte_rx(&obj->instance, &obj->rx_buffer_secondary[0], sizeof(obj->rx_buffer_secondary));
+                    if (!obj->rx_buffer_secondary_set) {
+                        nrfx_uarte_rx(&obj->instance, &obj->rx_buffer_secondary[0], sizeof(obj->rx_buffer_secondary));
+                    }
                 }
-                irq_handler(serial_irq_ids[obj->instance.drv_inst_idx], RxIrq);
+                if (irq_handler) {
+                    irq_handler(serial_irq_ids[obj->instance.drv_inst_idx], RxIrq);
+                }
             }
             break;
         case NRFX_UARTE_EVT_ERROR:
@@ -57,24 +65,53 @@ static void serial_event_handler(const nrfx_uarte_event_t* event, void* context)
 }
 
 void serial_init(serial_t *obj, PinName tx, PinName rx) {
-#if NRFX_CHECK(NRFX_UARTE0_ENABLED)
-    nrfx_uarte_t instance = NRFX_UARTE_INSTANCE(0);
-#elif NRFX_CHECK(NRFX_UARTE1_ENABLED)
-    nrfx_uarte_t instance = NRFX_UARTE_INSTANCE(1);
-#elif NRFX_CHECK(NRFX_UARTE2_ENABLED)
-    nrfx_uarte_t instance = NRFX_UARTE_INSTANCE(2);
-#elif NRFX_CHECK(NRFX_UARTE3_ENABLED)
-    nrfx_uarte_t instance = NRFX_UARTE_INSTANCE(3);
-#else
-#error No NRFX_UARTE instance enabled
-#endif
     MBED_ASSERT(obj);
     memset(obj, 0, sizeof(*obj));
-    memcpy(&obj->instance, &instance, sizeof(obj->instance));
+    obj->instance.drv_inst_idx = NRFX_UARTE_ENABLED_COUNT;
+
+    for (uint8_t index = 0; index < UARTE_COUNT; ++index) {
+        if (!nrfx_uarte_in_use[index]) {
+            nrfx_uarte_in_use[index] = true;
+            switch (index) {
+#if NRFX_CHECK(NRFX_UARTE0_ENABLED)
+                case 0: {
+                    nrfx_uarte_t instance0 = NRFX_UARTE_INSTANCE(0);
+                    memcpy(&obj->instance, &instance0, sizeof(obj->instance));
+                    break;
+                }
+#endif
+#if NRFX_CHECK(NRFX_UARTE1_ENABLED)
+                case 1: {
+                    nrfx_uarte_t instance1 = NRFX_UARTE_INSTANCE(1);
+                    memcpy(&obj->instance, &instance1, sizeof(obj->instance));
+                    break;
+                }
+#endif
+#if NRFX_CHECK(NRFX_UARTE2_ENABLED)
+                case 2: {
+                    nrfx_uarte_t instance2 = NRFX_UARTE_INSTANCE(2);
+                    memcpy(&obj->instance, &instance2, sizeof(obj->instance));
+                    break;
+                }
+#endif
+#if NRFX_CHECK(NRFX_UARTE3_ENABLED)
+                case 3: {
+                    nrfx_uarte_t instance3 = NRFX_UARTE_INSTANCE(3);
+                    memcpy(&obj->instance, &instance3, sizeof(obj->instance));
+                    break;
+                }
+#endif
+                default:
+                    break;
+            }
+            break;
+        }
+    }
+    MBED_ASSERT(obj->instance.drv_inst_idx < NRFX_UARTE_ENABLED_COUNT);
 
     nrfx_uarte_config_t config = NRFX_UARTE_DEFAULT_CONFIG(tx, rx);
     memcpy(&obj->config, &config, sizeof(obj->config));
-    obj->config.p_context = &obj;
+    obj->config.p_context = (serial_t *)obj;
 
     if (obj == &stdio_uart) {
         stdio_uart_inited = 1;
@@ -85,7 +122,9 @@ void serial_init(serial_t *obj, PinName tx, PinName rx) {
 }
 
 void serial_free(serial_t *obj) {
+    uint8_t index = obj->instance.drv_inst_idx;
     nrfx_uarte_uninit(&obj->instance);
+    nrfx_uarte_in_use[index] = false;
 }
 
 void serial_baud(serial_t *obj, int baudrate) {
