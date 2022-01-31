@@ -22,9 +22,9 @@
 #include "nrfx_uarte.h"
 #include "mbed_error.h"
 
-static uint32_t serial_irq_ids[NRFX_UARTE_ENABLED_COUNT] = {0};
+static uint32_t serial_irq_ids[UARTE_COUNT] = {0};
 static uart_irq_handler irq_handler = NULL;
-static bool nrfx_uarte_in_use[NRFX_UARTE_ENABLED_COUNT] = {false};
+static bool nrfx_uarte_in_use[UARTE_COUNT] = {false};
 
 int stdio_uart_inited = 0;
 serial_t stdio_uart;
