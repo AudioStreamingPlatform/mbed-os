@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if DEVICE_SERIAL
+
 #include <string.h>
 
 #include "serial_api.h"
@@ -228,3 +230,5 @@ void serial_break_clear(serial_t *obj) {
 void serial_break_set(serial_t *obj) {
     MBED_WARNING(MBED_MAKE_ERROR(MBED_MODULE_DRIVER_SERIAL, MBED_ERROR_CODE_UNSUPPORTED), "serial_break_set");
 }
+
+#endif // DEVICE_SERIAL
