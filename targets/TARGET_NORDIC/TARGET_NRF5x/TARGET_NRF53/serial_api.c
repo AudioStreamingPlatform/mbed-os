@@ -73,7 +73,6 @@ void serial_init(serial_t *obj, PinName tx, PinName rx) {
 
     for (uint8_t index = 0; index < UARTE_COUNT; ++index) {
         if (!nrfx_uarte_in_use[index]) {
-            nrfx_uarte_in_use[index] = true;
             switch (index) {
 #if NRFX_CHECK(NRFX_UARTE0_ENABLED)
                 case 0: {
@@ -104,8 +103,9 @@ void serial_init(serial_t *obj, PinName tx, PinName rx) {
                 }
 #endif
                 default:
-                    break;
+                    continue;
             }
+            nrfx_uarte_in_use[index] = true;
             break;
         }
     }
