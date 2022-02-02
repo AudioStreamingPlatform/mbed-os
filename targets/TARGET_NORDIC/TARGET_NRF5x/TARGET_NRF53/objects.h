@@ -48,7 +48,7 @@
 #elif DEVICE_SPI
 #include "nrfx_spi.h"
 #endif
-#include "nrf_twim.h"
+#include "nrfx_twim.h"
 
 #include "nrf_pwm.h"
 
@@ -110,25 +110,13 @@ struct pwmout_s {
 };
 
 struct i2c_s {
-    int instance;
-    PinName sda;
-    PinName scl;
-    nrf_twim_frequency_t frequency;
-    int state;
-    int mode;
-    bool update;
-
-#if DEVICE_I2C_ASYNCH
-    uint32_t handler;
-    uint32_t mask;
-    uint32_t event;
-#endif
-
-#if DEVICE_I2CSLAVE
-    bool was_slave;
-    bool is_slave;
-    uint8_t slave_addr;
-#endif
+    nrfx_twim_t instance;
+    nrfx_twim_config_t config;
+    int transfer_result;
+    volatile bool transfer_complete;
+    int address;
+    char buffer[256];
+    uint16_t length;
 };
 
 struct analogin_s {

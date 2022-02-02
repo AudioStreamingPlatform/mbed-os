@@ -13,7 +13,6 @@ target_include_directories(mbed-core
         nrfx/helpers
         nrfx/mdk
         nrfx/soc
-        nrfx/templates
 )
 
 target_sources(mbed-core
@@ -43,9 +42,9 @@ target_sources(mbed-core
         nrfx/drivers/src/nrfx_systick.c
         nrfx/drivers/src/nrfx_temp.c
         nrfx/drivers/src/nrfx_timer.c
-        nrfx/drivers/src/nrfx_twi.c
         nrfx/drivers/src/nrfx_twi_twim.c
         nrfx/drivers/src/nrfx_twi.c
+        nrfx/drivers/src/nrfx_twim.c
         nrfx/drivers/src/nrfx_twis.c
         nrfx/drivers/src/nrfx_uart.c
         nrfx/drivers/src/nrfx_uarte.c

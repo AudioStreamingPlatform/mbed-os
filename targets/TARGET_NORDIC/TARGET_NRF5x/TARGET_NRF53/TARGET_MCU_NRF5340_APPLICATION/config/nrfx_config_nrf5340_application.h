@@ -1650,28 +1650,28 @@
 
 
 #ifndef NRFX_TWIM0_ENABLED
-#define NRFX_TWIM0_ENABLED 1
+#define NRFX_TWIM0_ENABLED 0
 #endif
 
 // <q> NRFX_TWIM1_ENABLED  - Enables TWIM1 instance.
 
 
 #ifndef NRFX_TWIM1_ENABLED
-#define NRFX_TWIM1_ENABLED 1
+#define NRFX_TWIM1_ENABLED 0
 #endif
 
 // <q> NRFX_TWIM2_ENABLED  - Enables TWIM2 instance.
 
 
 #ifndef NRFX_TWIM2_ENABLED
-#define NRFX_TWIM2_ENABLED 0
+#define NRFX_TWIM2_ENABLED 1
 #endif
 
 // <q> NRFX_TWIM3_ENABLED  - Enables TWIM3 instance.
 
 
 #ifndef NRFX_TWIM3_ENABLED
-#define NRFX_TWIM3_ENABLED 0
+#define NRFX_TWIM3_ENABLED 1
 #endif
 
 // <o> NRFX_TWIM_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority.
