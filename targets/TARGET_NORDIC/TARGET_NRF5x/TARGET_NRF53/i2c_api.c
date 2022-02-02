@@ -24,9 +24,27 @@
 
 static bool nrfx_twim_in_use[TWIM_COUNT] = {false};
 
-int nrfx_error = 0;
-i2c_t *nrfx_obj = NULL;
-int nrfx_function = 0;
+static void i2c_event_handler(const nrfx_twim_evt_t* event, void* context)
+{
+    i2c_t *obj = (i2c_t *)context;
+    if (obj) {
+        switch (event->type) {
+            case NRFX_TWIM_EVT_DONE:
+                obj->transfer_result = event->xfer_desc.primary_length;
+                break;
+            case NRFX_TWIM_EVT_ADDRESS_NACK:
+            case NRFX_TWIM_EVT_DATA_NACK:
+                obj->transfer_result = I2C_ERROR_NO_SLAVE;
+                break;
+            case NRFX_TWIM_EVT_OVERRUN:
+            case NRFX_TWIM_EVT_BUS_ERROR:
+                obj->transfer_result = I2C_ERROR_BUS_BUSY;
+                break;
+        }
+
+        obj->transfer_complete = true;
+    }
+}
 
 void i2c_init(i2c_t *obj, PinName sda, PinName scl)
 {
@@ -73,18 +91,15 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
         }
     }
     MBED_ASSERT(obj->instance.drv_inst_idx < NRFX_UARTE_ENABLED_COUNT);
-    //obj->instance.p_twim = NRF_TWIM2_NS;
-    nrfx_obj = obj;
 
     nrfx_twim_config_t config = NRFX_TWIM_DEFAULT_CONFIG(scl, sda);
     memcpy(&obj->config, &config, sizeof(obj->config));
-    int error = nrfx_twim_init(&obj->instance, &obj->config, NULL, NULL);
-    nrfx_error = error;
+    nrfx_twim_init(&obj->instance, &obj->config, i2c_event_handler, obj);
+    nrfx_twim_enable(&obj->instance);
 }
 
 void i2c_frequency(i2c_t *obj, int hz)
 {
-    nrfx_function = 1;
     nrfx_twim_uninit(&obj->instance);
 
     switch (hz) {
@@ -107,36 +122,47 @@ void i2c_frequency(i2c_t *obj, int hz)
             break;
     }
 
-    nrfx_twim_init(&obj->instance, &obj->config, NULL, NULL);
+    nrfx_twim_init(&obj->instance, &obj->config, i2c_event_handler, obj);
+    nrfx_twim_enable(&obj->instance);
 }
 
 int i2c_start(i2c_t *obj)
 {
-    nrfx_function = 2;
-    return -1;
+    obj->length = 0;
+    obj->address = 0;
+    return 0;
 }
 
 int i2c_byte_write(i2c_t *obj, int data)
 {
-    nrfx_function = 3;
-    return -1;
+    /* The TWIM driver does not support single byte writes so combine the bytes and send on i2c_stop() */
+    if (obj->address == 0) {
+        obj->address = data;
+    } else if (obj->length < sizeof(obj->buffer)) {
+        obj->buffer[obj->length++] = data;
+    } else {
+        return 0;
+    }
+
+    return 1;
 }
 
 int i2c_byte_read(i2c_t *obj, int last)
 {
-    nrfx_function = 4;
-    return -1;
+    return I2C_ERROR_NO_SLAVE;
 }
 
 int i2c_stop(i2c_t *obj)
 {
-    nrfx_function = 5;
-    return -1;
+    if (obj->length) {
+        i2c_write(obj, obj->address, &obj->buffer[0], obj->length, true);
+    }
+
+    return 0;
 }
 
 void i2c_reset(i2c_t *obj)
 {
-    nrfx_function = 6;
     uint8_t index = obj->instance.drv_inst_idx;
     nrfx_twim_uninit(&obj->instance);
     nrfx_twim_in_use[index] = false;
@@ -144,20 +170,30 @@ void i2c_reset(i2c_t *obj)
 
 int i2c_read(i2c_t *obj, int address, char *data, int length, int stop)
 {
-    nrfx_function = 7;
     while(nrfx_twim_is_busy(&obj->instance));
+
+    obj->transfer_complete = false;
     nrfx_twim_xfer_desc_t descriptor = NRFX_TWIM_XFER_DESC_RX(address, (uint8_t *)data, length);
-    int error = nrfx_twim_xfer(&obj->instance, &descriptor, 0);
-    return error ? -error : length;
+    if (nrfx_twim_xfer(&obj->instance, &descriptor, 0)) {
+        return I2C_ERROR_BUS_BUSY;
+    }
+
+    while(!obj->transfer_complete);
+    return obj->transfer_result;
 }
 
 int i2c_write(i2c_t *obj, int address, const char *data, int length, int stop)
 {
-    nrfx_function = 8;
     while(nrfx_twim_is_busy(&obj->instance));
+
+    obj->transfer_complete = false;
     nrfx_twim_xfer_desc_t descriptor = NRFX_TWIM_XFER_DESC_TX(address, (uint8_t *)data, length);
-    int error = nrfx_twim_xfer(&obj->instance, &descriptor, stop ? 0 : NRFX_TWIM_FLAG_TX_NO_STOP);
-    return error ? -error : length;
+    if (nrfx_twim_xfer(&obj->instance, &descriptor, stop ? 0 : NRFX_TWIM_FLAG_TX_NO_STOP)) {
+        return I2C_ERROR_BUS_BUSY;
+    }
+
+    while(!obj->transfer_complete);
+    return obj->transfer_result;
 }
 
 #endif // DEVICE_I2C

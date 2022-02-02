@@ -112,6 +112,11 @@ struct pwmout_s {
 struct i2c_s {
     nrfx_twim_t instance;
     nrfx_twim_config_t config;
+    int transfer_result;
+    volatile bool transfer_complete;
+    int address;
+    char buffer[256];
+    uint16_t length;
 };
 
 struct analogin_s {
