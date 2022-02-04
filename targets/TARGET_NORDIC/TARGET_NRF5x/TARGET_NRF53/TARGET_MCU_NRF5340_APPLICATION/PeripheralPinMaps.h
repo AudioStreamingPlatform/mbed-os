@@ -19,28 +19,18 @@
 #define MBED_PERIPHERALPINMAPS_H
 
 #include <mstd_cstddef>
-
-typedef enum {
-    NRF_SAADC_CHANNEL_0 = 0,
-    NRF_SAADC_CHANNEL_1 = 1,
-    NRF_SAADC_CHANNEL_2 = 2,
-    NRF_SAADC_CHANNEL_3 = 3,
-    NRF_SAADC_CHANNEL_4 = 4,
-    NRF_SAADC_CHANNEL_5 = 5,
-    NRF_SAADC_CHANNEL_6 = 6,
-    NRF_SAADC_CHANNEL_7 = 7,
-} nrf_saadc_channel_t;
+#include <nrf_saadc.h>
 
 /************ADC***************/
 /* The third "function" value is used to select the correct ADC channel */
 #if DEVICE_ANALOGIN
 MSTD_CONSTEXPR_OBJ_11 PinMap PinMap_ADC[] = {
-    { P0_4,  ADC0_0, NRF_SAADC_CHANNEL_0 },
-    { P0_5,  ADC0_0, NRF_SAADC_CHANNEL_1 },
-    { P0_6,  ADC0_0, NRF_SAADC_CHANNEL_2 },
-    { P0_7,  ADC0_0, NRF_SAADC_CHANNEL_3 },
-    { P0_25, ADC0_0, NRF_SAADC_CHANNEL_4 },
-    { P0_26, ADC0_0, NRF_SAADC_CHANNEL_5 },
+    { P0_4,  ADC0_0, NRF_SAADC_INPUT_AIN0 },
+    { P0_5,  ADC0_0, NRF_SAADC_INPUT_AIN1 },
+    { P0_6,  ADC0_0, NRF_SAADC_INPUT_AIN2 },
+    { P0_7,  ADC0_0, NRF_SAADC_INPUT_AIN3 },
+    { P0_25, ADC0_0, NRF_SAADC_INPUT_AIN4 },
+    { P0_26, ADC0_0, NRF_SAADC_INPUT_AIN5 },
     { NC,    NC,     NC                  }
 };
 #endif
