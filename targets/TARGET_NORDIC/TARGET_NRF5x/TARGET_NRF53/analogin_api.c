@@ -23,28 +23,13 @@
 #include "PeripheralPins.h"
 
 #include "nrfx_saadc.h"
-#include "nrfx_errors.h"
 #include "sdk_config.h"
 
 #define ADC_12BIT_RANGE 0x0FFF
 #define ADC_16BIT_RANGE 0xFFFF
 
-/* Unused event handler but driver requires one. */
-static void analog_in_event_handler(nrfx_saadc_evt_t const *p_event)
-{
-    (void) p_event;
+int nrfx_result = 0;
 
-}
-
-/* Interrupt handler implemented in nrfx_saadc.c. */
-void SAADC_IRQHandler(void);
-
-/** Initialize the analogin peripheral
- *
- * Configures the pin used by analogin.
- * @param obj The analogin object to initialize
- * @param pin The analogin pin name
- */
 #if STATIC_PINMAP_READY
 #define ANALOGIN_INIT_DIRECT analogin_init_direct
 void analogin_init_direct(analogin_t *obj, const PinMap *pinmap)
@@ -53,63 +38,28 @@ void analogin_init_direct(analogin_t *obj, const PinMap *pinmap)
 static void _analogin_init_direct(analogin_t *obj, const PinMap *pinmap)
 #endif
 {
+    ret_code_t result;
     MBED_ASSERT(obj);
 
     /* Only initialize SAADC on first pin. */
     static bool first_init = true;
 
     if (first_init) {
-
-        first_init = false;
-
-        /* Use configuration from sdk_config.h.
-         * Default is:
-         *  - 12 bit.
-         *  - No oversampling.
-         *  - Priority 7 (lowest).
-         *  - No low power mode.
-         */
-        nrf_saadc_config_t adc_config = {
-            .resolution         = (nrf_saadc_resolution_t)SAADC_CONFIG_RESOLUTION,
-            .oversample         = (nrf_saadc_oversample_t)SAADC_CONFIG_OVERSAMPLE,
-            .interrupt_priority = SAADC_CONFIG_IRQ_PRIORITY,
-            .low_power_mode     = SAADC_CONFIG_LP_MODE
-        };
-
-        [[maybe_unused]] ret_code_t result = nrfx_saadc_init(&adc_config, analog_in_event_handler);
+        result = nrfx_saadc_init(NRFX_SAADC_DEFAULT_CONFIG_IRQ_PRIORITY);
         MBED_ASSERT(result == NRFX_SUCCESS);
-
-        /* Register interrupt handler in vector table. */
-        NVIC_SetVector(SAADC_IRQn, (uint32_t)SAADC_IRQHandler);
+        first_init = false;
     }
 
     /* Use pinmap function to get associated channel. */
     uint32_t channel = (uint32_t) pinmap->function;
     MBED_ASSERT(channel != (uint32_t) NC);
 
-    /* Account for an off-by-one in Channel definition and Input definition. */
-    nrf_saadc_input_t input = channel + 1;
-
-    /* Configure channel and pin:
-     *  - the 1/4 gain and VDD/4 makes the reference voltage VDD.
-     */
-    nrf_saadc_channel_config_t channel_config = {
-        .resistor_p = NRF_SAADC_RESISTOR_DISABLED,
-        .resistor_n = NRF_SAADC_RESISTOR_DISABLED,
-        .gain       = NRF_SAADC_GAIN1_4,
-        .reference  = NRF_SAADC_REFERENCE_VDD4,
-        .acq_time   = NRF_SAADC_ACQTIME_10US,
-        .mode       = NRF_SAADC_MODE_SINGLE_ENDED,
-        .burst      = NRF_SAADC_BURST_DISABLED,
-        .pin_p      = input,
-        .pin_n      = NRF_SAADC_INPUT_DISABLED
-    };
-
-    [[maybe_unused]] ret_code_t result = nrfx_saadc_channel_init(channel, &channel_config);
+    nrfx_saadc_channel_t channel_config = NRFX_SAADC_DEFAULT_CHANNEL_SE(channel, 0);
+    result = nrfx_saadc_channel_config(&channel_config);
     MBED_ASSERT(result == NRFX_SUCCESS);
 
-    /* Store channel in ADC object. */
-    obj->channel = channel;
+    result = nrfx_saadc_simple_mode_set()
+    MBED_ASSERT(result == NRFX_SUCCESS);
 }
 
 void analogin_init(analogin_t *obj, PinName pin)
@@ -136,11 +86,16 @@ uint16_t analogin_read_u16(analogin_t *obj)
 
     /* Read single channel, blocking. */
     nrf_saadc_value_t value = { 0 };
-    ret_code_t result = nrfx_saadc_sample_convert(obj->channel, &value);
+    ret_code_t result = nrfx_saadc_buffer_set(&value, 1);
+    nrfx_result = result;
+    MBED_ASSERT(result == NRFX_SUCCESS);
+
+    result = nrfx_saadc_mode_trigger();
+    nrfx_result = result;
+    MBED_ASSERT(result == NRFX_SUCCESS);
 
     /* nrf_saadc_value_t is a signed integer. Only take the absolute value. */
-    if ((result == NRFX_SUCCESS) && (value > 0)) {
-
+    if (value > 0) {
         /* Normalize 12 bit ADC value to 16 bit Mbed ADC range. */
         uint32_t normalized = value;
         retval = (normalized * ADC_16BIT_RANGE) / ADC_12BIT_RANGE;

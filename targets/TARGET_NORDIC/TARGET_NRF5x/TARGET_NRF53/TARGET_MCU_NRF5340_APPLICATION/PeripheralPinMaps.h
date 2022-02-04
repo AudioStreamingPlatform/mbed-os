@@ -35,15 +35,13 @@ typedef enum {
 /* The third "function" value is used to select the correct ADC channel */
 #if DEVICE_ANALOGIN
 MSTD_CONSTEXPR_OBJ_11 PinMap PinMap_ADC[] = {
-    { p2,  ADC0_0, NRF_SAADC_CHANNEL_0 },
-    { p3,  ADC0_0, NRF_SAADC_CHANNEL_1 },
-    { p4,  ADC0_0, NRF_SAADC_CHANNEL_2 },
-    { p5,  ADC0_0, NRF_SAADC_CHANNEL_3 },
-    { p28, ADC0_0, NRF_SAADC_CHANNEL_4 },
-    { p29, ADC0_0, NRF_SAADC_CHANNEL_5 },
-    { p30, ADC0_0, NRF_SAADC_CHANNEL_6 },
-    { p31, ADC0_0, NRF_SAADC_CHANNEL_7 },
-    { NC,  NC,     NC                  }
+    { P0_4,  ADC0_0, NRF_SAADC_CHANNEL_0 },
+    { P0_5,  ADC0_0, NRF_SAADC_CHANNEL_1 },
+    { P0_6,  ADC0_0, NRF_SAADC_CHANNEL_2 },
+    { P0_7,  ADC0_0, NRF_SAADC_CHANNEL_3 },
+    { P0_25, ADC0_0, NRF_SAADC_CHANNEL_4 },
+    { P0_26, ADC0_0, NRF_SAADC_CHANNEL_5 },
+    { NC,    NC,     NC                  }
 };
 #endif
 
