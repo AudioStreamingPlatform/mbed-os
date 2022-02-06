@@ -17,7 +17,6 @@
 #include "sleep_api.h"
 #include "cmsis.h"
 #include "mbed_interface.h"
-#include "nrf_soc.h"
 #include "nrf_timer.h"
 #include "us_ticker.h"
 
