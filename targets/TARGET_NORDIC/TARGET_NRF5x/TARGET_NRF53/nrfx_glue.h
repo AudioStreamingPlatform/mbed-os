@@ -53,9 +53,7 @@ extern "C" {
  *        the needs of the host environment into which @em nrfx is integrated.
  */
 
-// Uncomment this line to use the standard MDK way of binding IRQ handlers
-// at linking time.
-//#include <soc/nrfx_irqs.h>
+#include <soc/nrfx_irqs.h>
 #include <nrfx_atomic.h>
 #include <nrfx_coredep.h>
 #include <critical_section_api.h>
@@ -84,10 +82,8 @@ extern "C" {
  * @param irq_number IRQ number.
  * @param priority   Priority to be set.
  */
-#define NRFX_IRQ_PRIORITY_SET(irq_number, priority) \
-    _NRFX_IRQ_PRIORITY_SET(irq_number, priority)
-static inline void _NRFX_IRQ_PRIORITY_SET(IRQn_Type irq_number,
-                                          uint8_t   priority)
+#define NRFX_IRQ_PRIORITY_SET(irq_number, priority) _NRFX_IRQ_PRIORITY_SET(irq_number, priority)
+static inline void _NRFX_IRQ_PRIORITY_SET(IRQn_Type irq_number, uint8_t priority)
 {
     NVIC_SetPriority(irq_number, priority);
 }
@@ -97,7 +93,7 @@ static inline void _NRFX_IRQ_PRIORITY_SET(IRQn_Type irq_number,
  *
  * @param irq_number IRQ number.
  */
-#define NRFX_IRQ_ENABLE(irq_number)  _NRFX_IRQ_ENABLE(irq_number)
+#define NRFX_IRQ_ENABLE(irq_number) _NRFX_IRQ_ENABLE(irq_number)
 static inline void _NRFX_IRQ_ENABLE(IRQn_Type irq_number)
 {
     NVIC_EnableIRQ(irq_number);
@@ -111,7 +107,7 @@ static inline void _NRFX_IRQ_ENABLE(IRQn_Type irq_number)
  * @retval true  If the IRQ is enabled.
  * @retval false Otherwise.
  */
-#define NRFX_IRQ_IS_ENABLED(irq_number)  _NRFX_IRQ_IS_ENABLED(irq_number)
+#define NRFX_IRQ_IS_ENABLED(irq_number) _NRFX_IRQ_IS_ENABLED(irq_number)
 static inline bool _NRFX_IRQ_IS_ENABLED(IRQn_Type irq_number)
 {
     return 0 != (NVIC->ISER[irq_number / 32] & (1UL << (irq_number % 32)));
@@ -122,7 +118,7 @@ static inline bool _NRFX_IRQ_IS_ENABLED(IRQn_Type irq_number)
  *
  * @param irq_number IRQ number.
  */
-#define NRFX_IRQ_DISABLE(irq_number)  _NRFX_IRQ_DISABLE(irq_number)
+#define NRFX_IRQ_DISABLE(irq_number) _NRFX_IRQ_DISABLE(irq_number)
 static inline void _NRFX_IRQ_DISABLE(IRQn_Type irq_number)
 {
     NVIC_DisableIRQ(irq_number);
