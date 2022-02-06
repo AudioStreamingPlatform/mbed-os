@@ -56,10 +56,9 @@ extern "C" {
 // Uncomment this line to use the standard MDK way of binding IRQ handlers
 // at linking time.
 //#include <soc/nrfx_irqs.h>
-#include <mbed_assert.h>
-#include <mbed_critical.h>
 #include <nrfx_atomic.h>
 #include <nrfx_coredep.h>
+#include <critical_section_api.h>
 
 //------------------------------------------------------------------------------
 
@@ -164,10 +163,10 @@ static inline bool _NRFX_IRQ_IS_PENDING(IRQn_Type irq_number)
 }
 
 /** @brief Macro for entering into a critical section. */
-#define NRFX_CRITICAL_SECTION_ENTER() core_util_critical_section_enter()
+#define NRFX_CRITICAL_SECTION_ENTER() hal_critical_section_enter()
 
 /** @brief Macro for exiting from a critical section. */
-#define NRFX_CRITICAL_SECTION_EXIT() core_util_critical_section_exit()
+#define NRFX_CRITICAL_SECTION_EXIT() hal_critical_section_exit()
 
 //------------------------------------------------------------------------------
 
@@ -263,7 +262,27 @@ static inline bool _NRFX_IRQ_IS_PENDING(IRQn_Type irq_number)
  *        in a customized way and the default definitions from @c <nrfx_error.h>
  *        should not be used.
  */
-#define NRFX_CUSTOM_ERROR_CODES 0
+#define NRFX_CUSTOM_ERROR_CODES 1
+
+typedef uint32_t nrfx_err_t;
+
+#define NRFX_SUCCESS                    0
+#define NRFX_ERROR_INTERNAL             1
+#define NRFX_ERROR_NO_MEM               2
+#define NRFX_ERROR_NOT_SUPPORTED        3
+#define NRFX_ERROR_INVALID_PARAM        4
+#define NRFX_ERROR_INVALID_STATE        5
+#define NRFX_ERROR_INVALID_LENGTH       6
+#define NRFX_ERROR_TIMEOUT              7
+#define NRFX_ERROR_FORBIDDEN            8
+#define NRFX_ERROR_NULL                 9
+#define NRFX_ERROR_INVALID_ADDR         10
+#define NRFX_ERROR_BUSY                 11
+#define NRFX_ERROR_ALREADY_INITIALIZED  12
+
+#define NRFX_ERROR_DRV_TWI_ERR_OVERRUN  100
+#define NRFX_ERROR_DRV_TWI_ERR_ANACK    101
+#define NRFX_ERROR_DRV_TWI_ERR_DNACK    102
 
 //------------------------------------------------------------------------------
 
