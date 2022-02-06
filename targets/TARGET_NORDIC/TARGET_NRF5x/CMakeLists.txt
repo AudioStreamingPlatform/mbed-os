@@ -59,6 +59,7 @@ elseif("NRFX" IN_LIST MBED_TARGET_LABELS)
         nrfx/drivers/src/nrfx_wdt.c
         nrfx/drivers/src/prs/nrfx_prs.c
         nrfx/helpers/nrfx_flag32_allocator.c
+        nrfx/soc/nrfx_atomic.c
     )
 endif()
 
