@@ -400,6 +400,7 @@ typedef struct
 /* Operating Mode Flags */
 #define CAN_FLAG_WKU               ((uint32_t)0x00000103)  /*!< Wake up flag           */
 #define CAN_FLAG_SLAK              ((uint32_t)0x00000101)  /*!< Sleep acknowledge flag */
+#define CAN_FLAG_ERRI              ((uint32_t)0x00000102)  /*!< Error flag             */
 #define CAN_FLAG_SLAKI             ((uint32_t)0x00000104)  /*!< Sleep acknowledge flag */
 /* @note When SLAK interrupt is disabled (SLKIE=0), no polling on SLAKI is possible.
          In this case the SLAK bit can be polled.*/
@@ -543,10 +544,10 @@ typedef struct
   * @retval The new state of __FLAG__ (TRUE or FALSE).
   */
 #define __HAL_CAN_CLEAR_FLAG(__HANDLE__, __FLAG__) \
-((((__FLAG__) >> 8U) == 5)? (((__HANDLE__)->Instance->TSR) = (1U << ((__FLAG__) & CAN_FLAG_MASK))): \
- (((__FLAG__) >> 8U) == 2)? (((__HANDLE__)->Instance->RF0R) = (1U << ((__FLAG__) & CAN_FLAG_MASK))): \
- (((__FLAG__) >> 8U) == 4)? (((__HANDLE__)->Instance->RF1R) = (1U << ((__FLAG__) & CAN_FLAG_MASK))): \
- (((__FLAG__) >> 8U) == 1)? (((__HANDLE__)->Instance->MSR) = (1U << ((__FLAG__) & CAN_FLAG_MASK))): 0)
+((((__FLAG__) >> 8U) == 5U)? (((__HANDLE__)->Instance->TSR) = ((uint32_t)1U << ((__FLAG__) & CAN_FLAG_MASK))): \
+ (((__FLAG__) >> 8U) == 2U)? (((__HANDLE__)->Instance->RF0R) = ((uint32_t)1U << ((__FLAG__) & CAN_FLAG_MASK))): \
+ (((__FLAG__) >> 8U) == 4U)? (((__HANDLE__)->Instance->RF1R) = ((uint32_t)1U << ((__FLAG__) & CAN_FLAG_MASK))): \
+ (((__HANDLE__)->Instance->MSR) = ((uint32_t)1U << ((__FLAG__) & CAN_FLAG_MASK))))
 
 
 /** @brief  Check whether the specified CAN interrupt source is enabled or not.
