@@ -703,7 +703,7 @@ static void _can_init_freq_direct(can_t *obj, const can_pinmap_t *pinmap, int hz
     /*  Use default values for rist init */
     obj->CanHandle.Instance = (CAN_TypeDef *)pinmap->peripheral;
     obj->CanHandle.Init.TTCM = DISABLE;
-    obj->CanHandle.Init.ABOM = DISABLE;
+    obj->CanHandle.Init.ABOM = ENABLE;
     obj->CanHandle.Init.AWUM = DISABLE;
     obj->CanHandle.Init.NART = DISABLE;
     obj->CanHandle.Init.RFLM = DISABLE;
@@ -1059,7 +1059,7 @@ int can_mode(can_t *obj, CanMode mode)
     int success = 0;
     CAN_TypeDef *can = obj->CanHandle.Instance;
 
-    can->MCR |= CAN_MCR_INRQ ;
+    can->MCR |= CAN_MCR_INRQ;
     while ((can->MSR & CAN_MSR_INAK) != CAN_MSR_INAK) {
     }
 
@@ -1095,7 +1095,6 @@ int can_mode(can_t *obj, CanMode mode)
     can->MCR &= ~(uint32_t)CAN_MCR_INRQ;
     while ((can->MSR & CAN_MSR_INAK) == CAN_MSR_INAK) {
     }
-
     return success;
 }
 
@@ -1131,7 +1130,6 @@ int can_filter(can_t *obj, uint32_t id, uint32_t mask, CANFormat format, int32_t
             success = 1;
         }
     }
-
     return success;
 }
 
@@ -1169,7 +1167,8 @@ static void can_irq(CANName name, int id)
     tmp1 = __HAL_CAN_GET_FLAG(&CanHandle, CAN_FLAG_EPV);
     tmp2 = __HAL_CAN_GET_IT_SOURCE(&CanHandle, CAN_IT_EPV);
     tmp3 = __HAL_CAN_GET_IT_SOURCE(&CanHandle, CAN_IT_ERR);
-
+    if (tmp1)
+        __HAL_CAN_CLEAR_FLAG(&CanHandle, CAN_FLAG_EPV);
     if (tmp1 && tmp2 && tmp3) {
         irq_handler(can_irq_ids[id], IRQ_PASSIVE);
     }
@@ -1177,11 +1176,15 @@ static void can_irq(CANName name, int id)
     tmp1 = __HAL_CAN_GET_FLAG(&CanHandle, CAN_FLAG_BOF);
     tmp2 = __HAL_CAN_GET_IT_SOURCE(&CanHandle, CAN_IT_BOF);
     tmp3 = __HAL_CAN_GET_IT_SOURCE(&CanHandle, CAN_IT_ERR);
+    if (tmp1)
+        __HAL_CAN_CLEAR_FLAG(&CanHandle, CAN_FLAG_BOF);
     if (tmp1 && tmp2 && tmp3) {
         irq_handler(can_irq_ids[id], IRQ_BUS);
     }
 
     tmp3 = __HAL_CAN_GET_IT_SOURCE(&CanHandle, CAN_IT_ERR);
+    if(tmp3)
+        __HAL_CAN_CLEAR_FLAG(&CanHandle, CAN_FLAG_ERRI);
     if (tmp1 && tmp2 && tmp3) {
         irq_handler(can_irq_ids[id], IRQ_ERROR);
     }
