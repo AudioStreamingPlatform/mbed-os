@@ -58,12 +58,14 @@ public:
         gpio_init_inout(&gpio, pin, direction, mode, value);
     }
 
+    virtual ~DigitalInOut() = default;
+
     /** Set the output, specified as 0 or 1 (int)
      *
      *  @param value An integer specifying the pin output value,
      *      0 for logical 0, 1 (or any other non-zero value) for logical 1
      */
-    void write(int value)
+    virtual void write(int value)
     {
         // Thread safe / atomic HAL call
         gpio_write(&gpio, value);
@@ -75,7 +77,7 @@ public:
      *    an integer representing the output setting of the pin if it is an output,
      *    or read the input if set as an input
      */
-    int read()
+    virtual int read()
     {
         // Thread safe / atomic HAL call
         return gpio_read(&gpio);
@@ -83,17 +85,17 @@ public:
 
     /** Set as an output
      */
-    void output();
+    virtual void output();
 
     /** Set as an input
      */
-    void input();
+    virtual void input();
 
     /** Set the input pin mode
      *
      *  @param pull PullUp, PullDown, PullNone, OpenDrain
      */
-    void mode(PinMode pull);
+    virtual void mode(PinMode pull);
 
     /** Return the output setting, represented as 0 or 1 (int)
      *
@@ -101,7 +103,7 @@ public:
      *    Non zero value if pin is connected to uc GPIO
      *    0 if gpio object was initialized with NC
      */
-    int is_connected()
+    virtual int is_connected()
     {
         // Thread safe / atomic HAL call
         return gpio_is_connected(&gpio);
@@ -117,7 +119,7 @@ public:
      *      inout = button;     // Equivalent to inout.write(button.read())
      * @endcode
      */
-    DigitalInOut &operator= (int value)
+    virtual DigitalInOut &operator= (int value)
     {
         // Underlying write is thread safe
         write(value);
@@ -128,7 +130,7 @@ public:
      * state from the DigitalInOut argument.
      * \sa DigitalInOut::write()
      */
-    DigitalInOut &operator= (DigitalInOut &rhs);
+    virtual DigitalInOut &operator= (DigitalInOut &rhs);
 
     /** A shorthand for read()
      * \sa DigitalInOut::read()
@@ -140,7 +142,7 @@ public:
      *      led = inout;   // Equivalent to led.write(inout.read())
      * @endcode
      */
-    operator int()
+    virtual operator int()
     {
         // Underlying call is thread safe
         return read();
