@@ -26,7 +26,9 @@ NOTICE: This file has been modified by Nordic Semiconductor ASA.
 #include <stdint.h>
 #include <stdbool.h>
 #include "nrf.h"
+#include "nrf_gpio.h"
 #include "nrf_erratas.h"
+#include "nrf_reset.h"
 #include "system_nrf5340_application.h"
 #include "system_nrf53_approtect.h"
 
@@ -57,6 +59,20 @@ NOTICE: This file has been modified by Nordic Semiconductor ASA.
 #elif defined   ( __GNUC__ )
     uint32_t SystemCoreClock __attribute__((used)) = __SYSTEM_CLOCK_INITIAL;
 #endif
+
+void SystemEnableNetworkMCU(void)
+{
+    /* FIXME: Release the UART1 pins for now */
+    NRF_P0_S->PIN_CNF[10] = (GPIO_PIN_CNF_MCUSEL_NetworkMCU << GPIO_PIN_CNF_MCUSEL_Pos);
+    NRF_P0_S->PIN_CNF[11] = (GPIO_PIN_CNF_MCUSEL_NetworkMCU << GPIO_PIN_CNF_MCUSEL_Pos);
+    NRF_P1_S->PIN_CNF[0] = (GPIO_PIN_CNF_MCUSEL_NetworkMCU << GPIO_PIN_CNF_MCUSEL_Pos);
+    NRF_P1_S->PIN_CNF[1] = (GPIO_PIN_CNF_MCUSEL_NetworkMCU << GPIO_PIN_CNF_MCUSEL_Pos);
+
+    /* Retain nRF5340 Network MCU in Secure domain */
+    NRF_SPU_S->EXTDOMAIN[0].PERM = 1 << 4;
+
+    nrf_reset_network_force_off(NRF_RESET, false);
+}
 
 void SystemCoreClockUpdate(void)
 {
@@ -233,6 +249,7 @@ void SystemInit(void)
         /* Handle fw-branch APPROTECT setup. */
         nrf53_handle_approtect();
 
+        SystemEnableNetworkMCU();
     #endif
 
     /* Enable the FPU if the compiler used floating point unit instructions. __FPU_USED is a MACRO defined by the
