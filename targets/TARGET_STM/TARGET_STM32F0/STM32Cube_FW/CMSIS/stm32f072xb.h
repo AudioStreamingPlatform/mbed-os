@@ -5025,7 +5025,7 @@ typedef struct
 #define CRC_DR_DR                CRC_DR_DR_Msk                                 /*!< Data register bits */
 
 /*******************  Bit definition for CRC_IDR register  ********************/
-#define CRC_IDR_IDR              ((uint8_t)0xFFU)                              /*!< General-purpose 8-bit data register bits */
+#define CRC_IDR_IDR              (0xFFU)                                       /*!< General-purpose 8-bit data register bits */
 
 /********************  Bit definition for CRC_CR register  ********************/
 #define CRC_CR_RESET_Pos         (0U)                                          
