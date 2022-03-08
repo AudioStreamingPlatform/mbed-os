@@ -358,7 +358,7 @@ typedef struct
 
 #endif /* CEC */
 
-#if defined(USB)
+#if defined(USB1)
 /** @defgroup RCC_LL_EC_USB_CLKSOURCE Peripheral USB clock source selection
   * @{
   */
@@ -406,7 +406,7 @@ typedef struct
   */
 #endif /* CEC */
 
-#if defined(USB)
+#if defined(USB1)
 /** @defgroup RCC_LL_EC_USB Peripheral USB get clock source
   * @{
   */
@@ -1303,7 +1303,7 @@ __STATIC_INLINE void LL_RCC_SetCECClockSource(uint32_t CECxSource)
 }
 #endif /* CEC */
 
-#if defined(USB)
+#if defined(USB1)
 /**
   * @brief  Configure USB clock source
   * @rmtoll CFGR3        USBSW         LL_RCC_SetUSBClockSource
@@ -1383,7 +1383,7 @@ __STATIC_INLINE uint32_t LL_RCC_GetCECClockSource(uint32_t CECx)
 }
 #endif /* CEC */
 
-#if defined(USB)
+#if defined(USB1)
 /**
   * @brief  Get USBx clock source
   * @rmtoll CFGR3        USBSW         LL_RCC_GetUSBClockSource
@@ -2227,7 +2227,7 @@ ErrorStatus LL_RCC_DeInit(void);
 void        LL_RCC_GetSystemClocksFreq(LL_RCC_ClocksTypeDef *RCC_Clocks);
 uint32_t    LL_RCC_GetUSARTClockFreq(uint32_t USARTxSource);
 uint32_t    LL_RCC_GetI2CClockFreq(uint32_t I2CxSource);
-#if defined(USB_OTG_FS) || defined(USB)
+#if defined(USB_OTG_FS) || defined(USB1)
 uint32_t    LL_RCC_GetUSBClockFreq(uint32_t USBxSource);
 #endif /* USB_OTG_FS || USB */
 #if defined(CEC)

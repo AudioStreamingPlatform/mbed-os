@@ -28,7 +28,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_ll_usb.h"
 
-#if defined (USB)
+#if defined (USB1)
 
 /** @addtogroup STM32F0xx_HAL_Driver
   * @{

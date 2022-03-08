@@ -67,7 +67,7 @@
 
 #ifdef HAL_PCD_MODULE_ENABLED
 
-#if defined (USB)
+#if defined (USB1)
 
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
