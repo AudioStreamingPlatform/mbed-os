@@ -9,7 +9,7 @@
   *          This file contains:
   *           - Data structures and the address mapping for all peripherals
   *           - Peripheral's registers declarations and bits definition
-  *           - Macros to access peripheral’s registers hardware
+  *           - Macros to access peripheralï¿½s registers hardware
   *  
   ******************************************************************************
   * @attention
@@ -770,7 +770,7 @@ typedef struct
 #define GPIOD               ((GPIO_TypeDef *) GPIOD_BASE)
 #define GPIOE               ((GPIO_TypeDef *) GPIOE_BASE)
 #define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
-#define USB                 ((USB_TypeDef *) USB_BASE)
+#define USB1                ((USB_TypeDef *) USB_BASE)
 /**
   * @}
   */
@@ -11230,7 +11230,7 @@ typedef struct
                                                   ((INSTANCE) == USART4))
 
 /****************************** USB Instances ********************************/
-#define IS_PCD_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == USB)
+#define IS_PCD_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == USB1)
 
 /****************************** WWDG Instances ********************************/
 #define IS_WWDG_ALL_INSTANCE(INSTANCE)  ((INSTANCE) == WWDG)

@@ -131,7 +131,7 @@ extern "C" {
 #if defined(I2C2)
 #define LL_APB1_GRP1_PERIPH_I2C2           RCC_APB1ENR_I2C2EN
 #endif /*I2C2*/
-#if defined(USB)
+#if defined(USB1)
 #define LL_APB1_GRP1_PERIPH_USB            RCC_APB1ENR_USBEN
 #endif /* USB */
 #if defined(CAN)

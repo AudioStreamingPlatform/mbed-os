@@ -373,7 +373,7 @@ uint32_t HAL_RCCEx_GetPeriphCLKFreq(uint32_t PeriphClk)
   uint32_t frequency = 0U;
   
   uint32_t srcclk = 0U;
-#if defined(USB)
+#if defined(USB1)
   uint32_t pllmull = 0U, pllsource = 0U, predivfactor = 0U;
 #endif /* USB */
 
@@ -506,7 +506,7 @@ uint32_t HAL_RCCEx_GetPeriphCLKFreq(uint32_t PeriphClk)
       }
       break;
     }
-#if defined(USB)
+#if defined(USB1)
   case RCC_PERIPHCLK_USB:
     {
       /* Get the current USB source */

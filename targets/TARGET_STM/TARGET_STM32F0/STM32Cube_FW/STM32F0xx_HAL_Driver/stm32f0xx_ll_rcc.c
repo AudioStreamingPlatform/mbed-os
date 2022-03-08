@@ -60,7 +60,7 @@
 
 #define IS_LL_RCC_I2C_CLKSOURCE(__VALUE__)     ((__VALUE__) == LL_RCC_I2C1_CLKSOURCE)
 
-#if defined(USB)
+#if defined(USB1)
 #define IS_LL_RCC_USB_CLKSOURCE(__VALUE__)    (((__VALUE__) == LL_RCC_USB_CLKSOURCE))
 #endif /* USB */
 
@@ -388,7 +388,7 @@ uint32_t LL_RCC_GetI2CClockFreq(uint32_t I2CxSource)
   return i2c_frequency;
 }
 
-#if defined(USB)
+#if defined(USB1)
 /**
   * @brief  Return USBx clock frequency
   * @param  USBxSource This parameter can be one of the following values:
