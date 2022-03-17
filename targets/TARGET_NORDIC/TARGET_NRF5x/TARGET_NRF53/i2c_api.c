@@ -173,7 +173,7 @@ int i2c_read(i2c_t *obj, int address, char *data, int length, int stop)
     while(nrfx_twim_is_busy(&obj->instance));
 
     obj->transfer_complete = false;
-    nrfx_twim_xfer_desc_t descriptor = NRFX_TWIM_XFER_DESC_RX(address, (uint8_t *)data, length);
+    nrfx_twim_xfer_desc_t descriptor = NRFX_TWIM_XFER_DESC_RX(address >> 1, (uint8_t *)data, length);
     if (nrfx_twim_xfer(&obj->instance, &descriptor, 0)) {
         return I2C_ERROR_BUS_BUSY;
     }
@@ -187,7 +187,7 @@ int i2c_write(i2c_t *obj, int address, const char *data, int length, int stop)
     while(nrfx_twim_is_busy(&obj->instance));
 
     obj->transfer_complete = false;
-    nrfx_twim_xfer_desc_t descriptor = NRFX_TWIM_XFER_DESC_TX(address, (uint8_t *)data, length);
+    nrfx_twim_xfer_desc_t descriptor = NRFX_TWIM_XFER_DESC_TX(address >> 1, (uint8_t *)data, length);
     if (nrfx_twim_xfer(&obj->instance, &descriptor, stop ? 0 : NRFX_TWIM_FLAG_TX_NO_STOP)) {
         return I2C_ERROR_BUS_BUSY;
     }
