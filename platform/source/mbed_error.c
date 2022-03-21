@@ -657,7 +657,7 @@ static void print_error_report(const mbed_error_ctx *ctx, const char *error_msg,
     }
 
     mbed_error_printf("\nError Value: 0x%" PRIX32, ctx->error_value);
-#ifdef MBED_CONF_RTOS_PRESENT
+#if MBED_CONF_PLATFORM_ERROR_ALL_THREADS_INFO && defined(MBED_CONF_RTOS_PRESENT)
     bool is_handler = mbed_error_is_handler(ctx);
     mbed_error_printf("\nCurrent Thread: %s%s Id: 0x%" PRIX32 " Entry: 0x%" PRIX32 " StackSize: 0x%" PRIX32 " StackMem: 0x%" PRIX32 " SP: 0x%" PRIX32 " ",
                       name_or_unnamed((osRtxThread_t *)ctx->thread_id), is_handler ? " <handler>" : "",
