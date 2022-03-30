@@ -91,7 +91,7 @@ public:
      *    An integer representing the state of the input pin,
      *    0 for logical 0, 1 for logical 1
      */
-    int read();
+    virtual int read();
 
     /** An operator shorthand for read()
      */
@@ -102,30 +102,30 @@ public:
      *
      *  @param func A pointer to a void function, or 0 to set as none
      */
-    void rise(Callback<void()> func);
+    virtual void rise(Callback<void()> func);
 
     /** Attach a function to call when a falling edge occurs on the input
      *
      *  @param func A pointer to a void function, or 0 to set as none
      */
-    void fall(Callback<void()> func);
+    virtual void fall(Callback<void()> func);
 
     /** Set the input pin mode
      *
      *  @param pull PullUp, PullDown, PullNone, PullDefault
      *  See PinNames.h for your target for definitions)
      */
-    void mode(PinMode pull);
+    virtual void mode(PinMode pull);
 
     /** Enable IRQ. This method depends on hardware implementation, might enable one
      *  port interrupts. For further information, check gpio_irq_enable().
      */
-    void enable_irq();
+    virtual void enable_irq();
 
     /** Disable IRQ. This method depends on hardware implementation, might disable one
      *  port interrupts. For further information, check gpio_irq_disable().
      */
-    void disable_irq();
+    virtual void disable_irq();
 
     static void _irq_handler(uint32_t id, gpio_irq_event event);
 #if !defined(DOXYGEN_ONLY)
