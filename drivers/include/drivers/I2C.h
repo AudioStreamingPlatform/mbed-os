@@ -107,6 +107,10 @@ public:
     I2C(const i2c_pinmap_t &static_pinmap);
     I2C(const i2c_pinmap_t &&) = delete; // prevent passing of temporary objects
 
+    /** Create an I2C Master interface default instance
+     */
+    I2C() = default;
+
     /** Create an I2C Master interface from an existing object
      */
     I2C(const I2C&) = default;
@@ -115,7 +119,7 @@ public:
      *
      *  @param hz The bus frequency in hertz
      */
-    void frequency(int hz);
+    virtual void frequency(int hz);
 
     /** Read from an I2C slave
      *
@@ -141,7 +145,7 @@ public:
      *  @returns
      *    the byte read
      */
-    int read(int ack);
+    virtual int read(int ack);
 
     /** Write to an I2C slave
      *
@@ -169,15 +173,15 @@ public:
      *    '1' - ACK was received,
      *    '2' - timeout
      */
-    int write(int data);
+    virtual int write(int data);
 
     /** Creates a start condition on the I2C bus
      */
-    void start(void);
+    virtual void start(void);
 
     /** Creates a stop condition on the I2C bus
      */
-    void stop(void);
+    virtual void stop(void);
 
     /** Recover I2C bus, when stuck with SDA low
      * 
@@ -185,7 +189,7 @@ public:
      *    '0' - Successfully recovered
      *    'I2C_ERROR_BUS_BUSY' - In case of failure
      */
-    int recover(void);
+    virtual int recover(void);
 
     /** Acquire exclusive access to this I2C bus
      */
