@@ -47,6 +47,8 @@ public:
     typedef void (T::*CCallbackSimple)(void);
     typedef void (T::*CCallback)(void *context);
 
+    CThunk() = default;
+
     inline CThunk(T *instance)
     {
         init(instance, NULL, NULL);
