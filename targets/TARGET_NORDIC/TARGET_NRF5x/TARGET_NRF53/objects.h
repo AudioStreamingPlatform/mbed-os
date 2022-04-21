@@ -120,6 +120,7 @@ struct i2c_s {
 };
 
 struct analogin_s {
+    uint8_t channel_index;
 };
 
 struct gpio_irq_s {
