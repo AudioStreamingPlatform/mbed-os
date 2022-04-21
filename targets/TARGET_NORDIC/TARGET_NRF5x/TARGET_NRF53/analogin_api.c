@@ -26,6 +26,8 @@
 #define ADC_12BIT_RANGE 0x0FFF
 #define ADC_16BIT_RANGE 0xFFFF
 
+static uint8_t channel_index = 0;
+
 #if STATIC_PINMAP_READY
 #define ANALOGIN_INIT_DIRECT analogin_init_direct
 void analogin_init_direct(analogin_t *obj, const PinMap *pinmap)
@@ -43,18 +45,21 @@ static void _analogin_init_direct(analogin_t *obj, const PinMap *pinmap)
     if (first_init) {
         result = nrfx_saadc_init(NRFX_SAADC_DEFAULT_CONFIG_IRQ_PRIORITY);
         MBED_ASSERT(result == NRFX_SUCCESS);
+        result = nrfx_saadc_offset_calibrate(NULL);
+        MBED_ASSERT(result == NRFX_SUCCESS);
         first_init = false;
     }
 
-    /* Only use a single channel (index 0) for all conversions */
-    nrfx_saadc_channel_t channel = NRFX_SAADC_DEFAULT_CHANNEL_SE(pinmap->function, 0);
-
+    nrfx_saadc_channel_t channel = NRFX_SAADC_DEFAULT_CHANNEL_SE(pinmap->function, channel_index);
     /* The 1/4 gain and VDD/4 makes the reference voltage VDD */
     channel.channel_config.gain = NRF_SAADC_GAIN1_4,
     channel.channel_config.reference = NRF_SAADC_REFERENCE_VDD4;
 
     result = nrfx_saadc_channel_config(&channel);
     MBED_ASSERT(result == NRFX_SUCCESS);
+
+    obj->channel_index = channel_index;
+    channel_index++;
 }
 
 void analogin_init(analogin_t *obj, PinName pin)
@@ -66,25 +71,22 @@ void analogin_init(analogin_t *obj, PinName pin)
 uint16_t analogin_read_u16(analogin_t *obj)
 {
     nrfx_err_t result;
-    uint16_t value = 0;
-    nrf_saadc_value_t raw_value = 0;
+    nrf_saadc_value_t value = 0;
 
-    /* Use simple mode (single sample conversion) using channel index 0 in blocking mode */
-    result = nrfx_saadc_simple_mode_set((1 << 0), NRF_SAADC_RESOLUTION_12BIT, NRF_SAADC_OVERSAMPLE_DISABLED, NULL);
+    MBED_ASSERT(obj);
+
+    /* Use simple mode (single sample conversion) in blocking mode */
+    result = nrfx_saadc_simple_mode_set((1 << obj->channel_index), NRF_SAADC_RESOLUTION_12BIT, NRF_SAADC_OVERSAMPLE_DISABLED, NULL);
     MBED_ASSERT(result == NRFX_SUCCESS);
 
-    result = nrfx_saadc_buffer_set(&raw_value, 1);
+    result = nrfx_saadc_buffer_set(&value, 1);
     MBED_ASSERT(result == NRFX_SUCCESS);
 
     result = nrfx_saadc_mode_trigger();
     MBED_ASSERT(result == NRFX_SUCCESS);
 
-    if (raw_value > 0) {
-        /* Convert the value from 12 to 16-bit as used by Mbed */
-        value = ((uint32_t)raw_value * ADC_16BIT_RANGE) / ADC_12BIT_RANGE;
-    }
-
-    return value;
+    /* Convert the value from 12 to 16-bit as used by Mbed */
+    return (((uint32_t)value) * ADC_16BIT_RANGE) / ADC_12BIT_RANGE;
 }
 
 float analogin_read(analogin_t *obj)
