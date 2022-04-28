@@ -758,14 +758,6 @@ int QSPIFBlockDevice::_sfdp_set_quad_enabled(uint8_t *basic_param_table_ptr)
         return -1;
     }
 
-    // For Debug
-    memset(status_regs, 0, QSPI_MAX_STATUS_REGISTERS);
-    _qspi_read_status_registers(status_regs);
-    if (((status_regs[0] & status_reg_setup[0]) | (status_regs[1] & status_reg_setup[1])) == 0) {
-        tr_error("Status register not set correctly");
-        return -1;
-    }
-
     return 0;
 }
 
