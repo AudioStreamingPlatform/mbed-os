@@ -59,6 +59,7 @@ static void uart_irq(UARTName uart_name)
             }
             if (__HAL_UART_GET_FLAG(huart, UART_FLAG_ORE) != RESET) {
                 if (__HAL_UART_GET_IT(huart, UART_IT_ORE) != RESET) {
+                    __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_ORE);
                     volatile uint32_t tmpval __attribute__((unused)) = huart->Instance->RDR; // Clear ORE flag
                 }
             }

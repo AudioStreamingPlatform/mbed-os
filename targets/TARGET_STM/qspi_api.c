@@ -951,12 +951,14 @@ qspi_status_t qspi_enable_xip(qspi_t *obj)
     st_command.AddressMode       = QSPI_ADDRESS_4_LINES;
     st_command.Address           = 0;
     st_command.AddressSize       = QSPI_ADDRESS_24_BITS;
-    st_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+    st_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES;
+    st_command.AlternateBytes    = 0xA5;
+    st_command.AlternateBytesSize = 1;
     st_command.DataMode          = QSPI_DATA_4_LINES;
-    st_command.DummyCycles       = 6;
+    st_command.DummyCycles       = 4;
     st_command.DdrMode           = QSPI_DDR_MODE_DISABLE;
     st_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
-    st_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+    st_command.SIOOMode          = QSPI_SIOO_INST_ONLY_FIRST_CMD;
     st_command.NbData            = 0;
 
     QSPI_MemoryMappedTypeDef st_memory;
