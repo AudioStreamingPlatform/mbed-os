@@ -661,6 +661,89 @@ HAL_StatusTypeDef init_uart(serial_t *obj)
     return HAL_UART_Init(huart);
 }
 
+UART_HandleTypeDef * dmauart;
+
+void DMA1_Channel5_IRQHandler(void)
+{
+    HAL_DMA_IRQHandler(dmauart->hdmarx);
+}
+
+/**
+  * @brief  Rx Transfer completed callback
+  * @param  UartHandle: UART handle
+  * @note   This example shows a simple way to report end of DMA Rx transfer, and
+  *         you can add your own implementation.
+  * @retval None
+ */
+
+typedef void(*DmaCompleteCallback)(uint32_t);
+
+DmaCompleteCallback callback;
+uint32_t callback_id;
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+    /* Set transmission flag: transfer complete*/
+
+    if(callback){
+        callback(callback_id);
+    }
+
+}
+
+void serial_idle_callback(void)
+{
+    if (callback) {
+        callback(callback_id);
+    }; /* Check for data to process */
+}
+
+void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buffer, size_t buffer_size, void(*DmaCompleteCallback)(uint32_t), uint32_t id)
+{
+    __HAL_RCC_DMA1_CLK_ENABLE();
+    /* Configure the DMA handler for reception process */
+    hdma_rx->Instance                 = DMA1_Channel5;
+    hdma_rx->Init.Direction           = DMA_PERIPH_TO_MEMORY;
+    hdma_rx->Init.PeriphInc           = DMA_PINC_DISABLE;
+    hdma_rx->Init.MemInc              = DMA_MINC_ENABLE;
+    hdma_rx->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_rx->Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+    hdma_rx->Init.Mode                = DMA_CIRCULAR;
+    hdma_rx->Init.Priority            = DMA_PRIORITY_HIGH;
+    hdma_rx->Init.Request             = DMA_REQUEST_2;
+
+    HAL_DMA_Init(hdma_rx);
+
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+    /* Associate the initialized DMA handle to the the UART handle */
+    __HAL_LINKDMA(huart, hdmarx, *hdma_rx);
+    dmauart = huart;
+    /*##-4- Configure the NVIC for DMA #########################################*/
+    /* NVIC configuration for DMA transfer complete interrupt (USART1_RX) */
+    HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+
+
+    __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
+
+    if(HAL_UART_Receive_DMA(huart, (uint8_t *)buffer, buffer_size) != HAL_OK)
+    {
+        printf("woops!");
+    }
+
+    callback = DmaCompleteCallback;
+    callback_id = id;
+}
+
+size_t serial_get_dma_rx_position(serial_t *obj)
+{
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+
+    return huart->hdmarx->Instance->CNDTR;
+}
+
 int8_t get_uart_index(UARTName uart_name)
 {
     uint8_t index = 0;

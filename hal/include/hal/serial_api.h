@@ -451,6 +451,9 @@ void serial_tx_abort_asynch(serial_t *obj);
  */
 void serial_rx_abort_asynch(serial_t *obj);
 
+void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buffer, size_t buffer_size, void(*DmaCompleteCallback)(uint32_t), uint32_t id);
+size_t serial_get_dma_rx_position(serial_t *obj);
+void serial_idle_callback(void);
 /**@}*/
 
 #endif
