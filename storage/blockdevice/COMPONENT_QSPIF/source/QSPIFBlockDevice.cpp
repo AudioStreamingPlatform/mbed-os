@@ -750,8 +750,11 @@ int QSPIFBlockDevice::_sfdp_set_quad_enabled(uint8_t *basic_param_table_ptr)
         status_regs[i] |= status_reg_setup[i];
     }
 
+    const auto old_num_status_registers = _num_status_registers;
+    _num_status_registers = 2;
     // Write new Status Register Setup
     _qspi_write_status_registers(status_regs);
+    _num_status_registers = old_num_status_registers;
 
     if (false == _is_mem_ready()) {
         tr_error("Device not ready after write, failed");
