@@ -762,8 +762,10 @@ public:
         F *e = new (p) F(std::move(f));
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
         int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
-        if (!id)
+        if (!id) {
             queue_full(QUEUE_FULL_CALL, sizeof(F));
+            equeue_dealloc(&_equeue, p);
+        }
         return id;
     }
 
@@ -842,8 +844,10 @@ public:
         equeue_event_delay(e, ms.count());
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
         int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
-        if (!id)
+        if (!id) {
             queue_full(QUEUE_FULL_CALL_IN, sizeof(F));
+            equeue_dealloc(&_equeue, p);
+        }
         return id;
     }
 
@@ -1000,8 +1004,10 @@ public:
         equeue_event_period(e, ms.count());
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
         int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
-        if (!id)
+        if (!id) {
             queue_full(QUEUE_FULL_CALL_EVERY, sizeof(F));
+            equeue_dealloc(&_equeue, p);
+        }
         return id;
     }
 
