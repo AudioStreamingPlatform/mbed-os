@@ -794,12 +794,6 @@ static void uart1_irq_idle(void)
                 huart->gState = HAL_UART_STATE_READY;
             }
         }
-
-        if (__HAL_UART_GET_FLAG(huart, UART_FLAG_FE) != RESET) {
-            if(__HAL_UART_GET_IT(huart, UART_IT_FE) != RESET) {
-                __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_FE);
-            }
-        }
     }
 }
 
@@ -830,11 +824,9 @@ void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buff
     HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
-
     __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
     __HAL_UART_DISABLE_IT(huart, UART_IT_RXNE);
     __HAL_UART_DISABLE_IT(huart, UART_IT_PE);
-    __HAL_UART_DISABLE_IT(huart, UART_IT_FE);
     uint32_t vector = (uint32_t)&uart1_irq_idle;
     NVIC_SetVector(USART1_IRQn, vector);
     NVIC_EnableIRQ(USART1_IRQn);
