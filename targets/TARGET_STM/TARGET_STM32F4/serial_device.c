@@ -797,7 +797,7 @@ static void uart1_irq_idle(void)
     }
 }
 
-void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buffer, size_t buffer_size, void(*DmaCompleteCallback)(uint32_t), uint32_t id)
+void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buffer, size_t buffer_size, DmaCompleteCallback callback, uint32_t id)
 {
     __HAL_RCC_DMA2_CLK_ENABLE();
     /* Configure the DMA handler for reception process */
@@ -835,7 +835,7 @@ void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buff
 
     }
 
-    callback_dma_rx = DmaCompleteCallback;
+    callback_dma_rx = callback;
     callback_id_dma_rx = (uint32_t)id;
 }
 
@@ -847,7 +847,7 @@ size_t serial_get_dma_rx_position(serial_t *obj)
     return huart->hdmarx->Instance->NDTR;
 }
 
-void serial_tx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_tx, void(*DmaCompleteCallback)(uint32_t), uint32_t id)
+void serial_tx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_tx, DmaCompleteCallback callback, uint32_t id)
 {
     /* USART1_TX Init */
     hdma_tx->Instance = DMA2_Stream7;
@@ -871,7 +871,7 @@ void serial_tx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_tx, void(*DmaComp
     HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 
-    callback_dma_tx = DmaCompleteCallback;
+    callback_dma_tx = callback;
     callback_id_dma_tx = id;
 }
 
