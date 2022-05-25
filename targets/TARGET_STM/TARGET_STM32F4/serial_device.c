@@ -726,6 +726,166 @@ void serial_rx_abort_asynch(serial_t *obj)
     }
 }
 
+UART_HandleTypeDef * dmauart;
+
+void DMA2_Stream2_IRQHandler(void)
+{
+    HAL_DMA_IRQHandler(dmauart->hdmarx);
+}
+
+void DMA2_Stream7_IRQHandler(void)
+{
+    HAL_DMA_IRQHandler(dmauart->hdmatx);
+}
+
+/**
+  * @brief  Rx Transfer completed callback
+  * @param  UartHandle: UART handle
+  * @note   This example shows a simple way to report end of DMA Rx transfer, and
+  *         you can add your own implementation.
+  * @retval None
+ */
+
+typedef void(*DmaCompleteCallback)(uint32_t);
+
+DmaCompleteCallback callback_dma_rx;
+uint32_t callback_id_dma_rx;
+
+DmaCompleteCallback callback_dma_tx;
+uint32_t callback_id_dma_tx;
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
+{
+    /* Set transmission flag: transfer complete*/
+    serial_idle_callback();
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef* UartHandle)
+{
+    if (callback_dma_tx) {
+        callback_dma_tx(callback_id_dma_tx);
+    }
+}
+
+void serial_idle_callback(void)
+{
+    if (callback_dma_rx) {
+        callback_dma_rx(callback_id_dma_rx);
+    }
+}
+
+static void uart1_irq_idle(void)
+{
+    int8_t id = get_uart_index(UART_1);
+
+    if (id >= 0) {
+        UART_HandleTypeDef* huart = &uart_handlers[id];
+
+        if (__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE) != RESET) {
+            if (__HAL_UART_GET_IT_SOURCE(huart, UART_IT_IDLE) != RESET) {
+                __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_IDLE);
+                serial_idle_callback();
+            }
+        }
+
+        if (__HAL_UART_GET_FLAG(huart, UART_FLAG_TC) != RESET) {
+            if(__HAL_UART_GET_IT_SOURCE(huart, UART_IT_TC) != RESET) {
+                __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_TC);
+                huart->gState = HAL_UART_STATE_READY;
+            }
+        }
+    }
+}
+
+void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buffer, size_t buffer_size, void(*DmaCompleteCallback)(uint32_t), uint32_t id)
+{
+    __HAL_RCC_DMA2_CLK_ENABLE();
+    /* Configure the DMA handler for reception process */
+    hdma_rx->Instance = DMA2_Stream2;
+    hdma_rx->Init.Channel = DMA_CHANNEL_4;
+    hdma_rx->Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_rx->Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_rx->Init.MemInc = DMA_MINC_ENABLE;
+    hdma_rx->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_rx->Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_rx->Init.Mode = DMA_CIRCULAR;
+    hdma_rx->Init.Priority = DMA_PRIORITY_LOW;
+    hdma_rx->Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+
+    HAL_DMA_Init(hdma_rx);
+
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+    /* Associate the initialized DMA handle to the the UART handle */
+    __HAL_LINKDMA(huart, hdmarx, *hdma_rx);
+    dmauart = huart;
+    /*##-4- Configure the NVIC for DMA #########################################*/
+    /* NVIC configuration for DMA transfer complete interrupt (USART1_RX) */
+    HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+
+
+    __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
+    __HAL_UART_DISABLE_IT(huart, UART_IT_RXNE);
+    uint32_t vector = (uint32_t)&uart1_irq_idle;
+    NVIC_SetVector(USART1_IRQn, vector);
+    NVIC_EnableIRQ(USART1_IRQn);
+    if(HAL_UART_Receive_DMA(huart, (uint8_t *)buffer, buffer_size) != HAL_OK)
+    {
+
+    }
+
+    callback_dma_rx = DmaCompleteCallback;
+    callback_id_dma_rx = (uint32_t)id;
+}
+
+size_t serial_get_dma_rx_position(serial_t *obj)
+{
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+
+    return huart->hdmarx->Instance->NDTR;
+}
+
+void serial_tx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_tx, void(*DmaCompleteCallback)(uint32_t), uint32_t id)
+{
+    /* USART1_TX Init */
+    hdma_tx->Instance = DMA2_Stream7;
+    hdma_tx->Init.Channel = DMA_CHANNEL_4;
+    hdma_tx->Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_tx->Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_tx->Init.MemInc = DMA_MINC_ENABLE;
+    hdma_tx->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_tx->Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_tx->Init.Mode = DMA_NORMAL;
+    hdma_tx->Init.Priority = DMA_PRIORITY_LOW;
+    hdma_tx->Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    HAL_DMA_Init(hdma_tx);
+
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+
+    __HAL_LINKDMA(huart, hdmatx, *hdma_tx);
+    __HAL_UART_DISABLE_IT(huart, UART_IT_TXE);
+
+    HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
+
+    callback_dma_tx = DmaCompleteCallback;
+    callback_id_dma_tx = id;
+}
+
+size_t serial_tx_dma(serial_t *obj, uint8_t* buffer, size_t buffer_size)
+{
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+
+    if(HAL_UART_Transmit_DMA(huart, buffer, buffer_size) == HAL_OK) {
+        return buffer_size;
+    }
+    return 0;
+}
+
 #endif /* DEVICE_SERIAL_ASYNCH */
 
 #if DEVICE_SERIAL_FC
