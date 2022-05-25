@@ -875,6 +875,22 @@ void serial_tx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_tx, void(*DmaComp
     callback_id_dma_tx = id;
 }
 
+void serial_rx_dma_free(serial_t *obj)
+{
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+
+    HAL_DMA_DeInit(huart->hdmarx);
+}
+
+void serial_tx_dma_free(serial_t *obj)
+{
+    struct serial_s *obj_s = SERIAL_S(obj);
+    UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
+
+    HAL_DMA_DeInit(huart->hdmatx);
+}
+
 size_t serial_tx_dma(serial_t *obj, uint8_t* buffer, size_t buffer_size)
 {
     struct serial_s *obj_s = SERIAL_S(obj);
