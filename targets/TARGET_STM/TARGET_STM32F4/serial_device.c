@@ -783,7 +783,7 @@ static void uart1_irq_idle(void)
 
         if (__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE) != RESET) {
             if (__HAL_UART_GET_IT_SOURCE(huart, UART_IT_IDLE) != RESET) {
-                __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_IDLE);
+                volatile uint32_t tmpval __attribute__((unused)) = huart->Instance->DR; // Clear IDLE flag
                 serial_idle_callback();
             }
         }
