@@ -38,9 +38,10 @@
 
 #include "us_ticker_api.h"
 #include "common_rtc.h"
-#include "app_util.h"
 #include "lp_ticker_api.h"
 #include "mbed_critical.h"
+
+#include "nrfx/hal/nrf_rtc.h"
 
 #if defined(NRF52_PAN_20)
 /* Macro for testing if the SoftDevice is active, regardless of whether the
@@ -54,19 +55,13 @@
 #endif
 #endif
 
-
-//------------------------------------------------------------------------------
-// Common stuff used also by lp_ticker and rtc_api (see "common_rtc.h").
-//
-#include "app_util_platform.h"
-
 bool              m_common_rtc_enabled = false;
 uint32_t volatile m_common_rtc_overflows = 0;
 bool     volatile lp_ticker_interrupt_fire = false;
 
 __STATIC_INLINE void rtc_ovf_event_check(void)
 {
-    if (nrf_rtc_event_pending(COMMON_RTC_INSTANCE, NRF_RTC_EVENT_OVERFLOW)) {
+    if (nrf_rtc_event_check(COMMON_RTC_INSTANCE, NRF_RTC_EVENT_OVERFLOW)) {
         nrf_rtc_event_clear(COMMON_RTC_INSTANCE, NRF_RTC_EVENT_OVERFLOW);
         /* Don't disable this event. It shall occur periodically.
          * It is needed for RTC. */
@@ -84,7 +79,7 @@ void COMMON_RTC_IRQ_HANDLER(void)
     rtc_ovf_event_check();
 
 #if DEVICE_LPTICKER
-    if (nrf_rtc_event_pending(COMMON_RTC_INSTANCE, LP_TICKER_EVENT) ||
+    if (nrf_rtc_event_check(COMMON_RTC_INSTANCE, LP_TICKER_EVENT) ||
         lp_ticker_interrupt_fire) {
 
         if (lp_ticker_interrupt_fire) {
@@ -172,7 +167,7 @@ void common_rtc_init(void)
     nrf_rtc_int_disable(COMMON_RTC_INSTANCE, LP_TICKER_INT_MASK);
 #endif
 
-    NRFX_IRQ_PRIORITY_SET(nrfx_get_irq_number(COMMON_RTC_INSTANCE), APP_IRQ_PRIORITY_HIGH);
+    NRFX_IRQ_PRIORITY_SET(nrfx_get_irq_number(COMMON_RTC_INSTANCE), NRFX_RTC_DEFAULT_CONFIG_IRQ_PRIORITY);
     NRFX_IRQ_ENABLE(nrfx_get_irq_number(COMMON_RTC_INSTANCE));
 
     nrf_rtc_task_trigger(COMMON_RTC_INSTANCE, NRF_RTC_TASK_START);
@@ -213,7 +208,7 @@ void common_rtc_set_interrupt(uint32_t ticks_count, uint32_t cc_channel,
 
     nrf_rtc_cc_set(COMMON_RTC_INSTANCE, cc_channel, ticks_count);
 
-    if (!nrf_rtc_int_is_enabled(COMMON_RTC_INSTANCE, int_mask)) {
+    if (!nrf_rtc_int_enable_check(COMMON_RTC_INSTANCE, int_mask)) {
         nrf_rtc_event_clear(COMMON_RTC_INSTANCE, LP_TICKER_EVENT);
         nrf_rtc_int_enable(COMMON_RTC_INSTANCE, int_mask);
     }
@@ -239,7 +234,7 @@ void common_rtc_set_interrupt(uint32_t ticks_count, uint32_t cc_channel,
 
 void COMMON_RTC_IRQ_HANDLER(void)
 {
-    if(!nrf_rtc_event_pending(COMMON_RTC_INSTANCE, OS_TICK_EVENT)) {
+    if(!nrf_rtc_event_check(COMMON_RTC_INSTANCE, OS_TICK_EVENT)) {
         common_rtc_irq_handler();
     }
 }
