@@ -27,4 +27,5 @@ target_sources(mbed-core
         trng_api.c
         us_ticker.c
         watchdog_api.c
+        common_rtc.c
 )

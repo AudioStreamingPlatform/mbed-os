@@ -42,7 +42,6 @@
 
 #include "common_rtc.h"
 #include "nrf_rtc.h"
-#include "app_util_platform.h"
 
 static time_t m_time_base;
 
