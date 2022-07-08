@@ -215,7 +215,7 @@ int serial_readable(serial_t *obj) {
     return obj->rx_buffer_primary_set || obj->rx_buffer_secondary_set;
 }
 
-int serial_writable(serial_t *obj) {
+int serial_writable(const serial_t *obj) {
     return !nrfx_uarte_tx_in_progress(&obj->instance);
 }
 

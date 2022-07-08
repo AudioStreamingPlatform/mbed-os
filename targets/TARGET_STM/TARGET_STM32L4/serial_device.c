@@ -29,6 +29,8 @@
 
 uint32_t serial_irq_ids[UART_NUM] = {0};
 UART_HandleTypeDef uart_handlers[UART_NUM];
+DMA_HandleTypeDef dma_handlers_rx;
+DMA_HandleTypeDef dma_handlers_tx;
 
 static uart_irq_handler irq_handler;
 
@@ -641,16 +643,14 @@ void serial_rx_abort_asynch(serial_t *obj)
     }
 }
 
-UART_HandleTypeDef * dmauart;
-
 void DMA1_Channel5_IRQHandler(void)
 {
-    HAL_DMA_IRQHandler(dmauart->hdmarx);
+    HAL_DMA_IRQHandler(&dma_handlers_rx);
 }
 
 void DMA1_Channel4_IRQHandler(void)
 {
-    HAL_DMA_IRQHandler(dmauart->hdmatx);
+    HAL_DMA_IRQHandler(&dma_handlers_tx);
 }
 
 /**
@@ -666,20 +666,10 @@ typedef void(*DmaCompleteCallback)(uint32_t);
 DmaCompleteCallback callback_dma_rx;
 uint32_t callback_id_dma_rx;
 
-DmaCompleteCallback callback_dma_tx;
-uint32_t callback_id_dma_tx;
-
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* UartHandle)
 {
     /* Set transmission flag: transfer complete*/
     serial_idle_callback();
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef* UartHandle)
-{
-    if (callback_dma_tx) {
-        callback_dma_tx(callback_id_dma_tx);
-    }
 }
 
 void serial_idle_callback(void)
@@ -718,27 +708,27 @@ static void uart1_irq_idle(void)
     }
 }
 
-void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buffer, size_t buffer_size, DmaCompleteCallback callback, uint32_t id)
+void serial_rx_dma_init(serial_t *obj, uint8_t* buffer, size_t buffer_size, DmaCompleteCallback callback, uint32_t id)
 {
     __HAL_RCC_DMA1_CLK_ENABLE();
     /* Configure the DMA handler for reception process */
-    hdma_rx->Instance                 = DMA1_Channel5;
-    hdma_rx->Init.Direction           = DMA_PERIPH_TO_MEMORY;
-    hdma_rx->Init.PeriphInc           = DMA_PINC_DISABLE;
-    hdma_rx->Init.MemInc              = DMA_MINC_ENABLE;
-    hdma_rx->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_rx->Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
-    hdma_rx->Init.Mode                = DMA_CIRCULAR;
-    hdma_rx->Init.Priority            = DMA_PRIORITY_HIGH;
-    hdma_rx->Init.Request             = DMA_REQUEST_2;
+    dma_handlers_rx.Instance                 = DMA1_Channel5;
+    dma_handlers_rx.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+    dma_handlers_rx.Init.PeriphInc           = DMA_PINC_DISABLE;
+    dma_handlers_rx.Init.MemInc              = DMA_MINC_ENABLE;
+    dma_handlers_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    dma_handlers_rx.Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+    dma_handlers_rx.Init.Mode                = DMA_CIRCULAR;
+    dma_handlers_rx.Init.Priority            = DMA_PRIORITY_HIGH;
+    dma_handlers_rx.Init.Request             = DMA_REQUEST_2;
 
-    HAL_DMA_Init(hdma_rx);
+    HAL_DMA_Init(&dma_handlers_rx);
 
     struct serial_s *obj_s = SERIAL_S(obj);
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
     /* Associate the initialized DMA handle to the the UART handle */
-    __HAL_LINKDMA(huart, hdmarx, *hdma_rx);
-    dmauart = huart;
+    __HAL_LINKDMA(huart, hdmarx, dma_handlers_rx);
+
     /*##-4- Configure the NVIC for DMA #########################################*/
     /* NVIC configuration for DMA transfer complete interrupt (USART1_RX) */
     HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
@@ -752,8 +742,7 @@ void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buff
     uint32_t vector = (uint32_t)&uart1_irq_idle;
     NVIC_SetVector(USART1_IRQn, vector);
     NVIC_EnableIRQ(USART1_IRQn);
-    if(HAL_UART_Receive_DMA(huart, (uint8_t *)buffer, buffer_size) != HAL_OK)
-    {
+    if(HAL_UART_Receive_DMA(huart, (uint8_t *)buffer, buffer_size) != HAL_OK) {
 
     }
 
@@ -761,39 +750,36 @@ void serial_rx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_rx, uint8_t* buff
     callback_id_dma_rx = (uint32_t)id;
 }
 
-size_t serial_get_dma_rx_position(serial_t *obj)
+size_t serial_get_dma_rx_position(const serial_t *obj)
 {
-    struct serial_s *obj_s = SERIAL_S(obj);
+    const struct serial_s *obj_s = SERIAL_S(obj);
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
 
     return huart->hdmarx->Instance->CNDTR;
 }
 
-void serial_tx_dma_init(serial_t *obj, DMA_HandleTypeDef *hdma_tx, DmaCompleteCallback callback, uint32_t id)
+void serial_tx_dma_init(serial_t *obj)
 {
     /* USART1_TX Init */
-    hdma_tx->Instance = DMA1_Channel4;
-    hdma_tx->Init.Request = DMA_REQUEST_2;
-    hdma_tx->Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_tx->Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_tx->Init.MemInc = DMA_MINC_ENABLE;
-    hdma_tx->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_tx->Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_tx->Init.Mode = DMA_NORMAL;
-    hdma_tx->Init.Priority = DMA_PRIORITY_LOW;
-    HAL_DMA_Init(hdma_tx);
+    dma_handlers_tx.Instance = DMA1_Channel4;
+    dma_handlers_tx.Init.Request = DMA_REQUEST_2;
+    dma_handlers_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    dma_handlers_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+    dma_handlers_tx.Init.MemInc = DMA_MINC_ENABLE;
+    dma_handlers_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    dma_handlers_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    dma_handlers_tx.Init.Mode = DMA_NORMAL;
+    dma_handlers_tx.Init.Priority = DMA_PRIORITY_LOW;
+    HAL_DMA_Init(&dma_handlers_tx);
 
     struct serial_s *obj_s = SERIAL_S(obj);
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
 
-    __HAL_LINKDMA(huart, hdmatx, *hdma_tx);
+    __HAL_LINKDMA(huart, hdmatx, dma_handlers_tx);
     __HAL_UART_DISABLE_IT(huart, UART_IT_TXE);
 
     HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
-
-    callback_dma_tx = callback;
-    callback_id_dma_tx = id;
 }
 
 void serial_rx_dma_free(serial_t *obj)
@@ -812,12 +798,12 @@ void serial_tx_dma_free(serial_t *obj)
     HAL_DMA_DeInit(huart->hdmatx);
 }
 
-size_t serial_tx_dma(serial_t *obj, uint8_t* buffer, size_t buffer_size)
+size_t serial_tx_dma(serial_t *obj, const uint8_t* buffer, size_t buffer_size)
 {
     struct serial_s *obj_s = SERIAL_S(obj);
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
 
-    if(HAL_UART_Transmit_DMA(huart, buffer, buffer_size) == HAL_OK) {
+    if(HAL_UART_Transmit_DMA(huart, (uint8_t*)buffer, buffer_size) == HAL_OK) {
         return buffer_size;
     }
     return 0;

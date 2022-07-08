@@ -578,9 +578,9 @@ int serial_readable(serial_t *obj)
     return (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXNE) != RESET) ? 1 : 0;
 }
 
-int serial_writable(serial_t *obj)
+int serial_writable(const serial_t *obj)
 {
-    struct serial_s *obj_s = SERIAL_S(obj);
+    const struct serial_s *obj_s = SERIAL_S(obj);
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
 
     // Check if data is transmitted
