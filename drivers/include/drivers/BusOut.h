@@ -76,14 +76,14 @@ public:
      *
      *  @param value An integer specifying a bit to write for every corresponding DigitalOut pin
      */
-    void write(int value);
+    virtual void write(int value);
 
     /** Read the value currently output on the bus
      *
      *  @returns
      *    An integer with each bit corresponding to associated DigitalOut pin setting
      */
-    int read();
+    virtual int read();
 
     /** Binary mask of bus pins connected to actual pins (not NC pins)
      *  If bus pin is in NC state make corresponding bit will be cleared (set to 0), else bit will be set to 1
@@ -91,7 +91,7 @@ public:
      *  @returns
      *    Binary mask of connected pins
      */
-    int mask()
+    virtual int mask()
     {
         // No lock needed since _nc_mask is not modified outside the constructor
         return _nc_mask;
@@ -100,18 +100,18 @@ public:
     /** A shorthand for write()
      * \sa BusOut::write()
      */
-    BusOut &operator= (int v);
-    BusOut &operator= (BusOut &rhs);
+    virtual BusOut &operator= (int v);
+    virtual BusOut &operator= (BusOut &rhs);
 
     /** Access to particular bit in random-iterator fashion
      * @param index  Bit Position
      */
-    DigitalOut &operator[](int index);
+    virtual DigitalOut &operator[](int index);
 
     /** A shorthand for read()
      * \sa BusOut::read()
      */
-    operator int();
+    virtual operator int();
 #if !defined(DOXYGEN_ONLY)
 protected:
     virtual void lock();
