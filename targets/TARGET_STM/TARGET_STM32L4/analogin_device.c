@@ -152,6 +152,7 @@ uint16_t adc_read(analogin_t *obj)
             break;
         case 4:
             sConfig.Channel = ADC_CHANNEL_4;
+            sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5; // Workaround for AIXV-140. For unknown reasons channel 4 is slower.
             break;
         case 5:
             sConfig.Channel = ADC_CHANNEL_5;
