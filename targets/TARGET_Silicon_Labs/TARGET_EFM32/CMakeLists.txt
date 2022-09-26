@@ -68,13 +68,13 @@ target_sources(mbed-core
         emlib/src/em_i2c.c
         emlib/src/em_iadc.c
         emlib/src/em_idac.c
-        emlib/src/em_int.c
+        # emlib/src/em_int.c # Deprecated
         emlib/src/em_lcd.c
         emlib/src/em_ldma.c
         emlib/src/em_lesense.c
         emlib/src/em_letimer.c
         emlib/src/em_leuart.c
-        emlib/src/em_mpu.c
+        # emlib/src/em_mpu.c # Deprecated
         emlib/src/em_msc.c
         emlib/src/em_opamp.c
         emlib/src/em_pcnt.c

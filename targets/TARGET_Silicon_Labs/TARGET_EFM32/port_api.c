@@ -74,15 +74,15 @@ void port_dir(port_t *obj, PinDirection dir)
 
 void port_write(port_t *obj, int value)
 {
-    GPIO_PortOutSetVal(obj->port, value, obj->mask);
+    GPIO_PortOutSetVal((GPIO_Port_TypeDef)obj->port, value, obj->mask);
 }
 
 int port_read(port_t *obj)
 {
     if (obj->dir == PIN_INPUT) {
-        return (int) (GPIO_PortInGet(obj->port) & obj->mask);
+        return (int) (GPIO_PortInGet((GPIO_Port_TypeDef)obj->port) & obj->mask);
     } else {
-        return (int) (GPIO_PortOutGet(obj->port) & obj->mask);
+        return (int) (GPIO_PortOutGet((GPIO_Port_TypeDef)obj->port) & obj->mask);
     }
 }
 
