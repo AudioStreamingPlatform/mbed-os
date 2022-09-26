@@ -1140,7 +1140,7 @@ int serial_readable(serial_t *obj)
 /**
  * Check if TX buffer is empty
  */
-int serial_writable(serial_t *obj)
+int serial_writable(const serial_t *obj)
 {
     if(LEUART_REF_VALID(obj->serial.periph.leuart)) {
         return obj->serial.periph.leuart->STATUS & LEUART_STATUS_TXBL;
