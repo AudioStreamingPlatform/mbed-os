@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017, Arm Limited and affiliates.
+ * Copyright (c) 2014-2017, 2020, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -326,6 +326,7 @@ void icmpv6_stop_router_advertisements(protocol_interface_info_entry_t *cur, con
 static void icmpv6_send_ra(protocol_interface_info_entry_t *cur, const uint8_t *dest, const uint8_t *abro)
 {
 #ifndef HAVE_RPL
+    (void) dest;
     (void) abro;
 #endif
     if (cur->nwk_id == IF_6LoWPAN) {

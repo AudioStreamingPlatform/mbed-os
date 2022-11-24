@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018, Arm Limited and affiliates.
+ * Copyright (c) 2012-2018, 2020, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -114,7 +114,7 @@ void nd_border_router_setup_refresh(nwk_interface_id id, bool fresh_abro)
     nd_router_object->life_time = nd_configure->life_time;
 
     if (!ns_list_is_empty(&nd_router_object->prefix_list)) {
-        tr_debug("Release Prefix\n");
+        tr_debug("Release Prefix");
         icmpv6_prefix_list_free(&nd_router_object->prefix_list);
     }
 

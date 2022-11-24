@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * Copyright (c) 2018-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,12 +48,13 @@
  * \param timer_settings timer settings
  * \param sec_cfg security configuration
  * \param sec_keys_nw_info security keys network information
+ * \param frame_counters frame counters
  *
  * \return < 0 failure
  * \return >= 0 success
  *
  */
-int8_t ws_pae_auth_init(protocol_interface_info_entry_t *interface_ptr, sec_prot_gtk_keys_t *next_gtks, const sec_prot_certs_t *certs, sec_cfg_t *sec_cfg, sec_prot_keys_nw_info_t *sec_keys_nw_info);
+int8_t ws_pae_auth_init(protocol_interface_info_entry_t *interface_ptr, sec_prot_gtk_keys_t *next_gtks, const sec_prot_certs_t *certs, sec_cfg_t *sec_cfg, sec_prot_keys_nw_info_t *sec_keys_nw_info, frame_counters_t *frame_counters);
 
 /**
  * ws_pae_auth_addresses_set set relay addresses
@@ -250,6 +251,30 @@ typedef void ws_pae_auth_nw_info_updated(protocol_interface_info_entry_t *interf
 typedef void ws_pae_auth_ip_addr_get(protocol_interface_info_entry_t *interface_ptr, uint8_t *address);
 
 /**
+ * ws_pae_auth_congestion_get get congestion information
+ *
+ * \param interface_ptr interface
+ * \param active_supp active supplicants
+ *
+ * \return TRUE reject, FALSE accept
+ *
+ */
+typedef bool ws_pae_auth_congestion_get(protocol_interface_info_entry_t *interface_ptr, uint16_t active_supp);
+
+/**
+ * ws_pae_auth_nw_frame_counter_read network frame counter read callback
+ *
+ * \param interface_ptr interface
+ * \param counter frame counter
+ * \param gtk_index GTK index
+ *
+ * \return < 0 failure
+ * \return >= 0 success
+ *
+ */
+typedef int8_t ws_pae_auth_nw_frame_counter_read(protocol_interface_info_entry_t *interface_ptr, uint32_t *counter, uint8_t gtk_index);
+
+/**
  *  ws_pae_auth_cb_register register PAE authenticator callbacks
  *
  * \param interface_ptr interface
@@ -258,17 +283,19 @@ typedef void ws_pae_auth_ip_addr_get(protocol_interface_info_entry_t *interface_
  * \param nw_key_index_set network send key index callback
  * \param nw_info_updated network keys updated callback
  * \param ip_addr_get IP addressing information callback
+ * \param congestion_get congestion get callback
+ * \param nw_frame_cnt_read network frame counter read callback
  *
  */
-void ws_pae_auth_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_auth_gtk_hash_set *hash_set, ws_pae_auth_nw_key_insert *nw_key_insert, ws_pae_auth_nw_key_index_set *nw_key_index_set, ws_pae_auth_nw_info_updated *nw_info_updated, ws_pae_auth_ip_addr_get *ip_addr_get);
+void ws_pae_auth_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_auth_gtk_hash_set *hash_set, ws_pae_auth_nw_key_insert *nw_key_insert, ws_pae_auth_nw_key_index_set *nw_key_index_set, ws_pae_auth_nw_info_updated *nw_info_updated, ws_pae_auth_ip_addr_get *ip_addr_get, ws_pae_auth_congestion_get *congestion_get, ws_pae_auth_nw_frame_counter_read *nw_frame_cnt_read);
 
 #else
 
-#define ws_pae_auth_init(interface_ptr, next_gtks, certs, sec_cfg, sec_keys_nw_info) 1
+#define ws_pae_auth_init(interface_ptr, next_gtks, certs, sec_cfg, sec_keys_nw_info, frame_counters) 1
 #define ws_pae_auth_timing_adjust(timing)
 #define ws_pae_auth_addresses_set(interface_ptr, local_port, remote_addr, remote_port) 1
 #define ws_pae_auth_delete NULL
-#define ws_pae_auth_cb_register(interface_ptr, hash_set, nw_key_insert, nw_key_index_set, nw_info_updated, ip_addr_get) {(void) hash_set;}
+#define ws_pae_auth_cb_register(interface_ptr, hash_set, nw_key_insert, nw_key_index_set, nw_info_updated, ip_addr_get, congestion_get, nw_frame_cnt_read)
 #define ws_pae_auth_start(interface_ptr)
 #define ws_pae_auth_gtks_updated NULL
 #define ws_pae_auth_nw_key_index_update NULL

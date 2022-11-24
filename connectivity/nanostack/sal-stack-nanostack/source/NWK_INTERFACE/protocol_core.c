@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Arm Limited and affiliates.
+ * Copyright (c) 2014-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,7 +65,6 @@
 #include "6LoWPAN/Thread/thread_bootstrap.h"
 #include "6LoWPAN/Thread/thread_routing.h"
 #include "6LoWPAN/Thread/thread_management_internal.h"
-#include "6LoWPAN/ws/ws_bootstrap.h"
 #include "6LoWPAN/ws/ws_common.h"
 #ifdef HAVE_WS
 #include "6LoWPAN/ws/ws_pae_controller.h"
@@ -265,6 +264,7 @@ void core_timer_event_handle(uint16_t ticksUpdate)
                         cur->nwk_wpan_nvm_api->nvm_params_update_cb(cur->nwk_wpan_nvm_api, false);
                     }
                     etx_cache_timer(cur->id, seconds);
+                    lowpan_adaptation_interface_slow_timer(cur);
                 }
             } else if (cur->nwk_id == IF_IPV6) {
                 //Slow Pointer Update
@@ -461,6 +461,7 @@ static void protocol_core_base_init(protocol_interface_info_entry_t *entry, nwk_
     entry->ipv6_configure = NULL;
     entry->if_lowpan_security_params = NULL;
     entry->if_ns_transmit = NULL;
+    entry->if_common_forwarding_out_cb = NULL;
     entry->if_special_forwarding = NULL;
     entry->if_snoop = NULL;
     entry->if_icmp_handler = NULL;
@@ -800,6 +801,18 @@ protocol_interface_info_entry_t *protocol_stack_interface_info_get_by_fhss_api(c
     }
 #else
     (void)fhss_api;
+#endif //HAVE_WS
+    return NULL;
+}
+
+protocol_interface_info_entry_t *protocol_stack_interface_info_get_wisun_mesh(void)
+{
+#ifdef HAVE_WS
+    ns_list_foreach(protocol_interface_info_entry_t, cur, &protocol_interface_info_list) {
+        if (cur->ws_info) {
+            return cur;
+        }
+    }
 #endif //HAVE_WS
     return NULL;
 }
@@ -1146,7 +1159,7 @@ void net_bootsrap_cb_run(uint8_t event)
             if (thread_info(cur)) {
                 thread_bootstrap_state_machine(cur);
             } else if (ws_info(cur)) {
-                ws_bootstrap_state_machine(cur);
+                ws_common_state_machine(cur);
             } else {
                 protocol_6lowpan_bootstrap(cur);
             }

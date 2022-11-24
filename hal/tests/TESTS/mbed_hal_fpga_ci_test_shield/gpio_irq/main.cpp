@@ -19,7 +19,7 @@
 #error [NOT_SUPPORTED] test not supported
 #elif !COMPONENT_FPGA_CI_TEST_SHIELD
 #error [NOT_SUPPORTED] FPGA CI Test Shield is needed to run this test
-#elif !defined(TARGET_FF_ARDUINO) && !defined(MBED_CONF_TARGET_DEFAULT_FORM_FACTOR)
+#elif !(defined(TARGET_FF_ARDUINO) || defined(TARGET_FF_ARDUINO_UNO)) && !defined(MBED_CONF_TARGET_DEFAULT_FORM_FACTOR)
 #error [NOT_SUPPORTED] Test not supported for this form factor
 #else
 
@@ -40,7 +40,7 @@ using namespace utest::v1;
 MbedTester tester(DefaultFormFactor::pins(), DefaultFormFactor::restricted_pins());
 
 static volatile uint32_t call_counter;
-void test_gpio_irq_handler(uint32_t id, gpio_irq_event event)
+void test_gpio_irq_handler(uintptr_t context, gpio_irq_event event)
 {
     call_counter++;
 }
@@ -63,8 +63,8 @@ void fpga_gpio_irq_test(PinName pin)
     gpio_init_in(&gpio, pin);
 
     gpio_irq_t gpio_irq;
-    uint32_t id = 123;
-    TEST_ASSERT_EQUAL(0, gpio_irq_init(&gpio_irq, pin, test_gpio_irq_handler, id));
+    uintptr_t context = 123;
+    TEST_ASSERT_EQUAL(0, gpio_irq_init(&gpio_irq, pin, test_gpio_irq_handler, context));
 
     gpio_irq_set(&gpio_irq, IRQ_RISE, true);
     gpio_irq_enable(&gpio_irq);

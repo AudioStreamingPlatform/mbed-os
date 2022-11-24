@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited and affiliates.
+ * Copyright (c) 2017-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,6 +75,36 @@ typedef struct bbr_radius_timing {
 } bbr_radius_timing_t;
 
 /**
+ * \brief Daylights saving time parameters.
+ */
+typedef struct bbr_timezone_configuration {
+    /** Timestamp of the Daylight saving time change*/
+    uint64_t timestamp;
+    /** Time zone information in minutes*/
+    int16_t timezone;
+    /** Change that is applied when timestamp is reached*/
+    int16_t deviation;
+    /** Time configuration status bit field
+     * "bit xxxxxxxxxxxxxxxS"       0 = false 1 = true Daylight saving time status*/
+    uint16_t status;
+} bbr_timezone_configuration_t;
+
+
+/**
+ * \brief Border router configuration.
+ */
+typedef struct bbr_configuration_s {
+    uint32_t dhcp_address_lifetime;     /**< DHCP address lifetime in seconds minimum 2 hours and maximum few days*/
+    uint32_t rpl_default_lifetime;      /**< RPL default lifetime value from 30 minutes to 16 hours*/
+    uint16_t dag_max_rank_increase;     /**< DIO Max rank increase. Range 0-2048 */
+    uint16_t min_hop_rank_increase;     /**< DIO Min hop rank increase. range 32-256 */
+    uint16_t options;                   /**< Border router configuration options */
+    uint8_t dio_interval_min;           /**< DIO interval min. range 1-255 */
+    uint8_t dio_interval_doublings;     /**< DIO interval doublings. range 1-8 */
+    uint8_t dio_redundancy_constant;    /**< DIO redundancy constant. Range 0-10 */
+} bbr_configuration_t;
+
+/**
  * Start backbone border router service.
  *
  * if backbone interface is enabled and allows routing.
@@ -99,6 +129,7 @@ int ws_bbr_start(int8_t interface_id, int8_t backbone_interface_id);
 #define BBR_REQUIRE_DAO_REFRESH   0x0000 /**< Deprecated DAO Refresh is now the default functionality*/
 #define BBR_PERIODIC_VERSION_INC  0x0010 /**< Increment PAN version number Periodically*/
 #define BBR_GUA_SLAAC             0x0020 /**< in Global prefix use SLAAC address generation to reduce traffic during bootstrap */
+#define BBR_DHCP_ANONYMOUS        0x0040 /**< Generate anonymous addresses from DHCP server */
 
 /**
  * Configure border router features.
@@ -108,6 +139,9 @@ int ws_bbr_start(int8_t interface_id, int8_t backbone_interface_id);
  *          BBR_ULA_C     Configure Mesh local ULA prefix with SLAAC address
  *          BBR_GUA_ROUTE Add more specific route for GUA
  *          BBR_BB_WAIT   Start Wi-SUN network only when backbone is ready
+ *          BBR_DHCP_ANONYMOUS if true give anonymous address (16 bit suffix) to
+ *                             optimize data in RF interface (saves 12 bytes per hop)
+ *                             or false to reduce RAM usage in Border router as assigned address list is not needed (40 bytes per device).
  *
  * By default Wi-SUN network is started and is treated as separate interface even if backbone is not available.
  *
@@ -252,7 +286,52 @@ int ws_bbr_eapol_node_limit_set(int8_t interface_id, uint16_t limit);
 int ws_bbr_ext_certificate_validation_set(int8_t interface_id, uint8_t validation);
 
 /**
- * Sets RPL parameters
+ * Sets Border router configuration
+ *
+ * Sets the configuration to the border router. Use ws_configuration_get to get
+ * the settings and modify wanted parameters.
+ *
+ * Minor validation is done to parameters, but full validation must be done
+ * at application level
+ *
+ * \param interface_id Network interface ID.
+ * \param configuration_ptr Configuration structure.
+ *
+ * \return 0, Configuration parameters set.
+ * \return <0 Parameter set failed.
+ */
+int ws_bbr_configuration_set(int8_t interface_id, bbr_configuration_t *configuration_ptr);
+
+/**
+ * Get Border router configuration
+ *
+ * Gets the current configuration to the border router.
+ *
+ * \param interface_id Network interface ID.
+ * \param configuration_ptr Configuration structure.
+ *
+ * \return 0, Configuration parameters set.
+ * \return <0 Parameter set failed.
+ */
+int ws_bbr_configuration_get(int8_t interface_id, bbr_configuration_t *configuration_ptr);
+
+/**
+ * validate Border router configuration
+ *
+ * Minor validation is done to parameters.
+ * Full validation must be done at application level.
+ *
+ * \param interface_id Network interface ID.
+ * \param configuration_ptr Configuration structure.
+ *
+ * \return 0, Configuration parameters set.
+ * \return <0 Parameter set failed.
+ */
+int ws_bbr_configuration_validate(int8_t interface_id, bbr_configuration_t *configuration_ptr);
+
+/**
+ * Sets RPL parameters (DEPRECATED)
+ *  Use ws_bbr_configuration_set instead.
  *
  * Sets RPL DIO trickle parameters.
  *
@@ -267,7 +346,8 @@ int ws_bbr_ext_certificate_validation_set(int8_t interface_id, uint8_t validatio
 int ws_bbr_rpl_parameters_set(int8_t interface_id, uint8_t dio_interval_min, uint8_t dio_interval_doublings, uint8_t dio_redundancy_constant);
 
 /**
- * Gets RPL parameters
+ * Gets RPL parameters (DEPRECATED)
+ *   Use ws_bbr_configuration_get instead.
  *
  * Gets RPL DIO trickle parameters.
  *
@@ -282,7 +362,8 @@ int ws_bbr_rpl_parameters_set(int8_t interface_id, uint8_t dio_interval_min, uin
 int ws_bbr_rpl_parameters_get(int8_t interface_id, uint8_t *dio_interval_min, uint8_t *dio_interval_doublings, uint8_t *dio_redundancy_constant);
 
 /**
- * Validate RPL parameters
+ * Validate RPL parameters (DEPRECATED)
+ *   Use ws_bbr_configuration_validate instead.
  *
  * Validates RPL DIO trickle parameters.
  *
@@ -516,5 +597,23 @@ int ws_bbr_radius_timing_validate(int8_t interface_id, bbr_radius_timing_t *timi
  * \return >= 0 success
  */
 int ws_bbr_dns_query_result_set(int8_t interface_id, const uint8_t address[16], char *domain_name_ptr);
+
+/**
+ * \brief A function to set time zone and daylights saving time configuration
+ *
+ * Border router distributes this information in DHCP Reply messages to
+ * all the devices joining to the Wi-SUN mesh network.
+ *
+ * Border router keeps this information until reboot and continues to distribute the information.
+ * If the information is changed the updates are sent to devices in network when they
+ * renew their address. This can take time from 1 to 24 hours
+ *
+ * \param interface_id Network interface ID.
+ * \param daylight_saving_time_ptr daylights saving time configuration. NULL if you want to remove the configuration.
+ *
+ * \return < 0 failure
+ * \return >= 0 success
+ */
+int ws_bbr_timezone_configuration_set(int8_t interface_id, bbr_timezone_configuration_t *daylight_saving_time_ptr);
 
 #endif /* WS_BBR_API_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, Arm Limited and affiliates.
+ * Copyright (c) 2015-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +55,7 @@
 #include "RPL/rpl_downward.h"
 #include "RPL/rpl_policy.h"
 #include "RPL/rpl_control.h"
+#include "6LoWPAN/ws/ws_common.h"
 
 #define TRACE_GROUP "rplc"
 
@@ -131,6 +132,19 @@ void rpl_control_event(struct rpl_domain *domain, rpl_event_t event)
     }
 }
 
+static void rpl_control_convert_internal_config(rpl_dodag_conf_int_t *conf, const rpl_dodag_conf_t *external_conf)
+{
+    conf->dio_interval_min = external_conf->dio_interval_min;
+    conf->dio_interval_doublings = external_conf->dio_interval_doublings;
+    conf->dio_redundancy_constant = external_conf->dio_redundancy_constant;
+    conf->default_lifetime = external_conf->default_lifetime;
+    conf->dag_max_rank_increase = external_conf->dag_max_rank_increase;
+    conf->min_hop_rank_increase = external_conf->min_hop_rank_increase;
+    conf->objective_code_point = external_conf->objective_code_point;
+    conf->lifetime_unit = external_conf->lifetime_unit;
+    conf->options = rpl_conf_options(external_conf->authentication, external_conf->path_control_size);
+    conf->reserved = 0;
+}
 
 /* When we join a new instance, we need to publish existing addresses.
  * Later addresses additions/removals are handled by rpl_control_addr_notifier.
@@ -202,6 +216,12 @@ void rpl_control_set_initial_dao_ack_wait(uint16_t timeout_in_ms)
 void rpl_control_set_mrhof_parent_set_size(uint16_t parent_set_size)
 {
     rpl_policy_set_mrhof_parent_set_size(parent_set_size);
+}
+
+/* True Force RPL to use IPv6 tunneling when it send and forward data to Border router direction, This feature is disabled by default  */
+void rpl_control_set_force_tunnel(bool requested)
+{
+    rpl_policy_force_tunnel_set(requested);
 }
 
 /* Send address registration to either specified address, or to non-registered address */
@@ -298,6 +318,25 @@ bool rpl_control_probe_parent_candidate(protocol_interface_info_entry_t *interfa
         }
     }
     return false;
+}
+
+uint16_t rpl_control_neighbor_info_get(struct protocol_interface_info_entry *interface, const uint8_t ll_addr[16], uint8_t *global_address)
+{
+
+    if (!interface->rpl_domain) {
+        return 0xffff;
+    }
+    ns_list_foreach(struct rpl_instance, instance, &interface->rpl_domain->instances) {
+        rpl_neighbour_t *neighbour = rpl_lookup_neighbour_by_ll_address(instance, ll_addr, interface->id);
+        if (neighbour) {
+            const uint8_t *global_address_ptr = rpl_neighbour_global_address(neighbour);
+            if (global_address && global_address_ptr) {
+                memcpy(global_address, global_address_ptr, 16);
+            }
+            return rpl_instance_candidate_rank(neighbour);
+        }
+    }
+    return 0xffff;
 }
 
 bool rpl_possible_better_candidate(struct protocol_interface_info_entry *interface, rpl_instance_t *rpl_instance, const uint8_t ll_addr[16], uint16_t candidate_rank, uint16_t etx)
@@ -399,6 +438,7 @@ static void rpl_control_etx_change_callback(int8_t  nwk_id, uint16_t previous_et
     if (!cur || !cur->rpl_domain) {
         return;
     }
+    (void) attribute_index;
     // ETX is "better" if now lower, or previous was "unknown" and new isn't infinite
     bool better = current_etx < previous_etx || (previous_etx == 0 && current_etx != 0xffff);
 
@@ -444,6 +484,9 @@ rpl_domain_t *rpl_control_create_domain(void)
     ns_list_init(&domain->instances);
     domain->non_storing_downstream_interface = -1;
     domain->callback = NULL;
+    domain->new_parent_add = NULL;
+    domain->parent_dis = NULL;
+    domain->prefix_cb = NULL;
     domain->cb_handle = NULL;
     domain->force_leaf = false;
     domain->process_routes = true;
@@ -520,12 +563,13 @@ void rpl_control_free_domain_instances_from_interface(protocol_interface_info_en
     }
 }
 
-void rpl_control_set_callback(rpl_domain_t *domain, rpl_domain_callback_t callback, rpl_prefix_callback_t prefix_learn_cb, rpl_new_parent_callback_t new_parent_add, void *cb_handle)
+void rpl_control_set_callback(rpl_domain_t *domain, rpl_domain_callback_t callback, rpl_prefix_callback_t prefix_learn_cb, rpl_new_parent_callback_t new_parent_add, rpl_parent_dis_callback_t parent_dis, void *cb_handle)
 {
     domain->callback = callback;
     domain->prefix_cb = prefix_learn_cb;
     domain->cb_handle = cb_handle;
     domain->new_parent_add = new_parent_add;
+    domain->parent_dis = parent_dis;
 }
 
 /* To do - this should live somewhere nicer. Basically a bootstrap
@@ -554,6 +598,11 @@ bool rpl_control_have_dodag(rpl_domain_t *domain)
 
 typedef void rpl_control_predicate_loop_fn_t(rpl_instance_t *instance, rpl_dodag_version_t *version, void *arg);
 
+typedef struct rpl_loopfn_trigger_unicast_dio_arg {
+    struct protocol_interface_info_entry *interface;
+    const uint8_t *dst;
+} rpl_loopfn_trigger_unicast_dio_arg_t;
+
 /* Callbacks for rpl_control_predicate_loop */
 
 static void rpl_loopfn_reset_dio_timer(rpl_instance_t *instance, rpl_dodag_version_t *dodag_version, void *handle)
@@ -562,12 +611,19 @@ static void rpl_loopfn_reset_dio_timer(rpl_instance_t *instance, rpl_dodag_versi
     (void)handle;
 
     rpl_instance_inconsistency(instance);
-}
+    //Check was Multicast DIS from parent
+    rpl_loopfn_trigger_unicast_dio_arg_t *arg = handle;
+    rpl_domain_t *domain = arg->interface->rpl_domain;
+    if (domain && domain->parent_dis) {
 
-typedef struct rpl_loopfn_trigger_unicast_dio_arg {
-    struct protocol_interface_info_entry *interface;
-    const uint8_t *dst;
-} rpl_loopfn_trigger_unicast_dio_arg_t;
+        if (rpl_instance_address_is_parent(instance, arg->dst)) {
+            // Call Multicast DIS parent Callback
+            domain->parent_dis(arg->dst, arg->interface, instance);
+        }
+    }
+
+
+}
 
 static void rpl_loopfn_trigger_unicast_dio(rpl_instance_t *instance, rpl_dodag_version_t *dodag_version, void *handle)
 {
@@ -617,7 +673,9 @@ rpl_dodag_t *rpl_control_create_dodag_root(rpl_domain_t *domain, uint8_t instanc
         return NULL;
     }
 
-    rpl_dodag_update_config(dodag, conf, NULL, NULL);
+    rpl_dodag_conf_int_t internal_conf;
+    rpl_control_convert_internal_config(&internal_conf, conf);
+    rpl_dodag_update_config(dodag, &internal_conf, NULL, NULL);
     rpl_dodag_set_root(dodag, true);
     rpl_dodag_version_t *version = rpl_create_dodag_version(dodag, rpl_seq_init());
     if (!version) {
@@ -674,10 +732,11 @@ void rpl_control_update_dodag_config(struct rpl_dodag *dodag, const rpl_dodag_co
 {
 
     if (rpl_dodag_am_root(dodag)) {
-        rpl_dodag_update_config(dodag, conf, NULL, NULL);
+        rpl_dodag_conf_int_t internal_conf;
+        rpl_control_convert_internal_config(&internal_conf, conf);
+        rpl_dodag_update_config(dodag, &internal_conf, NULL, NULL);
     }
 }
-
 
 void rpl_control_set_dodag_pref(rpl_dodag_t *dodag, uint8_t pref)
 {
@@ -796,34 +855,33 @@ static const uint8_t *rpl_control_find_option_in_buffer(const buffer_t *buf, uin
  *
  *      Figure 24: Format of the DODAG Configuration Option
  */
-static const uint8_t *rpl_control_read_conf(rpl_dodag_conf_t *conf_out, const uint8_t *opt)
+static const uint8_t *rpl_control_read_conf(rpl_dodag_conf_int_t *conf_out, const uint8_t *opt)
 {
-    conf_out->authentication = opt[2] & 0x08;
-    conf_out->path_control_size = opt[2] & 0x07;
+    conf_out->options = opt[2];
     conf_out->dio_interval_doublings = opt[3];
     conf_out->dio_interval_min = opt[4];
     conf_out->dio_redundancy_constant = opt[5];
     conf_out->dag_max_rank_increase = common_read_16_bit(opt + 6);
     conf_out->min_hop_rank_increase = common_read_16_bit(opt + 8);
     conf_out->objective_code_point = common_read_16_bit(opt + 10);
+    conf_out->reserved = opt[12];
     conf_out->default_lifetime = opt[13];
     conf_out->lifetime_unit = common_read_16_bit(opt + 14);
     return opt + 16;
 }
 
-static uint8_t *rpl_control_write_conf(uint8_t *opt_out, const rpl_dodag_conf_t *conf)
+static uint8_t *rpl_control_write_conf(uint8_t *opt_out, const rpl_dodag_conf_int_t *conf)
 {
     opt_out[0] = RPL_DODAG_CONF_OPTION;
     opt_out[1] = 14;
-    opt_out[2] = conf->authentication ? RPL_CONF_FLAG_AUTH : 0;
-    opt_out[2] |= conf->path_control_size;
+    opt_out[2] = conf->options;
     opt_out[3] = conf->dio_interval_doublings;
     opt_out[4] = conf->dio_interval_min;
     opt_out[5] = conf->dio_redundancy_constant;
     common_write_16_bit(conf->dag_max_rank_increase, opt_out + 6);
     common_write_16_bit(conf->min_hop_rank_increase, opt_out + 8);
     common_write_16_bit(conf->objective_code_point, opt_out + 10);
-    opt_out[12] = 0; // reserved
+    opt_out[12] = conf->reserved;
     opt_out[13] = conf->default_lifetime;
     common_write_16_bit(conf->lifetime_unit, opt_out + 14);
     return opt_out + 16;
@@ -878,6 +936,11 @@ static void rpl_control_process_prefix_options(protocol_interface_info_entry_t *
         uint32_t valid = common_read_32_bit(ptr + 4);
         uint32_t preferred = common_read_32_bit(ptr + 8);
         const uint8_t *prefix = ptr + 16;
+
+        if (ws_info(cur)) {
+            //For Wi-SUN Interoperability force length to 64
+            prefix_len = 64;
+        }
 
         if (rpl_upward_accept_prefix_update(dodag, neighbour, pref_parent)) {
 
@@ -1126,7 +1189,7 @@ malformed:
     /* Update DODAG config information, if option present, and either we don't have it or version is newer */
     const uint8_t *dodag_conf_ptr = rpl_control_find_option_in_buffer(buf, 24, RPL_DODAG_CONF_OPTION, 14);
     if (dodag_conf_ptr) {
-        rpl_dodag_conf_t conf_buf;
+        rpl_dodag_conf_int_t conf_buf;
         rpl_control_read_conf(&conf_buf, dodag_conf_ptr);
         if (!rpl_dodag_update_config(dodag, &conf_buf, buf->src_sa.address, &become_leaf)) {
             goto invalid_parent;
@@ -1134,7 +1197,7 @@ malformed:
     }
 
     /* If we don't have any DODAG config information, ask by unicast DIS */
-    const rpl_dodag_conf_t *conf = rpl_dodag_get_config(dodag);
+    const rpl_dodag_conf_int_t *conf = rpl_dodag_get_config(dodag);
     if (!conf) {
         /* TODO - rate limit DIS? */
         if (domain->new_parent_add && !domain->new_parent_add(buf->src_sa.address, domain->cb_handle, instance, rank)) {
@@ -1313,7 +1376,7 @@ void rpl_control_transmit(rpl_domain_t *domain, protocol_interface_info_entry_t 
 
 
 /* Transmit a DIO (unicast or multicast); cur may be NULL if multicast */
-void rpl_control_transmit_dio(rpl_domain_t *domain, protocol_interface_info_entry_t *cur, uint8_t instance_id, uint8_t dodag_version, uint16_t rank, uint8_t g_mop_prf, uint8_t dtsn, rpl_dodag_t *dodag, const uint8_t dodagid[16], const rpl_dodag_conf_t *conf, const uint8_t *dst)
+void rpl_control_transmit_dio(rpl_domain_t *domain, protocol_interface_info_entry_t *cur, uint8_t instance_id, uint8_t dodag_version, uint16_t rank, uint8_t g_mop_prf, uint8_t dtsn, rpl_dodag_t *dodag, const uint8_t dodagid[16], const rpl_dodag_conf_int_t *conf, const uint8_t *dst)
 {
     uint16_t length;
 
@@ -1499,6 +1562,20 @@ static buffer_t *rpl_control_dis_handler(protocol_interface_info_entry_t *cur, r
                                preds, sol_instance_id, sol_dodagid, sol_version);
 
     return buffer_free(buf);
+}
+
+void rpl_control_transmit_dio_trigger(protocol_interface_info_entry_t *cur, struct rpl_domain *domain)
+{
+    ns_list_foreach(rpl_instance_t, instance, &domain->instances) {
+        rpl_instance_dio_trigger(instance, cur, NULL);
+    }
+}
+
+void rpl_control_parent_selection_trigger(struct rpl_domain *domain)
+{
+    ns_list_foreach(rpl_instance_t, instance, &domain->instances) {
+        rpl_instance_run_parent_selection(instance);
+    }
 }
 
 void rpl_control_transmit_dis(rpl_domain_t *domain, protocol_interface_info_entry_t *cur, uint8_t pred, uint8_t instance_id, const uint8_t *dodagid, const uint8_t version, const uint8_t *dst)
@@ -1869,7 +1946,7 @@ bool rpl_control_read_dodag_info(const rpl_instance_t *instance, rpl_dodag_info_
     return rpl_upward_read_dodag_info(instance, dodag_info);
 }
 
-const rpl_dodag_conf_t *rpl_control_get_dodag_config(const rpl_instance_t *instance)
+const rpl_dodag_conf_int_t *rpl_control_get_dodag_config(const rpl_instance_t *instance)
 {
     rpl_dodag_t *dodag = rpl_instance_current_dodag(instance);
     if (!dodag) {

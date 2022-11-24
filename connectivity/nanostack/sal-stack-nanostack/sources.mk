@@ -23,6 +23,10 @@ SRCS += \
 	source/6LoWPAN/ws/ws_mpx_header.c \
 	source/6LoWPAN/ws/ws_neighbor_class.c \
 	source/6LoWPAN/ws/ws_bootstrap.c \
+	source/6LoWPAN/ws/ws_bootstrap_6lbr.c \
+	source/6LoWPAN/ws/ws_bootstrap_6lr.c \
+	source/6LoWPAN/ws/ws_bootstrap_6ln.c \
+	source/6LoWPAN/ws/ws_bootstrap_ffn.c \
 	source/6LoWPAN/ws/ws_common.c \
 	source/6LoWPAN/ws/ws_management_api.c \
 	source/6LoWPAN/ws/ws_bbr_api.c \
@@ -43,6 +47,7 @@ SRCS += \
 	source/6LoWPAN/ws/ws_eapol_pdu.c \
 	source/6LoWPAN/ws/ws_stats.c \
 	source/6LoWPAN/ws/ws_cfg_settings.c \
+	source/6LoWPAN/ws/ws_phy.c \
 	source/BorderRouter/border_router.c \
 	source/Common_Protocols/icmpv6.c \
 	source/Common_Protocols/icmpv6_prefix.c \
@@ -83,6 +88,7 @@ SRCS += \
 	source/MAC/IEEE802_15_4/sw_mac.c \
 	source/MAC/IEEE802_15_4/mac_fhss_callbacks.c \
 	source/MAC/IEEE802_15_4/mac_cca_threshold.c \
+	source/MAC/IEEE802_15_4/mac_mode_switch.c \
 	source/MAC/ethernet/ethernet_mac_api.c \
 	source/MAC/serial/serial_mac_api.c \
 	source/MAC/virtual_rf/virtual_rf_client.c \
@@ -123,6 +129,7 @@ SRCS += \
 	source/Security/protocols/gkh_sec_prot/supp_gkh_sec_prot.c \
 	source/Security/protocols/radius_sec_prot/radius_client_sec_prot.c \
 	source/Security/protocols/radius_sec_prot/avp_helper.c \
+	source/Security/protocols/msg_sec_prot/msg_sec_prot.c \
 	source/Security/protocols/tls_sec_prot/tls_sec_prot.c \
 	source/Security/protocols/tls_sec_prot/tls_sec_prot_lib.c \
 	source/Security/PANA/eap_protocol.c \
@@ -211,6 +218,7 @@ SRCS += \
 	source/Service_Libs/utils/ns_crc.c \
 	source/Service_Libs/utils/isqrt.c \
 	source/Service_Libs/utils/ns_file_system.c \
+	source/Service_Libs/utils/ns_time.c \
 	source/Service_Libs/utils/ns_conf.c \
 	source/Service_Libs/mdns/ns_mdns_api.c \
 	source/Service_Libs/mdns/ns_fnet_port.c \

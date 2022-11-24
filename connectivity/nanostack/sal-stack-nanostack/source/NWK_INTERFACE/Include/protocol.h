@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Arm Limited and affiliates.
+ * Copyright (c) 2014-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,12 +91,10 @@ typedef enum icmp_state {
     ER_SCAN = 2,
     ER_ADDRESS_REQ = 3,
     ER_BIND_COMP = 4,
-#ifdef HAVE_RPL
     ER_RPL_MC       = 5,
     ER_RPL_SCAN     = 6,
     ER_RPL_UNICAST  = 7,
     ER_DAO_TX       = 8,
-#endif
     ER_PANA_AUTH    = 9,
     ER_PANA_AUTH_DONE   = 10,
     ER_PANA_AUTH_ERROR  = 11,
@@ -104,9 +102,7 @@ typedef enum icmp_state {
     ER_MLE_LINK_REQ = 13,
     ER_MLE_LINK_SHORT_SYNCH = 14,
     ER_MLE_LINK_ADDRESS_SYNCH = 15,
-#ifdef HAVE_RPL
     ER_ROUTER_SYNCH = 17,
-#endif
     ER_PANA_PING = 18,
     ER_PARENT_SYNCH_LOST = 19,
     ER_MLE_SCAN = 20,
@@ -124,6 +120,7 @@ typedef enum icmp_state {
     ER_BOOTSTRAP_NEW_FRAGMENT_START,
     ER_WAIT_RESTART,
     ER_RPL_LOCAL_REPAIR,
+    ER_RPL_NETWORK_LEAVING,
 } icmp_state_t;
 
 typedef enum {
@@ -447,6 +444,8 @@ struct protocol_interface_info_entry {
     br_info_t *border_router_setup;
     struct load_balance_api *lb_api;
     struct red_info_s *random_early_detection;
+    struct red_info_s *llc_random_early_detection;
+    struct red_info_s *llc_eapol_random_early_detection;
     neigh_cache_s neigh_cache;
     pan_blaclist_cache_s pan_blaclist_cache;
     pan_coordinator_blaclist_cache_s pan_cordinator_black_list;
@@ -471,6 +470,7 @@ struct protocol_interface_info_entry {
     int8_t (*if_down)(struct protocol_interface_info_entry *cur);
     int8_t (*if_up)(struct protocol_interface_info_entry *cur);
     void (*if_stack_buffer_handler)(buffer_t *);
+    void (*if_common_forwarding_out_cb)(struct protocol_interface_info_entry *, buffer_t *);
     bool (*if_ns_transmit)(struct protocol_interface_info_entry *cur, ipv6_neighbour_t *neighCacheEntry, bool unicast, uint8_t seq);
     bool (*if_map_ip_to_link_addr)(struct protocol_interface_info_entry *cur, const uint8_t *ip_addr, addrtype_t *ll_type, const uint8_t **ll_addr_out);
     bool (*if_map_link_addr_to_ip)(struct protocol_interface_info_entry *cur, addrtype_t ll_type, const uint8_t *ll_addr, uint8_t *ip_addr_out);

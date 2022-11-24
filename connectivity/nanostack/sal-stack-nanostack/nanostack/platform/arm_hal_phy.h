@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018, Arm Limited and affiliates.
+ * Copyright (c) 2014-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,6 +50,7 @@ typedef enum {
     PHY_LINK_TX_SUCCESS,        /**< MAC TX complete. MAC will a make decision to enter wait ACK or TX done state. */
     PHY_LINK_TX_FAIL,           /**< Link TX process fail. */
     PHY_LINK_CCA_FAIL,          /**< RF link CCA process fail. */
+    PHY_LINK_CCA_FAIL_RX,       /**< RF link CCA process failed because of packet reception. */
     PHY_LINK_CCA_OK,            /**< RF link CCA process ok. */
     PHY_LINK_CCA_PREPARE,       /**< Prepare for CCA after CSMA-CA: changes to CCA channel and gives permission to TX. See PHY_LINK_CCA_PREPARE status definitions for return values */
 } phy_link_tx_status_e;
@@ -142,6 +143,7 @@ typedef struct phy_signal_info_s {
 typedef struct phy_csma_params {
     uint32_t backoff_time;           /**< CSMA Backoff us time before start CCA & TX. 0 should disable current backoff*/
     bool cca_enabled;                /**< True will affect CCA check false start TX direct after backoff */
+    bool mode_switch_phr;            /**< True - Frame is a mode switch PHR. In this case PHY driver should skip FCS and send two byte PHR as it is given by TX callback */
 } phy_csma_params_t;
 
 /** PHY modulation scheme */

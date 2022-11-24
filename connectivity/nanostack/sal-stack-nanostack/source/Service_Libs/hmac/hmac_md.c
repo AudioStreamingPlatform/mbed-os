@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, Arm Limited and affiliates.
+ * Copyright (c) 2016-2020, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,12 +29,12 @@ int8_t hmac_md_calc(const alg_hmac_md_e md, const uint8_t *key, uint16_t key_len
 {
 #ifdef EXTRA_DEBUG_INFO
     // Extensive debug for now, to be disabled later
-    tr_debug("hmac_md key %s\n", trace_array(key, key_len));
+    tr_debug("hmac_md key %s", trace_array(key, key_len));
 
     const uint8_t *print_data = data;
     uint16_t print_data_len = data_len;
     while (true) {
-        tr_debug("hmac_md data %s\n", trace_array(print_data, print_data_len > 32 ? 32 : print_data_len));
+        tr_debug("hmac_md data %s", trace_array(print_data, print_data_len > 32 ? 32 : print_data_len));
         if (print_data_len > 32) {
             print_data_len -= 32;
             print_data += 32;
@@ -81,7 +81,7 @@ int8_t hmac_md_calc(const alg_hmac_md_e md, const uint8_t *key, uint16_t key_len
     memcpy(result, result_value, result_len);
 
 #ifdef EXTRA_DEBUG_INFO
-    tr_debug("hmac_md result %s\n", trace_array(result_value, 20));
+    tr_debug("hmac_md result %s", trace_array(result_value, 20));
 #endif
     return 0;
 

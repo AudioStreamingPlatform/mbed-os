@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited and affiliates.
+ * Copyright (c) 2020-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,7 @@ typedef enum {
 #define RADIUS_ACCESS_ACCEPT          2
 #define RADIUS_ACCESS_REJECT          3
 #define RADIUS_ACCESS_CHALLENGE       11
+#define RADIUS_MESSAGE_NONE           0
 
 #define MS_MPPE_RECV_KEY_SALT_LEN     2
 #define MS_MPPE_RECV_KEY_BLOCK_LEN    16
@@ -239,7 +240,7 @@ static int8_t radius_client_sec_prot_init(sec_prot_t *prot)
     data->send_radius_msg = NULL;
     data->identity_len = 0;
     data->identity = NULL;
-    data->radius_code = 0;
+    data->radius_code = RADIUS_MESSAGE_NONE;
     data->radius_identifier = 0;
     memset(data->request_authenticator, 0, 16);
     data->state_len = 0;
@@ -247,6 +248,7 @@ static int8_t radius_client_sec_prot_init(sec_prot_t *prot)
     memset(data->remote_eui_64_hash, 0, 8);
     data->remote_eui_64_hash_set = false;
     data->new_pmk_set = false;
+    data->radius_id_range_set = false;
 
     if (!shared_data) {
         shared_data = ns_dyn_mem_alloc(sizeof(radius_client_sec_prot_shared_t));
@@ -379,6 +381,10 @@ static int8_t radius_client_sec_prot_receive(sec_prot_t *prot, void *pdu, uint16
     uint8_t *radius_msg_ptr = pdu;
 
     uint8_t code = *radius_msg_ptr++;
+    if (code != RADIUS_ACCESS_ACCEPT && code != RADIUS_ACCESS_REJECT && code != RADIUS_ACCESS_CHALLENGE) {
+        return -1;
+    }
+
     uint8_t identifier = *radius_msg_ptr++;
     /* If identifier does not match to sent identifier, silently ignore message,
        already checked on socket if before routing the request to receive, so
@@ -430,6 +436,7 @@ static int8_t radius_client_sec_prot_receive(sec_prot_t *prot, void *pdu, uint16
         // Message does not have radius EAP-TLS specific fields
         data->radius_code = code;
         prot->state_machine(prot);
+        data->radius_code = RADIUS_MESSAGE_NONE;
 
         return 0;
     }
@@ -519,6 +526,7 @@ static int8_t radius_client_sec_prot_receive(sec_prot_t *prot, void *pdu, uint16
     data->radius_code = code;
     data->recv_eap_msg_len += data->radius_eap_tls_header_size;
     prot->state_machine(prot);
+    data->radius_code = RADIUS_MESSAGE_NONE;
 
     return 0;
 }
@@ -778,19 +786,31 @@ static int8_t radius_client_sec_prot_eui_64_hash_generate(uint8_t *eui_64, uint8
 
     mbedtls_sha256_init(&ctx);
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+    if (mbedtls_sha256_starts(&ctx, 0) != 0) {
+#else
     if (mbedtls_sha256_starts_ret(&ctx, 0) != 0) {
+#endif
         ret_val = -1;
         goto error;
     }
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+    if (mbedtls_sha256_update(&ctx, hashed_string, 24) != 0) {
+#else
     if (mbedtls_sha256_update_ret(&ctx, hashed_string, 24) != 0) {
+#endif
         ret_val = -1;
         goto error;
     }
 
     uint8_t output[32];
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+    if (mbedtls_sha256_finish(&ctx, output) != 0) {
+#else
     if (mbedtls_sha256_finish_ret(&ctx, output) != 0) {
+#endif
         ret_val = -1;
         goto error;
     }
@@ -864,19 +884,35 @@ static int8_t radius_client_sec_prot_response_authenticator_calc(sec_prot_t *pro
 
     mbedtls_md5_init(&ctx);
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+    if (mbedtls_md5_starts(&ctx) != 0) {
+#else
     if (mbedtls_md5_starts_ret(&ctx) != 0) {
+#endif
         goto end;
     }
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+    if (mbedtls_md5_update(&ctx, msg_ptr, msg_len) != 0) {
+#else
     if (mbedtls_md5_update_ret(&ctx, msg_ptr, msg_len) != 0) {
+#endif
         goto end;
     }
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+    if (mbedtls_md5_update(&ctx, key, key_len) != 0) {
+#else
     if (mbedtls_md5_update_ret(&ctx, key, key_len) != 0) {
+#endif
         goto end;
     }
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+    if (mbedtls_md5_finish(&ctx, auth_ptr) != 0) {
+#else
     if (mbedtls_md5_finish_ret(&ctx, auth_ptr) != 0) {
+#endif
         goto end;
     }
 
@@ -932,35 +968,59 @@ static int8_t radius_client_sec_prot_ms_mppe_recv_key_pmk_decrypt(sec_prot_t *pr
     while (cipher_text_len >= MS_MPPE_RECV_KEY_BLOCK_LEN) {
         mbedtls_md5_init(&ctx);
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+        if (mbedtls_md5_starts(&ctx) != 0) {
+#else
         if (mbedtls_md5_starts_ret(&ctx) != 0) {
+#endif
             md5_failed = true;
             break;
         }
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+        if (mbedtls_md5_update(&ctx, key, key_len) != 0) {
+#else
         if (mbedtls_md5_update_ret(&ctx, key, key_len) != 0) {
+#endif
             md5_failed = true;
             break;
         }
 
         if (first_interm_b_value) {
             // b(1) = MD5(secret + request-authenticator + salt)
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+            if (mbedtls_md5_update(&ctx, request_authenticator, MS_MPPE_RECV_KEY_BLOCK_LEN) != 0) {
+#else
             if (mbedtls_md5_update_ret(&ctx, request_authenticator, MS_MPPE_RECV_KEY_BLOCK_LEN) != 0) {
+#endif
                 md5_failed = true;
                 break;
             }
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+            if (mbedtls_md5_update(&ctx, salt_ptr, MS_MPPE_RECV_KEY_SALT_LEN) != 0) {
+#else
             if (mbedtls_md5_update_ret(&ctx, salt_ptr, MS_MPPE_RECV_KEY_SALT_LEN) != 0) {
+#endif
                 md5_failed = true;
                 break;
             }
         } else {
             // b(i) = MD5(secret + cipher_text(i - 1))
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+            if (mbedtls_md5_update(&ctx, cipher_text_ptr - MS_MPPE_RECV_KEY_BLOCK_LEN, MS_MPPE_RECV_KEY_BLOCK_LEN) != 0) {
+#else
             if (mbedtls_md5_update_ret(&ctx, cipher_text_ptr - MS_MPPE_RECV_KEY_BLOCK_LEN, MS_MPPE_RECV_KEY_BLOCK_LEN) != 0) {
+#endif
                 md5_failed = true;
                 break;
             }
         }
 
+#if (MBEDTLS_VERSION_MAJOR >= 3)
+        if (mbedtls_md5_finish(&ctx, interm_b_val) != 0) {
+#else
         if (mbedtls_md5_finish_ret(&ctx, interm_b_val) != 0) {
+#endif
             md5_failed = true;
             break;
         }
@@ -1029,7 +1089,7 @@ static void radius_client_sec_prot_state_machine(sec_prot_t *prot)
             tr_info("Radius: start, eui-64: %s", trace_array(sec_prot_remote_eui_64_addr_get(prot), 8));
 
             // Set default timeout for the total maximum length of the negotiation
-            sec_prot_default_timeout_set(&data->common);
+            sec_prot_timeout_set(&data->common, SEC_PROT_RETRYING_PROTOCOL_TIMEOUT);
 
             sec_prot_state_set(prot, &data->common, RADIUS_STATE_CREATE_RESP);
 
@@ -1088,7 +1148,7 @@ static void radius_client_sec_prot_state_machine(sec_prot_t *prot)
             sec_prot_timer_trickle_stop(&data->common);
 
             // Set timeout to wait for EAP-TLS to continue
-            data->common.ticks = prot->sec_cfg->prot_cfg.sec_prot_retry_timeout;
+            sec_prot_timeout_set(&data->common, prot->sec_cfg->prot_cfg.sec_prot_retry_timeout);
 
             // Send to radius EAP-TLS
             if (data->radius_eap_tls_send && data->radius_eap_tls_prot && data->recv_eap_msg && data->recv_eap_msg_len > 0) {
@@ -1124,6 +1184,16 @@ static void radius_client_sec_prot_state_machine(sec_prot_t *prot)
                 if (radius_client_sec_prot_radius_msg_send(prot) < 0) {
                     tr_error("Radius: retry msg send error");
                 }
+                return;
+            }
+
+            if (data->radius_code != RADIUS_MESSAGE_NONE) {
+                // Received retry for already handled message from RADIUS server, ignore
+                if (data->recv_eap_msg) {
+                    ns_dyn_mem_free(data->recv_eap_msg);
+                }
+                data->recv_eap_msg = NULL;
+                data->recv_eap_msg_len = 0;
                 return;
             }
 

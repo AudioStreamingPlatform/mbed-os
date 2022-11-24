@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * Copyright (c) 2018-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,8 @@
 #include "fhss_ws_extension.h"
 #include "6LoWPAN/ws/ws_common_defines.h"
 
+struct mcps_data_ie_list;
+
 #define RSL_UNITITIALIZED 0x7fff
 
 typedef struct ws_neighbor_class_entry {
@@ -33,8 +35,11 @@ typedef struct ws_neighbor_class_entry {
     bool broadcast_timing_info_stored: 1;
     bool broadcast_shedule_info_stored: 1;
     bool synch_done : 1;
-    bool negative_aro_send : 1;
     bool unicast_data_rx : 1;
+#ifdef HAVE_WS_VERSION_1_1
+    uint8_t phy_mode_id;                                    /*!< Bootstrap configured Preference Phy mode for MDR */
+    ws_phy_cap_info_t pcap_info;
+#endif
 } ws_neighbor_class_entry_t;
 
 /**
@@ -183,5 +188,10 @@ void ws_neighbor_class_rsl_in_calculate(ws_neighbor_class_entry_t *ws_neighbor, 
 void ws_neighbor_class_rsl_out_calculate(ws_neighbor_class_entry_t *ws_neighbor, uint8_t rsl_reported);
 
 bool ws_neighbor_class_neighbor_duplicate_packet_check(ws_neighbor_class_entry_t *ws_neighbor, uint8_t mac_dsn, uint32_t rx_timestamp);
+#ifdef HAVE_WS_VERSION_1_1
+void ws_neighbor_class_pcap_ie_store(ws_neighbor_class_entry_t *ws_neighbor, const struct mcps_data_ie_list *ie_ext);
+#else
+#define ws_neighbor_class_pcap_ie_store(ws_neighbor, ie_ext) ((void)0)
+#endif
 
 #endif /* WS_NEIGHBOR_CLASS_H_ */

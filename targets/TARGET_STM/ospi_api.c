@@ -34,7 +34,7 @@
 
 /* Max amount of flash size is 4Gbytes */
 /* hence 2^(31+1), then FLASH_SIZE_DEFAULT = 1<<31 */
-#define OSPI_FLASH_SIZE_DEFAULT 0x80000000
+#define OSPI_FLASH_SIZE_DEFAULT 0x4000000 //512Mbits
 
 static uint32_t get_alt_bytes_size(const uint32_t num_bytes)
 {
@@ -55,7 +55,7 @@ static uint32_t get_alt_bytes_size(const uint32_t num_bytes)
 
 ospi_status_t ospi_prepare_command(const ospi_command_t *command, OSPI_RegularCmdTypeDef *st_command)
 {
-    debug_if(ospi_api_c_debug, "ospi_prepare_command In: instruction.value %x dummy_count %x address.bus_width %x address.disabled %x address.value %x address.size %x\n",
+    debug_if(ospi_api_c_debug, "ospi_prepare_command In: instruction.value %x dummy_count %u address.bus_width %x address.disabled %x address.value %x address.size %x\n",
              command->instruction.value, command->dummy_count, command->address.bus_width, command->address.disabled, command->address.value, command->address.size);
 
     st_command->FlashId = HAL_OSPI_FLASH_ID_1;
@@ -65,7 +65,7 @@ ospi_status_t ospi_prepare_command(const ospi_command_t *command, OSPI_RegularCm
         st_command->Instruction = 0;
     } else {
         st_command->Instruction = ((command->instruction.bus_width == OSPI_CFG_BUS_OCTA) || (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR))
-		                            ? command->instruction.value << 8 | (0xFF - command->instruction.value) : command->instruction.value;
+                                  ? command->instruction.value << 8 | (0xFF - command->instruction.value) : command->instruction.value;
         switch (command->instruction.bus_width) {
             case OSPI_CFG_BUS_SINGLE:
                 st_command->InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
@@ -87,14 +87,14 @@ ospi_status_t ospi_prepare_command(const ospi_command_t *command, OSPI_RegularCm
     }
 
     st_command->InstructionSize    = (st_command->InstructionMode == HAL_OSPI_INSTRUCTION_8_LINES) ? HAL_OSPI_INSTRUCTION_16_BITS : HAL_OSPI_INSTRUCTION_8_BITS;
-    st_command->InstructionDtrMode = (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR) ? HAL_OSPI_INSTRUCTION_DTR_ENABLE :HAL_OSPI_INSTRUCTION_DTR_DISABLE;
+    st_command->InstructionDtrMode = (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR) ? HAL_OSPI_INSTRUCTION_DTR_ENABLE : HAL_OSPI_INSTRUCTION_DTR_DISABLE;
     st_command->DummyCycles = command->dummy_count;
     // these are target specific settings, use default values
     st_command->SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
     st_command->DataDtrMode = (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR) ? HAL_OSPI_DATA_DTR_ENABLE : HAL_OSPI_DATA_DTR_DISABLE;
     st_command->AddressDtrMode = (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR) ? HAL_OSPI_ADDRESS_DTR_ENABLE : HAL_OSPI_ADDRESS_DTR_DISABLE;
     st_command->AlternateBytesDtrMode = (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR) ? HAL_OSPI_ALTERNATE_BYTES_DTR_ENABLE : HAL_OSPI_ALTERNATE_BYTES_DTR_DISABLE;
-    st_command->DQSMode = (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR) ? HAL_OSPI_DQS_ENABLE :HAL_OSPI_DQS_DISABLE;
+    st_command->DQSMode = (command->instruction.bus_width == OSPI_CFG_BUS_OCTA_DTR) ? HAL_OSPI_DQS_ENABLE : HAL_OSPI_DQS_DISABLE;
 
     st_command->OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
     if (command->address.disabled == true) {
@@ -245,27 +245,30 @@ static ospi_status_t _ospi_init_direct(ospi_t *obj, const ospi_pinmap_t *pinmap,
     // Set default OCTOSPI handle values
     obj->handle.Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
 //#if defined(TARGET_MX25LM512451G)
- //   obj->handle.Init.MemoryType = HAL_OSPI_MEMTYPE_MACRONIX; // Read sequence in DTR mode: D1-D0-D3-D2
+//   obj->handle.Init.MemoryType = HAL_OSPI_MEMTYPE_MACRONIX; // Read sequence in DTR mode: D1-D0-D3-D2
 //#else
     obj->handle.Init.MemoryType = HAL_OSPI_MEMTYPE_MICRON;   // Read sequence in DTR mode: D0-D1-D2-D3
 //#endif
     obj->handle.Init.ClockPrescaler = 4; // default value, will be overwritten in ospi_frequency
     obj->handle.Init.FifoThreshold = 4;
     obj->handle.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_NONE;
-    obj->handle.Init.DeviceSize = POSITION_VAL(OSPI_FLASH_SIZE_DEFAULT) - 1;
+    obj->handle.Init.DeviceSize = 32;
     obj->handle.Init.ChipSelectHighTime = 3;
     obj->handle.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
-#if defined(HAL_OSPI_WRAP_NOT_SUPPORTED) // removed in STM32L4
+#if defined(HAL_OSPI_WRAP_NOT_SUPPORTED)
     obj->handle.Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
 #endif
     obj->handle.Init.ClockMode = mode == 0 ? HAL_OSPI_CLOCK_MODE_0 : HAL_OSPI_CLOCK_MODE_3;
     obj->handle.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_ENABLE;
     obj->handle.Init.ChipSelectBoundary = 0;
-#if defined(HAL_OSPI_DELAY_BLOCK_USED) // STM32L5
+#if defined(HAL_OSPI_DELAY_BLOCK_USED)
     obj->handle.Init.DelayBlockBypass = HAL_OSPI_DELAY_BLOCK_USED;
 #endif
-#if defined(TARGET_STM32L5)
+#if defined(TARGET_STM32L5) || defined(TARGET_STM32U5)
     obj->handle.Init.Refresh = 0;
+#endif
+#if defined(OCTOSPI_DCR3_MAXTRAN)
+    obj->handle.Init.MaxTran = 0;
 #endif
 
     // tested all combinations, take first
@@ -365,19 +368,19 @@ static ospi_status_t _ospi_init_direct(ospi_t *obj, const ospi_pinmap_t *pinmap,
 }
 
 ospi_status_t ospi_init(ospi_t *obj, PinName io0, PinName io1, PinName io2, PinName io3, PinName io4, PinName io5, PinName io6, PinName io7,
-			PinName sclk, PinName ssel, PinName dqs, uint32_t hz, uint8_t mode)
+                        PinName sclk, PinName ssel, PinName dqs, uint32_t hz, uint8_t mode)
 {
     OSPIName ospiio0name = (OSPIName)pinmap_peripheral(io0, PinMap_OSPI_DATA0);
     OSPIName ospiio1name = (OSPIName)pinmap_peripheral(io1, PinMap_OSPI_DATA1);
     OSPIName ospiio2name = (OSPIName)pinmap_peripheral(io2, PinMap_OSPI_DATA2);
     OSPIName ospiio3name = (OSPIName)pinmap_peripheral(io3, PinMap_OSPI_DATA3);
-    OSPIName ospiio4name = (OSPIName)pinmap_peripheral(io4, PinMap_OSPI_DATA4);
-    OSPIName ospiio5name = (OSPIName)pinmap_peripheral(io5, PinMap_OSPI_DATA5);
-    OSPIName ospiio6name = (OSPIName)pinmap_peripheral(io6, PinMap_OSPI_DATA6);
-    OSPIName ospiio7name = (OSPIName)pinmap_peripheral(io7, PinMap_OSPI_DATA7);
+    // OSPIName ospiio4name = (OSPIName)pinmap_peripheral(io4, PinMap_OSPI_DATA4); // IO4 pin not checked
+    // OSPIName ospiio5name = (OSPIName)pinmap_peripheral(io5, PinMap_OSPI_DATA5); // IO5 pin not checked
+    // OSPIName ospiio6name = (OSPIName)pinmap_peripheral(io6, PinMap_OSPI_DATA6); // IO6 pin not checked
+    // OSPIName ospiio7name = (OSPIName)pinmap_peripheral(io7, PinMap_OSPI_DATA7); // IO7 pin not checked
     OSPIName ospiclkname = (OSPIName)pinmap_peripheral(sclk, PinMap_OSPI_SCLK);
     OSPIName ospisselname = (OSPIName)pinmap_peripheral(ssel, PinMap_OSPI_SSEL);
-    OSPIName ospidqsname = (OSPIName)pinmap_peripheral(dqs, PinMap_OSPI_DQS);
+    // OSPIName ospidqsname = (OSPIName)pinmap_peripheral(dqs, PinMap_OSPI_DQS);   // DQS pin not checked
 
     OSPIName ospi_data_first = (OSPIName)pinmap_merge(ospiio0name, ospiio1name);
     OSPIName ospi_data_second = (OSPIName)pinmap_merge(ospiio2name, ospiio3name);
@@ -403,8 +406,9 @@ ospi_status_t ospi_init(ospi_t *obj, PinName io0, PinName io1, PinName io2, PinN
     int function_dqs = (int)pinmap_find_function(dqs, PinMap_OSPI_DQS);
 
     const ospi_pinmap_t static_pinmap = {peripheral, io0, function_io0, io1, function_io1, io2, function_io2, io3, function_io3,
-    		                             io4, function_io4, io5, function_io5, io6, function_io6, io7, function_io7,
-    		                             sclk, function_sclk, ssel, function_ssel, dqs, function_dqs};
+                                         io4, function_io4, io5, function_io5, io6, function_io6, io7, function_io7,
+                                         sclk, function_sclk, ssel, function_ssel, dqs, function_dqs
+                                        };
 
     return OSPI_INIT_DIRECT(obj, &static_pinmap, hz, mode);
 }
@@ -430,18 +434,18 @@ ospi_status_t ospi_free(ospi_t *obj)
     }
 #endif
 
-    // Configure GPIOs
-    pin_function(obj->io0, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->io1, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->io2, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->io3, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->io4, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->io5, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->io6, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->io7, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->sclk, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->ssel, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
-    pin_function(obj->dqs, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
+    // Configure GPIOs back to reset value
+    pin_function(obj->io0, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->io1, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->io2, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->io3, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->io4, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->io5, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->io6, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->io7, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->sclk, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->ssel, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
+    pin_function(obj->dqs, STM_PIN_DATA(STM_MODE_ANALOG, GPIO_NOPULL, 0));
 
     (void)(obj);
     return OSPI_STATUS_OK;
@@ -450,24 +454,29 @@ ospi_status_t ospi_free(ospi_t *obj)
 
 ospi_status_t ospi_frequency(ospi_t *obj, int hz)
 {
-    tr_debug("ospi_frequency hz %d", hz);
     ospi_status_t status = OSPI_STATUS_OK;
 
-    /* HCLK drives OSPI. OSPI clock depends on prescaler value:
+    /* OSPI clock depends on prescaler value:
     *  0: Freq = HCLK
     *  1: Freq = HCLK/2
     *  ...
     *  255: Freq = HCLK/256 (minimum value)
     */
 
-    int div = HAL_RCC_GetHCLKFreq() / hz;
+#if defined(TARGET_STM32L5)
+    uint32_t OSPI_clock_source = HAL_RCC_GetSysClockFreq();
+#else
+    uint32_t OSPI_clock_source = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_OSPI);
+#endif
+    int div = OSPI_clock_source / hz;
     if (div > 255) {
         div = 255;
     } else {
-        if (div == 1) {
+        if (OSPI_clock_source % hz != 0) {
             div = div + 1;
         }
     }
+    tr_debug("ospi_frequency hz %d source %d Prescaler %d", hz, OSPI_clock_source, div);
 
     obj->handle.Init.ClockPrescaler = div;
 

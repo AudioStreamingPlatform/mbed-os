@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2020 ARM Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
- * Licensed under the Apache License, Version 2.0 (the License); you may
- * not use this file except in compliance with the License.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an AS IS BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -619,7 +620,7 @@ static void rf_handle_cca_ed_done(void)
             backup_time = 0;
         }
         rf_backup_timer_start(0, backup_time + PACKET_PROCESSING_TIME);
-        device_driver.phy_tx_done_cb(rf_radio_driver_id, mac_tx_handle, PHY_LINK_CCA_FAIL, 0, 0);
+        device_driver.phy_tx_done_cb(rf_radio_driver_id, mac_tx_handle, PHY_LINK_CCA_FAIL_RX, 0, 0);
         return;
     }
     if ((cca_enabled == true) && (((int8_t) rf_read_rf_register(RF_EDV, rf_module) > cca_threshold))) {
@@ -702,7 +703,8 @@ static void rf_handle_rx_done(void)
         rf_state = RF_IDLE;
     }
     if (rf_read_bbc_register(BBC_PC, rf_module) & FCSOK) {
-        if (!rf_read_rx_buffer(cur_rx_packet_len, rf_module)) {
+        uint16_t rx_packet_len = rf_read_rx_frame_length(rf_module);
+        if (!rf_read_rx_buffer(rx_packet_len, rf_module)) {
             uint8_t version = ((rx_buffer[1] & VERSION_FIELD_MASK) >> SHIFT_VERSION_FIELD);
             if (((rx_buffer[0] & MAC_FRAME_TYPE_MASK) == MAC_TYPE_ACK) && (version < MAC_FRAME_VERSION_2)) {
                 rf_handle_ack(rx_buffer[2], rx_buffer[0] & MAC_DATA_PENDING);
@@ -710,11 +712,11 @@ static void rf_handle_rx_done(void)
                 int8_t rssi = (int8_t) rf_read_rf_register(RF_EDV, rf_module);
                 // Cut CRC bytes
                 if (mac_mode == IEEE_802_15_4_2011) {
-                    cur_rx_packet_len -= 2;
+                    rx_packet_len -= 2;
                 } else {
-                    cur_rx_packet_len -= 4;
+                    rx_packet_len -= 4;
                 }
-                device_driver.phy_rx_cb(rx_buffer, cur_rx_packet_len, 0xf0, rssi, rf_radio_driver_id);
+                device_driver.phy_rx_cb(rx_buffer, rx_packet_len, 0xf0, rssi, rf_radio_driver_id);
                 // If auto ack used, must wait until RF returns to RF_TXPREP state
                 if ((version != MAC_FRAME_VERSION_2) && (rx_buffer[0] & FC_AR)) {
                     wait_us(100);
@@ -997,7 +999,7 @@ static void rf_backup_timer_interrupt(void)
     }
     if ((rf_state == RF_CSMA_STARTED) || (rf_state == RF_CSMA_WHILE_RX)) {
         TEST_CSMA_DONE
-        device_driver.phy_tx_done_cb(rf_radio_driver_id, mac_tx_handle, PHY_LINK_CCA_FAIL, 0, 0);
+        device_driver.phy_tx_done_cb(rf_radio_driver_id, mac_tx_handle, PHY_LINK_CCA_FAIL_RX, 0, 0);
     }
     TEST_TX_DONE
     TEST_RX_DONE

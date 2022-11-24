@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Arm Limited and affiliates.
+ * Copyright (c) 2014-2020, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +39,23 @@ extern "C" {
 
 #include "ns_types.h"
 
+/**
+ * \brief Set Wi-SUN version number
+ *
+ * Sets the Wi-SUN protocol version.
+ *      1 = Wi-SUN FAN 1.0
+ *      2 = Wi-SUN FAN 1.1
+ *
+ * Set version to 0 to stop override and use stack default
+ *
+ * \param interface_id               Network Interface
+ * \param version                    Wi-SUN version
+ *
+ * \return 0                         OK
+ * \return <0                        Failure
+ */
+
+int ws_test_version_set(int8_t interface_id, uint8_t version);
 /**
  * \brief Set Pan size.
  *

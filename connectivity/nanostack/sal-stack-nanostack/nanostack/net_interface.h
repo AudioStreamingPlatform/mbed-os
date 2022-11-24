@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Arm Limited and affiliates.
+ * Copyright (c) 2014-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,6 +99,8 @@ typedef enum arm_library_event_type_e {
 #define SOCKET_NO_RAM                       (10 << 4)
 /** TCP connection problem indication (RFC 1122 R1) */
 #define SOCKET_CONNECTION_PROBLEM           (11 << 4)
+/** Socket is busy or Radio is returning CCA failure */
+#define SOCKET_BUSY                         (12 << 4)
 
 #define SOCKET_BIND_DONE                    SOCKET_CONNECT_DONE      /**< Backward compatibility */
 #define SOCKET_BIND_FAIL                    SOCKET_CONNECT_FAIL      /**< Backward compatibility */

@@ -207,8 +207,8 @@
 // Fragmentation on, as per IPv4 default
 #define LWIP_IPV6_FRAG              LWIP_IPV6
 
-// Queuing "disabled", as per IPv4 default (so actually queues 1)
-#define LWIP_ND6_QUEUEING           0
+// Queuing, default is  "disabled", as per IPv4 default (so actually queues 1)
+#define LWIP_ND6_QUEUEING           MBED_CONF_ND6_QUEUEING
 
 // Debug Options
 #define NETIF_DEBUG                 LWIP_DBG_OFF
@@ -311,6 +311,8 @@
 
 #endif
 
+#define LWIP_NETBUF_RECVINFO            MBED_CONF_LWIP_NETBUF_RECVINFO_ENABLED
+
 // Make sure we default these to off, so
 // LWIP doesn't default to on
 #ifndef LWIP_ARP
@@ -335,5 +337,7 @@
 #else
 #define LWIP_USE_EXTERNAL_MBEDTLS       0
 #endif
+
+#define LWIP_ND6_RDNSS_MAX_DNS_SERVERS  MBED_CONF_LWIP_ND6_RDNSS_MAX_DNS_SERVERS
 
 #endif /* LWIPOPTS_H_ */

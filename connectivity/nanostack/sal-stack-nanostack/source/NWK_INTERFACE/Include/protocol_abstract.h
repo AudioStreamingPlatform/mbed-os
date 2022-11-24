@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Arm Limited and affiliates.
+ * Copyright (c) 2015-2018, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,5 +45,6 @@ protocol_interface_info_entry_t *protocol_stack_interface_info_get_by_id(int8_t 
 protocol_interface_info_entry_t *protocol_stack_interface_info_get_by_bootstrap_id(int8_t id);
 protocol_interface_info_entry_t *protocol_stack_interface_info_get_by_rpl_domain(const struct rpl_domain *domain, int8_t last_id);
 protocol_interface_info_entry_t *protocol_stack_interface_info_get_by_fhss_api(const struct fhss_api *fhss_api);
+protocol_interface_info_entry_t *protocol_stack_interface_info_get_wisun_mesh(void);
 
 #endif /* NWK_INTERFACE_INCLUDE_PROTOCOL_ABSTRACT_H_ */

@@ -17,12 +17,50 @@
  */
 
 #include "flash_api.h"
-#include "mbed_critical.h"
+#include "platform/mbed_critical.h"
 
 #if DEVICE_FLASH
 #include "mbed_assert.h"
 #include "cmsis.h"
 
+
+uint32_t GetBank(uint32_t Addr)
+{
+#if defined(FLASH_DBANK_SUPPORT)
+    if (Addr < (FLASH_BASE + FLASH_BANK_SIZE))
+    {
+        return FLASH_BANK_1;
+    }
+    else
+    {
+        return FLASH_BANK_2;
+    }
+#else
+    return FLASH_BANK_1;
+#endif
+}
+
+uint32_t GetPage(uint32_t Addr)
+{
+    uint32_t page = 0;
+
+#if defined(FLASH_DBANK_SUPPORT)
+    if (Addr < (FLASH_BASE + FLASH_BANK_SIZE))
+    {
+        /* Bank 1 */
+        page = (Addr - FLASH_BASE) / FLASH_PAGE_SIZE;
+    }
+    else
+    {
+        /* Bank 2 */
+        page = (Addr - (FLASH_BASE + FLASH_BANK_SIZE)) / FLASH_PAGE_SIZE;
+    }
+#else
+    page = (Addr - FLASH_BASE) / FLASH_PAGE_SIZE;
+#endif
+
+    return page;
+}
 
 int32_t flash_init(flash_t *obj)
 {
@@ -57,7 +95,8 @@ int32_t flash_erase_sector(flash_t *obj, uint32_t address)
     /* MBED HAL erases 1 sector at a time */
     /* Fill EraseInit structure*/
     EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
-    EraseInitStruct.Page        = (address & 0xFFFFF) / 2048; // page size = 2048
+    EraseInitStruct.Banks       = GetBank(address);
+    EraseInitStruct.Page        = GetPage(address);
     EraseInitStruct.NbPages     = 1;
 
     /* Note: If an erase operation in Flash memory also concerns data in the data or instruction cache,
@@ -98,8 +137,6 @@ int32_t flash_program_page(flash_t *obj, uint32_t address,
         return -1;
     }
 
-    core_util_critical_section_enter();
-
     /* Program the user Flash area word by word */
     StartAddress = address;
 
@@ -129,8 +166,6 @@ int32_t flash_program_page(flash_t *obj, uint32_t address,
             }
         }
     }
-
-    core_util_critical_section_exit();
 
     if (HAL_FLASH_Lock() != HAL_OK) {
         return -1;

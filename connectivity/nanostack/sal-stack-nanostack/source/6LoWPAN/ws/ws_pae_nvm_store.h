@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * Copyright (c) 2018-2020, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,6 +46,38 @@ typedef struct {
 
 // tag + length
 #define NVM_TLV_FIXED_LEN               sizeof(nvm_tlv_t)
+
+/**
+ * ws_pae_nvm_store_generic_tlv_create create NVM generic storage TLV
+ *
+ * \param tlv_entry TLV entry
+ * \param tag tag
+ * \param length length of the (whole) entry
+ *
+ * \return < 0 failure
+ * \return >= 0 success
+ *
+ */
+void ws_pae_nvm_store_generic_tlv_create(nvm_tlv_t *tlv_entry, uint16_t tag, uint16_t length);
+
+/**
+ * ws_pae_nvm_store_generic_tlv_allocate_and_create allocate and create NVM generic storage TLV
+ *
+ * \param tag tag
+ * \param length length of the (whole) entry
+ *
+ * \return TLV entry or NULL
+ *
+ */
+nvm_tlv_t *ws_pae_nvm_store_generic_tlv_allocate_and_create(uint16_t tag, uint16_t length);
+
+/**
+ * ws_pae_nvm_store_generic_tlv_free free NVM generic storage TLV
+ *
+ * \param tlv_entry TLV entry
+ *
+ */
+void ws_pae_nvm_store_generic_tlv_free(nvm_tlv_t *tlv_entry);
 
 /**
  * ws_pae_nvm_store_tlv_file_write write a list of TLVs to file

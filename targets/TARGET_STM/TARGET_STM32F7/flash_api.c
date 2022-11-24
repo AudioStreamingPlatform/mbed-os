@@ -127,8 +127,6 @@ int32_t flash_program_page(flash_t *obj, uint32_t address, const uint8_t *data,
         return -1;
     }
 
-    core_util_critical_section_enter();
-
     /* Note: If an erase operation in Flash memory also concerns data in the data or instruction cache,
        you have to make sure that these data are rewritten before they are accessed during code
        execution. If this cannot be done safely, it is recommended to flush the caches by setting the
@@ -150,8 +148,6 @@ int32_t flash_program_page(flash_t *obj, uint32_t address, const uint8_t *data,
 
     SCB_CleanInvalidateDCache_by_Addr((uint32_t *)StartAddress, FullSize);
     SCB_InvalidateICache();
-
-    core_util_critical_section_exit();
 
     if (HAL_FLASH_Lock() != HAL_OK) {
         return -1;
@@ -192,8 +188,9 @@ uint32_t flash_get_size(const flash_t *obj)
 static uint32_t GetSector(uint32_t address)
 {
     uint32_t sector = 0;
-    uint32_t tmp = address - ADDR_FLASH_SECTOR_0;
+
 #if (MBED_CONF_TARGET_FLASH_DUAL_BANK) && defined(FLASH_OPTCR_nDBANK)
+    uint32_t tmp = address - ADDR_FLASH_SECTOR_0;
     if (address < ADDR_FLASH_SECTOR_4) { // Sectors 0 to 3
         sector += tmp >> 14;
     } else if (address < ADDR_FLASH_SECTOR_5) { // Sector 4
@@ -210,13 +207,37 @@ static uint32_t GetSector(uint32_t address)
         sector += 16 + (tmp >> 17);
     }
 #else // SINGLE BANK
-    if (address < ADDR_FLASH_SECTOR_4) { // Sectors 0 to 3
-        sector += tmp >> 15;
-    } else if (address < ADDR_FLASH_SECTOR_5) { // Sector 4
-        sector += FLASH_SECTOR_4;
-    } else { // Sectors 5 to 11
-        sector += 4 + (tmp >> 18);
+    if (address < ADDR_FLASH_SECTOR_1) {
+        sector = 0;
+    } else if (address < ADDR_FLASH_SECTOR_2) {
+        sector = 1;
+    } else if (address < ADDR_FLASH_SECTOR_3) {
+        sector = 2;
+    } else if (address < ADDR_FLASH_SECTOR_4) {
+        sector = 3;
+    } else if (address < ADDR_FLASH_SECTOR_5) {
+        sector = 4;
+    } else if (address < ADDR_FLASH_SECTOR_6) {
+        sector = 5;
+    } else if (address < ADDR_FLASH_SECTOR_7) {
+        sector = 6;
+#if defined (ADDR_FLASH_SECTOR_8)
+    } else if (address < ADDR_FLASH_SECTOR_8) {
+        sector = 7;
+    } else if (address < ADDR_FLASH_SECTOR_9) {
+        sector = 8;
+    } else if (address < ADDR_FLASH_SECTOR_10) {
+        sector = 9;
+    } else if (address < ADDR_FLASH_SECTOR_11) {
+        sector = 10;
+    } else {
+        sector = 11;
     }
+#else
+    } else {
+        sector = 7;
+    }
+#endif
 #endif
     return sector;
 }
@@ -243,11 +264,11 @@ static uint32_t GetSectorSize(uint32_t Sector)
 #else // SINGLE BANK
     if ((Sector == FLASH_SECTOR_0) || (Sector == FLASH_SECTOR_1) || \
             (Sector == FLASH_SECTOR_2) || (Sector == FLASH_SECTOR_3)) {
-        sectorsize = 32 * 1024;
+        sectorsize = ADDR_FLASH_SECTOR_1 - ADDR_FLASH_SECTOR_0;
     } else if (Sector == FLASH_SECTOR_4) {
-        sectorsize = 128 * 1024;
+        sectorsize = ADDR_FLASH_SECTOR_5 - ADDR_FLASH_SECTOR_4;
     } else {
-        sectorsize = 256 * 1024;
+        sectorsize = ADDR_FLASH_SECTOR_7 - ADDR_FLASH_SECTOR_6;
     }
 #endif
     return sectorsize;

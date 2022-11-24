@@ -21,11 +21,12 @@
 
 #include "cmsis_os.h"
 
-#include "mbed.h"
 #include "mbed_interface.h"
 #include "mbed_assert.h"
 #include "events/mbed_shared_queues.h"
 #include "netsocket/nsapi_types.h"
+#include "platform/mbed_power_mgmt.h"
+#include "platform/mbed_error.h"
 
 #include "stm32xx_emac_config.h"
 #include "stm32xx_emac.h"
@@ -45,6 +46,14 @@
 /* mbed_trace: debug traces (tr_debug) can be disabled here with no change in mbed_app.json */
 // #undef TRACE_LEVEL_DEBUG
 // #define TRACE_LEVEL_DEBUG 0
+
+/* To get trace from every packet, enable deep trace macro */
+// #define STM32xx_DEEP_TRACE
+#ifdef STM32xx_DEEP_TRACE
+#define tr_debug_deep(...) tr_debug(__VA_ARGS__)
+#else
+#define tr_debug_deep(...)
+#endif
 
 #if defined(ETH_IP_VERSION_V2)
 #include "lan8742/lan8742.h"
@@ -127,7 +136,7 @@ static ETH_TxPacketConfig TxConfig;
 
 #endif // ETH_IP_VERSION_V2
 
-__weak uint8_t mbed_otp_mac_address(char *mac);
+MBED_WEAK uint8_t mbed_otp_mac_address(char *mac);
 void mbed_default_mac_address(char *mac);
 
 #ifdef __cplusplus
@@ -135,8 +144,8 @@ extern "C" {
 #endif
 
 void _eth_config_mac(ETH_HandleTypeDef *heth);
-void HAL_ETH_RxCpltCallback(ETH_HandleTypeDef *heth);
 void ETH_IRQHandler(void);
+MBED_WEAK void STM_HAL_ETH_Handler(ETH_HandleTypeDef *heth);
 
 #ifdef __cplusplus
 }
@@ -233,20 +242,14 @@ static void MPU_Config(void)
 
 #endif
 
-
-
 /**
- * Ethernet Rx Transfer completed callback
+ * IRQ Handler
  *
  * @param  heth: ETH handle
  * @retval None
  */
-void HAL_ETH_RxCpltCallback(ETH_HandleTypeDef *heth)
+MBED_WEAK void STM_HAL_ETH_Handler()
 {
-    STM32_EMAC &emac = STM32_EMAC::get_instance();
-    if (emac.thread) {
-        osThreadFlagsSet(emac.thread, FLAG_RX);
-    }
 }
 
 /**
@@ -257,8 +260,7 @@ void HAL_ETH_RxCpltCallback(ETH_HandleTypeDef *heth)
  */
 void ETH_IRQHandler(void)
 {
-    STM32_EMAC &emac = STM32_EMAC::get_instance();
-    HAL_ETH_IRQHandler(&emac.EthHandle);
+    STM_HAL_ETH_Handler();
 }
 
 STM32_EMAC::STM32_EMAC()
@@ -310,7 +312,7 @@ bool STM32_EMAC::low_level_init_successful()
     EthHandle.Init.RxMode = ETH_RXINTERRUPT_MODE;
     EthHandle.Init.ChecksumMode = ETH_CHECKSUM_BY_SOFTWARE;
     EthHandle.Init.MediaInterface = MBED_CONF_STM32_EMAC_ETH_PHY_MEDIA_INTERFACE;
-    tr_info("PHY Addr %u AutoNegotiation %u", EthHandle.Init.PhyAddress, EthHandle.Init.AutoNegotiation);
+    tr_info("power_up: PHY Addr %u AutoNeg %u", EthHandle.Init.PhyAddress, EthHandle.Init.AutoNegotiation);
     tr_debug("MAC Addr %02x:%02x:%02x:%02x:%02x:%02x", MACAddr[0], MACAddr[1], MACAddr[2], MACAddr[3], MACAddr[4], MACAddr[5]);
     tr_info("ETH buffers : %u Rx %u Tx", ETH_RXBUFNB, ETH_TXBUFNB);
 
@@ -576,7 +578,7 @@ int STM32_EMAC::low_level_input(emac_mem_buf_t **buf)
 
     /* get received frame */
     if (HAL_ETH_GetReceivedFrame_IT(&EthHandle) != HAL_OK) {
-        tr_debug("low_level_input no frame");
+        tr_debug_deep("low_level_input no frame");
         return -1;
     }
 
@@ -588,7 +590,7 @@ int STM32_EMAC::low_level_input(emac_mem_buf_t **buf)
     dmarxdesc = EthHandle.RxFrameInfos.FSRxDesc;
 
     if (len > 0 && len <= ETH_RX_BUF_SIZE) {
-        tr_debug("low_level_input len %u", len);
+        tr_debug_deep("low_level_input len %u", len);
         /* Allocate a memory buffer chain from buffer pool */
         *buf = memory_manager->alloc_pool(len, 0);
     }
@@ -843,7 +845,7 @@ void mbed_mac_address(char *mac)
     return;
 }
 
-__weak uint8_t mbed_otp_mac_address(char *mac)
+MBED_WEAK uint8_t mbed_otp_mac_address(char *mac)
 {
     return 0;
 }
@@ -877,8 +879,6 @@ void mbed_default_mac_address(char *mac)
 
 bool STM32_EMAC::power_up()
 {
-    tr_info("power_up");
-
     sleep_manager_lock_deep_sleep();
 
     /* Initialize the hardware */

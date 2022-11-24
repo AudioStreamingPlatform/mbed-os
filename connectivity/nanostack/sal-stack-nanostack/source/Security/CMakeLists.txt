@@ -1,4 +1,4 @@
-# Copyright (c) 2020 ARM Limited. All rights reserved.
+# Copyright (c) 2020-2021, Pelion and affiliates.
 # SPDX-License-Identifier: Apache-2.0
 
 target_include_directories(mbed-nanostack-sal_stack
@@ -58,6 +58,8 @@ target_sources(mbed-nanostack-sal_stack
         protocols/gkh_sec_prot/supp_gkh_sec_prot.c
 
         protocols/key_sec_prot/key_sec_prot.c
+        
+        protocols/msg_sec_prot/msg_sec_prot.c
 
         protocols/radius_sec_prot/avp_helper.c
         protocols/radius_sec_prot/radius_client_sec_prot.c

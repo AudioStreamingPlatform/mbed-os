@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Arm Limited and affiliates.
+ * Copyright (c) 2015-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -501,7 +501,7 @@ static void mpl_buffer_transmit(mpl_domain_t *domain, mpl_buffered_message_t *me
     memcpy(buf->src_sa.address, message->message + IPV6_HDROFF_SRC_ADDR, 16);
 
     ipv6_transmit_multicast_on_interface(buf, domain->interface);
-    tr_debug("MPL transmit %u", mpl_buffer_sequence(message));
+    tr_info("MPL transmit %u", mpl_buffer_sequence(message));
 }
 
 static void mpl_buffer_inconsistent(const mpl_domain_t *domain, mpl_buffered_message_t *message)
@@ -1065,6 +1065,7 @@ static buffer_t *mpl_exthdr_provider(buffer_t *buf, ipv6_exthdr_stage_t stage, i
     if (!domain) {
         // We will need to tunnel - do nothing on the inner packet
         *result = 0;
+        buf->options.ipv6_use_min_mtu = 1;
         return buf;
     }
 

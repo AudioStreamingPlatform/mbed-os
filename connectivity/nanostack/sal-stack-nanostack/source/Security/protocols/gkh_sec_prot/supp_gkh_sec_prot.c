@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * Copyright (c) 2018-2020, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -247,7 +247,7 @@ static void supp_gkh_sec_prot_state_machine(sec_prot_t *prot)
             }
 
             // Set default timeout for the total maximum length of the negotiation
-            sec_prot_default_timeout_set(&data->common);
+            sec_prot_timeout_set(&data->common, prot->sec_cfg->prot_cfg.sec_prot_retry_timeout);
 
             supp_gkh_sec_prot_security_replay_counter_update(prot);
 

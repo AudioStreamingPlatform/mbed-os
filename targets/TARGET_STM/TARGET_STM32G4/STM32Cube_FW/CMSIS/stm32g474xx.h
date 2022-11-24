@@ -7,7 +7,7 @@
   *          This file contains:
   *           - Data structures and the address mapping for all peripherals
   *           - Peripheral's registers declarations and bits definition
-  *           - Macros to access peripheral’s registers hardware
+  *           - Macros to access peripheral's registers hardware
   *
   ******************************************************************************
   * @attention
@@ -1120,7 +1120,6 @@ typedef struct
 typedef struct {
   HRTIM_Master_TypeDef sMasterRegs;
   HRTIM_Timerx_TypeDef sTimerxRegs[6];
-// uint32_t             RESERVED0[32];
   HRTIM_Common_TypeDef sCommonRegs;
 }HRTIM_TypeDef;
 

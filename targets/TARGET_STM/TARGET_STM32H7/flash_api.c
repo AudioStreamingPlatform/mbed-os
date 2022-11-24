@@ -80,11 +80,15 @@ int32_t flash_erase_sector(flash_t *obj, uint32_t address)
     EraseInitStruct.Sector = GetSector(address);
     EraseInitStruct.NbSectors = 1;
 
+#if defined (DUAL_BANK)
     if (address < FLASH_BANK2_BASE) {
         EraseInitStruct.Banks = FLASH_BANK_1;
     } else {
         EraseInitStruct.Banks = FLASH_BANK_2;
     }
+#else
+    EraseInitStruct.Banks = FLASH_BANK_1;
+#endif
 
     if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
         status = -1;
@@ -134,8 +138,6 @@ int32_t flash_program_page(flash_t *obj, uint32_t address, const uint8_t *data,
         return -1;
     }
 
-    core_util_critical_section_enter();
-
     StartAddress = address;
     while ((address < (StartAddress + size)) && (status == 0)) {
         if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, address, (uint32_t)data) == HAL_OK) {
@@ -150,13 +152,13 @@ int32_t flash_program_page(flash_t *obj, uint32_t address, const uint8_t *data,
 #if defined(CORE_CM7)
     SCB_CleanInvalidateDCache_by_Addr((uint32_t *)StartAddress, FullSize);
     SCB_InvalidateICache();
+#else /* CORE_CM4 */
+   __HAL_ART_ENABLE();
 #endif /* CORE_CM7 */
 #else /* DUAL_CORE */
     SCB_CleanInvalidateDCache_by_Addr((uint32_t *)StartAddress, FullSize);
     SCB_InvalidateICache();
 #endif /* DUAL_CORE */
-
-    core_util_critical_section_exit();
 
     if (HAL_FLASH_Lock() != HAL_OK) {
         return -1;
@@ -225,7 +227,9 @@ static uint32_t GetSectorBase(uint32_t SectorId, uint32_t BanksId)
     if (BanksId == FLASH_BANK_1) {
         address_sector = FLASH_BANK1_BASE;
     } else {
+#if defined (DUAL_BANK)
         address_sector = FLASH_BANK2_BASE;
+#endif
     }
 
     for (i = 0; i < SectorId; i++) {

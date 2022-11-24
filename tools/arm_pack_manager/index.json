@@ -179274,6 +179274,120 @@
         "sub_family": "M2351",
         "vendor": "Nuvoton:18"
     }, 
+    "M2354KJFAE": {
+        "algorithms": [
+            {
+                "default": false, 
+                "file_name": "Flash/M2354_NS.FLM",
+                "ram_size": 4608,
+                "ram_start": 805371904,
+                "size": 1048576,
+                "start": 268435456
+            },
+            {
+                "default": false,
+                "file_name": "Flash/M2354_LD_16.FLM", 
+                "ram_size": 4608,
+                "ram_start": 536870912,
+                "size": 16384, 
+                "start": 1048576
+            }, 
+            {
+                "default": false, 
+                "file_name": "Flash/M2354_AP_1M.FLM", 
+                "ram_size": 4608,
+                "ram_start": 536870912,
+                "size": 1048576, 
+                "start": 0
+            }
+        ], 
+        "family": "NuMicro M23 Family",
+        "from_pack": {
+            "pack": "NuMicro_DFP", 
+            "url": "http://www.nuvoton.com/hq/enu/Documents/KEILSoftwarePack", 
+            "vendor": "Nuvoton", 
+            "version": "1.3.7"
+        }, 
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": true
+                }, 
+                "default": true, 
+                "size": 131072, 
+                "start": 536870912, 
+                "startup": false
+            }, 
+            "IRAM2": {
+                "access": {
+                    "execute": false, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": true
+                }, 
+                "default": false, 
+                "size": 131072, 
+                "start": 805437440, 
+                "startup": false
+            }, 
+            "IROM1": {
+                "access": {
+                    "execute": true, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": false
+                }, 
+                "default": true, 
+                "size": 524288, 
+                "start": 0, 
+                "startup": true
+            }, 
+            "IROM2": {
+                "access": {
+                    "execute": true, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": false
+                }, 
+                "default": false, 
+                "size": 524288, 
+                "start": 268959744, 
+                "startup": false
+            }
+        }, 
+        "name": "M2354KJFAE", 
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM23", 
+                "fpu": "None", 
+                "mpu": "Present", 
+                "units": 1
+            }
+        }, 
+        "sectors": [
+            [
+                0, 
+                2048
+            ]
+        ],
+        "sub_family": "M2354",
+        "vendor": "Nuvoton:18"
+    },
     "M251EB2AE": {
         "algorithms": [
             {
@@ -189214,6 +189328,82 @@
         }, 
         "sectors": null, 
         "sub_family": "M480",
+        "vendor": "Nuvoton:18"
+    }, 
+    "M467HJHAE": {
+        "algorithms": [
+            {
+                "default": false, 
+                "file_name": "Flash/M460_LD_8.FLM", 
+                "ram_size": null, 
+                "ram_start": null, 
+                "size": 8192, 
+                "start": 252706816
+            }, 
+            {
+                "default": true, 
+                "file_name": "Flash/M460_AP_1M.FLM", 
+                "ram_size": null, 
+                "ram_start": null, 
+                "size": 1048576, 
+                "start": 0
+            }
+        ], 
+        "family": "NuMicro M4 Family",
+        "from_pack": {
+            "pack": "NuMicro_DFP", 
+            "url": "http://www.nuvoton.com/hq/enu/Documents/KEILSoftwarePack", 
+            "vendor": "Nuvoton", 
+            "version": "1.3.13"
+        }, 
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": true
+                }, 
+                "default": true, 
+                "size": 524288, 
+                "start": 536870912, 
+                "startup": false
+            }, 
+            "IROM1": {
+                "access": {
+                    "execute": true, 
+                    "non_secure": false, 
+                    "non_secure_callable": false, 
+                    "peripheral": false, 
+                    "read": true, 
+                    "secure": false, 
+                    "write": false
+                }, 
+                "default": true, 
+                "size": 1048576, 
+                "start": 0, 
+                "startup": true
+            }
+        }, 
+        "name": "M467HJHAE", 
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM4", 
+                "fpu": "SinglePrecision", 
+                "mpu": "NotPresent", 
+                "units": 1
+            }
+        }, 
+        "sectors": [
+            [
+                0, 
+                4096
+            ]
+        ], 
+        "sub_family": "M460",
         "vendor": "Nuvoton:18"
     }, 
     "M4LEDLE6AE": {
@@ -370039,7 +370229,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370119,7 +370309,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370199,7 +370389,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370279,7 +370469,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370359,7 +370549,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370519,7 +370709,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370599,7 +370789,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370679,7 +370869,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370759,7 +370949,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370839,7 +371029,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -370919,7 +371109,7 @@
                     "write": true
                 }, 
                 "default": true, 
-                "size": 16384, 
+                "size": 12288,
                 "start": 536870912, 
                 "startup": false
             }, 
@@ -418999,7 +419189,211 @@
         ], 
         "sub_family": "STM32G041", 
         "vendor": "STMicroelectronics:13"
-    }, 
+    },
+    "STM32G050K8Tx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32G0xx_64.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 65536,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G0 Series",
+        "from_pack": {
+            "pack": "STM32G0xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 18432,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 65536,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G050K8Tx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM0Plus",
+                "fpu": "None",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G050",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32G051K8Tx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32G0xx_64.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 65536,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G0 Series",
+        "from_pack": {
+            "pack": "STM32G0xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 18432,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 65536,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G051K8Tx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM0Plus",
+                "fpu": "None",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G051",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32G061K8Tx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32G0xx_64.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 65536,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G0 Series",
+        "from_pack": {
+            "pack": "STM32G0xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 18432,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 65536,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G061K8Tx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM0Plus",
+                "fpu": "None",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G061",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32G070CBTx": {
         "algorithms": [
             {
@@ -422679,7 +423073,211 @@
         ], 
         "sub_family": "STM32G081", 
         "vendor": "STMicroelectronics:13"
-    }, 
+    },
+    "STM32G0B0RETx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32G0Bx_512.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G0 Series",
+        "from_pack": {
+            "pack": "STM32G0xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 147456,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G0B0RETx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM0Plus",
+                "fpu": "None",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G0B0",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32G0B1RETx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32G0Bx_512.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G0 Series",
+        "from_pack": {
+            "pack": "STM32G0xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 147456,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G0B1RETx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM0Plus",
+                "fpu": "None",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G0B1",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32G0C1RETx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32G0Bx_512.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G0 Series",
+        "from_pack": {
+            "pack": "STM32G0xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 147456,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G0C1RETx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM0Plus",
+                "fpu": "None",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G0C1",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32G431C6Tx": {
         "algorithms": [
             {
@@ -431176,6 +431774,142 @@
         "sub_family": "STM32G484", 
         "vendor": "STMicroelectronics:13"
     }, 
+    "STM32G491RETx": {
+        "algorithms": [
+            {
+                "default": false,
+                "file_name": "CMSIS/Flash/STM32G4xx_512.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G4 Series",
+        "from_pack": {
+            "pack": "STM32G4xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.4.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 114688,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G491RETx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM4",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G491",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32G4A1RETx": {
+        "algorithms": [
+            {
+                "default": false,
+                "file_name": "CMSIS/Flash/STM32G4xx_512.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32G4 Series",
+        "from_pack": {
+            "pack": "STM32G4xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.4.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 114688,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32G4A1RETx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM4",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32G4A1",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32GBK1CB": {
         "algorithms": [
             {
@@ -431243,7 +431977,346 @@
         ], 
         "sub_family": "STM32GBK1", 
         "vendor": "STMicroelectronics:13"
-    }, 
+    },
+    "STM32H723ZGTx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32H72x-73x_1024.FLM",
+                "ram_size": 131072,
+                "ram_start": 536870912,
+                "size": 1048576,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32H7 Series",
+        "from_pack": {
+            "pack": "STM32H7xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "2.7.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 536870912,
+                "startup": false
+            },
+            "IRAM2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 327680,
+                "start": 603979776,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 1048576,
+                "start": 134217728,
+                "startup": true
+            },
+            "RAM_D2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 32768,
+                "start": 805306368,
+                "startup": false
+            },
+            "RAM_D3": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 16384,
+                "start": 939524096,
+                "startup": false
+            }
+        },
+        "name": "STM32H723ZGTx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM7",
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                131072
+            ]
+        ],
+        "sub_family": "STM32H723",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32H725AEIx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32H72x-73x_1024.FLM",
+                "ram_size": 131072,
+                "ram_start": 536870912,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32H7 Series",
+        "from_pack": {
+            "pack": "STM32H7xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "2.7.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 536870912,
+                "startup": false
+            },
+            "IRAM2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 603979776,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            },
+            "RAM_D2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 16384,
+                "start": 805306368,
+                "startup": false
+            },
+            "RAM_D3": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 16384,
+                "start": 805322752,
+                "startup": false
+            }
+        },
+        "name": "STM32H725AEIx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM7",
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                131072
+            ]
+        ],
+        "sub_family": "STM32H725",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32H735IGTx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32H72x-73x_1024.FLM",
+                "ram_size": 131072,
+                "ram_start": 536870912,
+                "size": 1048576,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32H7 Series",
+        "from_pack": {
+            "pack": "STM32H7xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "2.7.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 536870912,
+                "startup": false
+            },
+            "IRAM2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 603979776,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 1048576,
+                "start": 134217728,
+                "startup": true
+            },
+            "RAM_D2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 16384,
+                "start": 805306368,
+                "startup": false
+            },
+            "RAM_D3": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 16384,
+                "start": 805322752,
+                "startup": false
+            }
+        },
+        "name": "STM32H735IGTx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM7",
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                131072
+            ]
+        ],
+        "sub_family": "STM32H735",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32H742AGIx": {
         "algorithms": [
             {
@@ -434434,46 +435507,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -434525,23 +435558,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -434795,46 +435813,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -434886,23 +435864,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -435329,46 +436292,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -435420,23 +436343,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -435517,46 +436425,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -435608,23 +436476,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -436051,46 +436904,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -436142,23 +436955,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -436239,46 +437037,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -436330,23 +437088,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -436600,46 +437343,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -436691,23 +437394,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -436961,46 +437649,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -437052,23 +437700,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -437140,6 +437773,172 @@
         "sub_family": "STM32H743", 
         "vendor": "STMicroelectronics:13"
     }, 
+    "STM32H7A3ZITxQ": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32H7x_2048.FLM",
+                "ram_size": 32768,
+                "ram_start": 536870912,
+                "size": 2097152,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32H7 Series",
+        "from_pack": {
+            "pack": "STM32H7xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "2.7.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 1048576,
+                "start": 603979776,
+                "startup": false
+            },
+            "IRAM2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 2097152,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32H7A3ZITxQ",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM7",
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                131072
+            ]
+        ],
+        "sub_family": "STM32H7A3",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32H7B3ZITxQ": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32H7x_2048.FLM",
+                "ram_size": 32768,
+                "ram_start": 536870912,
+                "size": 2097152,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32H7 Series",
+        "from_pack": {
+            "pack": "STM32H7xx_DFP",
+            "url": "https://www.keil.com/pack/",
+            "vendor": "Keil",
+            "version": "2.8.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 1048576,
+                "start": 603979776,
+                "startup": false
+            },
+            "IRAM2": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 131072,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 2097152,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32H7B3ZITxQ",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM7",
+                "fpu": "DoublePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                131072
+            ]
+        ],
+        "sub_family": "STM32H7B3",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32H745BGTx": {
         "algorithms": [
             {
@@ -440294,7 +441093,7 @@
                 "startup": false
             }
         }, 
-        "name": "STM32H747XIHx", 
+        "name": "STM32H747XIHx:CM7",
         "processor": {
             "Asymmetric": {
                 "CM4": {
@@ -441050,46 +441849,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -441141,23 +441900,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -441238,46 +441982,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -441329,23 +442033,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -441426,46 +442115,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -441517,23 +442166,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -441614,46 +442248,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -441705,23 +442299,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -441802,46 +442381,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -441893,23 +442432,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -441990,46 +442514,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -442081,23 +442565,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -442178,46 +442647,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -442269,23 +442698,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -442366,46 +442780,6 @@
                 "ram_start": 536870912, 
                 "size": 2097152, 
                 "start": 134217728
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 67108864, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H7xx_MT25TL01G_DUAL.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H750B-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/MT25TL01G_STM32H745I-DISCO.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 134217728, 
-                "start": 2415919104
-            }, 
-            {
-                "default": false, 
-                "file_name": "CMSIS/Flash/STM32H743I-eval_FMC.FLM", 
-                "ram_size": 65524, 
-                "ram_start": 536870912, 
-                "size": 16777216, 
-                "start": 1610612736
             }
         ], 
         "family": "STM32H7 Series", 
@@ -442457,23 +442831,8 @@
                     "write": false
                 }, 
                 "default": true, 
-                "size": 1048576, 
+                "size": 2097152,
                 "start": 134217728, 
-                "startup": true
-            }, 
-            "IROM2": {
-                "access": {
-                    "execute": true, 
-                    "non_secure": false, 
-                    "non_secure_callable": false, 
-                    "peripheral": false, 
-                    "read": true, 
-                    "secure": false, 
-                    "write": false
-                }, 
-                "default": true, 
-                "size": 1048576, 
-                "start": 135266304, 
                 "startup": true
             }, 
             "RAM_D2": {
@@ -459205,7 +459564,7 @@
         "sub_family": "STM32L151xxA",
         "vendor": "STMicroelectronics:13"
     }, 
-    "STM32L151CC": {
+    "STM32L151CCTx": {
         "algorithms": [
             {
                 "default": true,
@@ -459271,7 +459630,7 @@
                 "startup": true
             }
         }, 
-        "name": "STM32L151CC",
+        "name": "STM32L151CCTx",
         "processor": {
             "Symmetric": {
                 "core": "CortexM3", 
@@ -463069,7 +463428,7 @@
         "sub_family": "STM32L152xxA",
         "vendor": "STMicroelectronics:13"
     }, 
-    "STM32L152RC": {
+    "STM32L152RCTx": {
         "algorithms": [
             {
                 "default": true,
@@ -463135,7 +463494,7 @@
                 "startup": true
             }
         }, 
-        "name": "STM32L152RC",
+        "name": "STM32L152RCTx",
         "processor": {
             "Symmetric": {
                 "core": "CortexM3", 
@@ -463345,7 +463704,7 @@
         "sub_family": "STM32L152",
         "vendor": "STMicroelectronics:13"
     }, 
-    "STM32L152RE": {
+    "STM32L152RETx": {
         "algorithms": [
             {
                 "default": true,
@@ -463411,7 +463770,7 @@
                 "startup": true
             }
         }, 
-        "name": "STM32L152RE",
+        "name": "STM32L152RETx",
         "processor": {
             "Symmetric": {
                 "core": "CortexM3", 
@@ -465461,6 +465820,57 @@
         "sub_family": "STM32L162",
         "vendor": "STMicroelectronics:13"
     }, 
+    "STM32L412KBTx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32L4xx_128.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 131072,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32L4 Series",
+        "from_pack": {
+            "pack": "STM32L4xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "2.6.1"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 40960,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 131072,
+                "start": 134217728,
+                "startup": true
+            }
+        }
+    },
     "STM32L431CBTx": {
         "algorithms": [
             {
@@ -477382,6 +477792,74 @@
         "sub_family": "STM32L4A6",
         "vendor": "STMicroelectronics:13"
     }, 
+    "STM32L4P5ZGTx": {
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32L4P5xx_1M.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 1048576,
+                "start": 134217728
+            }
+        ],
+        "family": "STM32L4 Series",
+        "from_pack": {
+            "pack": "STM32L4xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "2.2.0"
+        },
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 327680,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 1048576,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32L4P5ZGTx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM4",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                4096
+            ]
+        ],
+        "sub_family": "STM32L4P5",
+        "vendor": "STMicroelectronics:13"
+    },
     "STM32L4R5AIIx": {
         "algorithms": [
             {
@@ -479422,6 +479900,284 @@
         "sub_family": "STM32L4S9",
         "vendor": "STMicroelectronics:13"
     }, 
+    "STM32L552ZETxQ": {
+        "family": "STM32L5 Series",
+        "from_pack": {
+            "pack": "STM32L5xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32L5x_512_0800.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 262144,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32L552ZETxQ",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM33",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32L562",
+        "vendor": "STMicroelectronics:13"
+    },
+    "STM32L562QEIxQ": {
+        "family": "STM32L5 Series",
+        "from_pack": {
+            "pack": "STM32L5xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.3.0"
+        },
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32L5x_512_0800.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 524288,
+                "start": 134217728
+            }
+        ],
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 262144,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 524288,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32L562QEIxQ",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM33",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32L562",
+        "vendor": "STMicroelectronics:13"
+    },
+
+    "STM32U575ZITx": {
+        "family": "STM32U5 Series",
+        "from_pack": {
+            "pack": "STM32U5xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.0.5"
+        },
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32U5xx_2M_0800.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 2097152,
+                "start": 134217728
+            }
+        ],
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 786432,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 2097152,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32U575ZITx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM33",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32U575",
+        "vendor": "STMicroelectronics:13"
+    },
+
+    "STM32U585AIIx": {
+        "family": "STM32U5 Series",
+        "from_pack": {
+            "pack": "STM32U5xx_DFP",
+            "url": "http://www.keil.com/pack",
+            "vendor": "Keil",
+            "version": "1.0.5"
+        },
+        "algorithms": [
+            {
+                "default": true,
+                "file_name": "CMSIS/Flash/STM32U5xx_2M_0800.FLM",
+                "ram_size": null,
+                "ram_start": null,
+                "size": 2097152,
+                "start": 134217728
+            }
+        ],
+        "memories": {
+            "IRAM1": {
+                "access": {
+                    "execute": false,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": true
+                },
+                "default": true,
+                "size": 786432,
+                "start": 536870912,
+                "startup": false
+            },
+            "IROM1": {
+                "access": {
+                    "execute": true,
+                    "non_secure": false,
+                    "non_secure_callable": false,
+                    "peripheral": false,
+                    "read": true,
+                    "secure": false,
+                    "write": false
+                },
+                "default": true,
+                "size": 2097152,
+                "start": 134217728,
+                "startup": true
+            }
+        },
+        "name": "STM32U585AIIx",
+        "processor": {
+            "Symmetric": {
+                "core": "CortexM33",
+                "fpu": "SinglePrecision",
+                "mpu": "Present",
+                "units": 1
+            }
+        },
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32U585",
+        "vendor": "STMicroelectronics:13"
+    },
+
+
+
+
     "STM32W108C8": {
         "algorithms": [
             {
@@ -479821,7 +480577,276 @@
         ], 
         "sub_family": "STM32W1",
         "vendor": "STMicroelectronics:13"
-    }, 
+    },
+    "STM32WL55JCIx": {
+        "name": "STM32WL55JCIx:CM4",
+        "memories": {
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 65536,
+            "startup": false,
+            "default": true
+          },
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 262144,
+            "startup": true,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WLxx_CM4.FLM",
+            "start": 134217728,
+            "size": 262144,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "None",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WLxx_DFP",
+          "version": "1.0.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WL Series",
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32WL55"
+    },
+    "STM32WLE5JCIx": {
+        "name": "STM32WLE5JCIx:CM4",
+        "memories": {
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 65536,
+            "startup": false,
+            "default": true
+          },
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 262144,
+            "startup": true,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WLxx_CM4.FLM",
+            "start": 134217728,
+            "size": 262144,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "None",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WLxx_DFP",
+          "version": "1.1.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WL Series",
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32WLE5"
+      },
+      "STM32WLE5CCUx": {
+        "name": "STM32WLE5CCUx:CM4",
+        "memories": {
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 65536,
+            "startup": false,
+            "default": true
+          },
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 262144,
+            "startup": true,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WLxx_CM4.FLM",
+            "start": 134217728,
+            "size": 262144,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "None",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WLxx_DFP",
+          "version": "1.1.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WL Series",
+        "sectors": [
+            [
+                134217728,
+                2048
+            ]
+        ],
+        "sub_family": "STM32WLE5"
+      },
+      "STM32WB15CCUx": {
+        "name": "STM32WB15CCUx",
+        "memories": {
+          "IROM1": {
+            "access": {
+              "read": true,
+              "write": false,
+              "execute": true,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 134217728,
+            "size": 327680,
+            "startup": true,
+            "default": true
+          },
+          "IRAM1": {
+            "access": {
+              "read": true,
+              "write": true,
+              "execute": false,
+              "peripheral": false,
+              "secure": false,
+              "non_secure": false,
+              "non_secure_callable": false
+            },
+            "start": 536870912,
+            "size": 49152,
+            "startup": false,
+            "default": true
+          }
+        },
+        "algorithms": [
+          {
+            "file_name": "CMSIS/Flash/STM32WB_M4.FLM",
+            "start": 134217728,
+            "size": 1048576,
+            "default": true,
+            "ram_start": null,
+            "ram_size": null
+          }
+        ],
+        "processor": {
+          "Symmetric": {
+            "units": 1,
+            "core": "CortexM4",
+            "fpu": "SinglePrecision",
+            "mpu": "Present"
+          }
+        },
+        "from_pack": {
+          "vendor": "Keil",
+          "pack": "STM32WBxx_DFP",
+          "version": "1.2.0",
+          "url": "http://www.keil.com/pack"
+        },
+        "sectors" : [
+            [ 134217728, 4096 ]
+        ],
+        "vendor": "STMicroelectronics:13",
+        "family": "STM32WB Series",
+        "sub_family": "STM32WB15"
+    },
     "STM32WB55CCUx": {
         "name": "STM32WB55CCUx",
         "memories": {
@@ -503394,7 +504419,167 @@
         ], 
         "sub_family": "M4K(1)",
         "vendor": "Toshiba:92"
-    }, 
+    },
+    "TMPM4KNFYAFG": {
+    "name": "TMPM4KNFYAFG",
+    "memories": {
+      "IROM1": {
+        "access": {
+          "read": true,
+          "write": false,
+          "execute": true,
+          "peripheral": false,
+          "secure": false,
+          "non_secure": false,
+          "non_secure_callable": false
+        },
+        "start": 0,
+        "size": 262144,
+        "startup": true,
+        "default": true
+      },
+      "IRAM1": {
+        "access": {
+          "read": true,
+          "write": true,
+          "execute": false,
+          "peripheral": false,
+          "secure": false,
+          "non_secure": false,
+          "non_secure_callable": false
+        },
+        "start": 536870912,
+        "size": 24576,
+        "startup": false,
+        "default": true
+      }
+    },
+    "algorithms": [
+      {
+        "file_name": "Flash/TMPM4Kx_code_256.FLM",
+        "start": 0,
+        "size": 262144,
+        "default": true,
+        "ram_start": 536870912,
+        "ram_size": 8192
+      },
+      {
+        "file_name": "Flash/TMPM4Kx_data_32.FLM",
+        "start": 805306368,
+        "size": 32768,
+        "default": true,
+        "ram_start": 536870912,
+        "ram_size": 8192
+      }
+    ],
+    "processor": {
+      "Symmetric": {
+        "units": 1,
+        "core": "CortexM4",
+        "fpu": "SinglePrecision",
+        "mpu": "Present"
+      }
+    },
+    "from_pack": {
+      "vendor": "Toshiba",
+      "pack": "TXZ4Aplus-M4K2_DFP",
+      "version": "1.0.0",
+      "url": "https://toshiba.semicon-storage.com/content/dam/toshiba-ss/shared/docs/product/micro/device-family-Pack/"
+    },
+    "sectors": [
+            [
+                0, 
+                4096
+            ], 
+            [
+                805306368, 
+                4096
+            ]
+    ],  
+    "vendor": "Toshiba:92",
+    "family": "TXZ4A+ Series",
+    "sub_family": "M4K(2)"
+    },
+    "TMPM4NRF20FG": {
+    "name": "TMPM4NRF20FG",
+    "memories": {
+      "IROM1": {
+        "access": {
+          "read": true,
+          "write": false,
+          "execute": true,
+          "peripheral": false,
+          "secure": false,
+          "non_secure": false,
+          "non_secure_callable": false
+        },
+        "start": 0,
+        "size": 2097152,
+        "startup": true,
+        "default": true
+      },
+      "IRAM1": {
+        "access": {
+          "read": true,
+          "write": true,
+          "execute": false,
+          "peripheral": false,
+          "secure": false,
+          "non_secure": false,
+          "non_secure_callable": false
+        },
+        "start": 536870912,
+        "size": 262144,
+        "startup": false,
+        "default": true
+      }
+    },
+    "algorithms": [
+      {
+        "file_name": "Flash/TMPM4Nx_code_2048.FLM",
+        "start": 0,
+        "size": 2097152,
+        "default": true,
+        "ram_start": 536870912,
+        "ram_size": 8192
+      },
+      {
+        "file_name": "Flash/TMPM4Nx_data_32.FLM",
+        "start": 805306368,
+        "size": 32768,
+        "default": true,
+        "ram_start": 536870912,
+        "ram_size": 8192
+      }
+    ],
+    "processor": {
+      "Symmetric": {
+        "units": 1,
+        "core": "CortexM4",
+        "fpu": "SinglePrecision",
+        "mpu": "Present"
+      }
+    },
+    "from_pack": {
+      "vendor": "Toshiba",
+      "pack": "TXZ4Aplus-M4N1_DFP",
+      "version": "1.0.1",
+      "url": "https://toshiba.semicon-storage.com/content/dam/toshiba-ss/shared/docs/product/micro/device-family-Pack/"
+    },
+	"sectors": [
+            [
+                0, 
+                4096
+            ], 
+            [
+                805306368, 
+                4096
+            ]
+    ], 
+    "vendor": "Toshiba:92",
+    "family": "TXZ4A+ Series",
+    "sub_family": "M4N(1)"
+	},	
     "XMC1100-Q024x0008": {
         "algorithms": [
             {

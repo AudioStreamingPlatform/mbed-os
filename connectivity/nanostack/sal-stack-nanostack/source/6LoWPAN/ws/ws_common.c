@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * Copyright (c) 2018-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,20 +20,29 @@
 #include "ns_types.h"
 #include "ns_trace.h"
 #include "randLIB.h"
+#include "common_functions.h"
 #include <ns_list.h>
 #include <nsdynmemLIB.h>
 #include "Common_Protocols/icmpv6.h"
 #include "mac_common_defines.h"
 #include "net_interface.h"
+#include "eventOS_event.h"
 #include "6LoWPAN/MAC/mpx_api.h"
 #include "6LoWPAN/ws/ws_config.h"
 #include "6LoWPAN/ws/ws_common_defines.h"
 #include "6LoWPAN/ws/ws_llc.h"
 #include "6LoWPAN/ws/ws_common.h"
 #include "6LoWPAN/ws/ws_bootstrap.h"
+#include "6LoWPAN/ws/ws_bootstrap_6ln.h"
+#include "6LoWPAN/ws/ws_bootstrap_6lr.h"
+#include "6LoWPAN/ws/ws_bootstrap_6lbr.h"
+#include "6LoWPAN/ws/ws_bootstrap_ffn.h"
 #include "6LoWPAN/ws/ws_bbr_api_internal.h"
 #include "6LoWPAN/ws/ws_pae_controller.h"
 #include "6LoWPAN/ws/ws_cfg_settings.h"
+#include "6LoWPAN/ws/ws_stats.h"
+#include "6LoWPAN/ws/ws_ie_lib.h"
+#include "6LoWPAN/ws/ws_phy.h"
 #include "Service_Libs/etx/etx.h"
 #include "Service_Libs/mac_neighbor_table/mac_neighbor_table.h"
 #include "Service_Libs/blacklist/blacklist.h"
@@ -57,13 +66,13 @@ static int8_t ws_disable_channels_in_range(uint32_t *channel_mask, uint16_t numb
 {
     for (uint16_t i = 0; i < number_of_channels; i++) {
         if (i >= range_start && i <= range_stop) {
-            channel_mask[0 + (i / 32)] &= ~(1 << (i % 32));
+            channel_mask[i / 32] &= ~(1U << (i % 32));
         }
     }
     return 0;
 }
 
-int8_t ws_generate_channel_list(uint32_t *channel_mask, uint16_t number_of_channels, uint8_t regulatory_domain, uint8_t operating_class, uint8_t channel_plan_id)
+int8_t ws_common_generate_channel_list(uint32_t *channel_mask, uint16_t number_of_channels, uint8_t regulatory_domain, uint8_t operating_class, uint8_t channel_plan_id)
 {
     // Clear channel mask
     for (uint8_t i = 0; i < 8; i++) {
@@ -71,16 +80,9 @@ int8_t ws_generate_channel_list(uint32_t *channel_mask, uint16_t number_of_chann
     }
     // Enable all channels
     for (uint16_t i = 0; i < number_of_channels; i++) {
-        channel_mask[0 + (i / 32)] |= (1 << (i % 32));
+        channel_mask[i / 32] |= 1U << (i % 32);
     }
     // Disable unsupported channels per regional frequency bands
-    if (regulatory_domain == REG_DOMAIN_NA) {
-        if (channel_plan_id == 1) {
-            ws_disable_channels_in_range(channel_mask, number_of_channels, 1, 7);
-        } else if (channel_plan_id == 5) {
-            ws_disable_channels_in_range(channel_mask, number_of_channels, 5, 7);
-        }
-    }
     if (regulatory_domain == REG_DOMAIN_BZ) {
         if (channel_plan_id == 255) {
             if (operating_class == 1) {
@@ -92,138 +94,49 @@ int8_t ws_generate_channel_list(uint32_t *channel_mask, uint16_t number_of_chann
             }
         } else {
             if (channel_plan_id == 1) {
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 1, 7);
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 64, 64);
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 72, 103);
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 106, 111);
+                ws_disable_channels_in_range(channel_mask, number_of_channels, 26, 64);
             } else if (channel_plan_id == 2) {
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 24, 24);
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 32, 47);
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 52, 55);
+                ws_disable_channels_in_range(channel_mask, number_of_channels, 12, 32);
             } else if (channel_plan_id == 5) {
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 5, 10);
-                ws_disable_channels_in_range(channel_mask, number_of_channels, 19, 23);
+                ws_disable_channels_in_range(channel_mask, number_of_channels, 3, 10);
             }
+        }
+    } else if (regulatory_domain == REG_DOMAIN_EU) {
+        if (channel_plan_id == 32) {
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 55, 56);
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 61, 63);
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 65, 66);
+        } else if (channel_plan_id == 33) {
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 27, 28);
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 30, 33);
+        } else if (channel_plan_id == 36) {
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 55, 56);
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 61, 63);
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 65, 66);
+        } else if (channel_plan_id == 37) {
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 27, 28);
+            ws_disable_channels_in_range(channel_mask, number_of_channels, 30, 33);
         }
     }
     return 0;
 }
 
-uint16_t ws_active_channel_count(uint32_t *channel_mask, uint16_t number_of_channels)
+uint16_t ws_common_active_channel_count(uint32_t *channel_mask, uint16_t number_of_channels)
 {
     uint16_t active_channels = 0;
     // Set channel maks outside excluded channels
     for (uint16_t i = 0; i < number_of_channels; i++) {
-        if (channel_mask[0 + (i / 32)] & (1 << (i % 32))) {
+        if (channel_mask[i / 32] & (1U << (i % 32))) {
             active_channels++;
         }
     }
     return active_channels;
 }
 
-uint32_t ws_decode_channel_spacing(uint8_t channel_spacing)
-{
-    if (CHANNEL_SPACING_100 == channel_spacing) {
-        return 100000;
-    } else if (CHANNEL_SPACING_200 == channel_spacing) {
-        return 200000;
-    } else if (CHANNEL_SPACING_250 == channel_spacing) {
-        return 250000;
-    } else if (CHANNEL_SPACING_400 == channel_spacing) {
-        return 400000;
-    } else if (CHANNEL_SPACING_600 == channel_spacing) {
-        return 600000;
-    } else if (CHANNEL_SPACING_800 == channel_spacing) {
-        return 800000;
-    } else if (CHANNEL_SPACING_1200 == channel_spacing) {
-        return 1200000;
-    }
-    return 0;
-}
-
-uint32_t ws_get_datarate_using_operating_mode(uint8_t operating_mode)
-{
-    if ((OPERATING_MODE_1a == operating_mode) || (OPERATING_MODE_1b == operating_mode)) {
-        return 50000;
-    } else if ((OPERATING_MODE_2a == operating_mode) || (OPERATING_MODE_2b == operating_mode)) {
-        return 100000;
-    } else if (OPERATING_MODE_3 == operating_mode) {
-        return 150000;
-    } else if ((OPERATING_MODE_4a == operating_mode) || (OPERATING_MODE_4b == operating_mode)) {
-        return 200000;
-    } else if (OPERATING_MODE_5 == operating_mode) {
-        return 300000;
-    }
-    return 0;
-}
-
-uint32_t ws_get_datarate_using_phy_mode_id(uint8_t phy_mode_id)
-{
-    if (84 == phy_mode_id) {
-        return 150000;
-    } else if (85 == phy_mode_id) {
-        return 200000;
-    } else if ((68 == phy_mode_id) || (86 == phy_mode_id)) {
-        return 300000;
-    } else if ((34 == phy_mode_id) || (51 == phy_mode_id) || (69 == phy_mode_id)) {
-        return 400000;
-    } else if ((52 == phy_mode_id) || (70 == phy_mode_id)) {
-        return 600000;
-    } else if ((35 == phy_mode_id) || (53 == phy_mode_id)) {
-        return 800000;
-    } else if ((36 == phy_mode_id) || (54 == phy_mode_id)) {
-        return 1200000;
-    } else if (37 == phy_mode_id) {
-        return 1600000;
-    } else if (38 == phy_mode_id) {
-        return 2400000;
-    }
-    return 0;
-}
-
-uint8_t ws_get_ofdm_option_using_phy_mode_id(uint8_t phy_mode_id)
-{
-    if ((phy_mode_id >= 34) && (phy_mode_id <= 38)) {
-        return OFDM_OPTION_1;
-    } else if ((phy_mode_id >= 51) && (phy_mode_id <= 54)) {
-        return OFDM_OPTION_2;
-    } else if ((phy_mode_id >= 68) && (phy_mode_id <= 70)) {
-        return OFDM_OPTION_3;
-    } else if ((phy_mode_id >= 84) && (phy_mode_id <= 86)) {
-        return OFDM_OPTION_4;
-    }
-    return 0;
-}
-
-uint8_t ws_get_ofdm_mcs_using_phy_mode_id(uint8_t phy_mode_id)
-{
-    if (34 == phy_mode_id) {
-        return OFDM_MCS_2;
-    } else if ((35 == phy_mode_id) || (51 == phy_mode_id)) {
-        return OFDM_MCS_3;
-    } else if ((36 == phy_mode_id) || (52 == phy_mode_id) || (68 == phy_mode_id) || (84 == phy_mode_id)) {
-        return OFDM_MCS_4;
-    } else if ((37 == phy_mode_id) || (53 == phy_mode_id) || (69 == phy_mode_id) || (85 == phy_mode_id)) {
-        return OFDM_MCS_5;
-    } else if ((38 == phy_mode_id) || (54 == phy_mode_id) || (70 == phy_mode_id) || (86 == phy_mode_id)) {
-        return OFDM_MCS_6;
-    }
-    return 0;
-}
-
-phy_modulation_index_e ws_get_modulation_index_using_operating_mode(uint8_t operating_mode)
-{
-    if ((OPERATING_MODE_1b == operating_mode) || (OPERATING_MODE_2b == operating_mode) || (OPERATING_MODE_4b == operating_mode)) {
-        return MODULATION_INDEX_1_0;
-    } else {
-        return MODULATION_INDEX_0_5;
-    }
-}
-
 int8_t ws_common_regulatory_domain_config(protocol_interface_info_entry_t *cur, ws_hopping_schedule_t *hopping_schdule)
 {
     (void)cur;
-    if (ws_get_datarate_using_operating_mode(hopping_schdule->operating_mode) == 0) {
+    if (ws_common_datarate_get_from_phy_mode(hopping_schdule->phy_mode_id, hopping_schdule->operating_mode) == 0) {
         //Unsupported operation mode
         return -1;
     }
@@ -241,23 +154,18 @@ int8_t ws_common_regulatory_domain_config(protocol_interface_info_entry_t *cur, 
         if (phy_type >= 2 && phy_mode > 6) {
             return -1;
         }
-        // Skip if PHY mode is for FSK modulation
-        if (!phy_mode_id || ((phy_mode_id > 8) && (phy_mode_id < 17)) || phy_mode_id > 24) {
+
+        if (M_OFDM == ws_phy_get_modulation_using_phy_mode_id(phy_mode_id)) {
             // Validate OFDM configurations
-            if (((phy_mode_id >= 34) && (phy_mode_id <= 38)) ||
-                    ((phy_mode_id >= 51) && (phy_mode_id <= 54)) ||
-                    ((phy_mode_id >= 68) && (phy_mode_id <= 70)) ||
-                    ((phy_mode_id >= 84) && (phy_mode_id <= 86))) {
-                if (ws_get_datarate_using_phy_mode_id(phy_mode_id) == 0 ||
-                        ws_get_ofdm_option_using_phy_mode_id(phy_mode_id) == 0 ||
-                        ws_get_ofdm_mcs_using_phy_mode_id(phy_mode_id) == 0) {
-                    //Unsupported PHY mode
-                    return -1;
-                }
-            } else {
-                // Invalid PHY mode ID
+            if (!ws_phy_get_datarate_using_phy_mode_id(phy_mode_id) ||
+                    !ws_phy_get_ofdm_option_using_phy_mode_id(phy_mode_id) ||
+                    !ws_phy_get_ofdm_mcs_using_phy_mode_id(phy_mode_id)) {
+                //Unsupported PHY mode
                 return -1;
             }
+        } else if (M_UNDEFINED == ws_phy_get_modulation_using_phy_mode_id(phy_mode_id)) {
+            // Invalid PHY mode ID
+            return -1;
         }
     }
     hopping_schdule->channel_plan = 0;
@@ -273,20 +181,44 @@ int8_t ws_common_regulatory_domain_config(protocol_interface_info_entry_t *cur, 
             return -1;
         }
     } else if (hopping_schdule->regulatory_domain == REG_DOMAIN_EU) {
-        if (hopping_schdule->operating_class == 1) {
-            hopping_schdule->ch0_freq = 8631;
-            hopping_schdule->channel_spacing = CHANNEL_SPACING_100;
-        } else if (hopping_schdule->operating_class == 2) {
-            hopping_schdule->ch0_freq = 8631;
-            hopping_schdule->channel_spacing = CHANNEL_SPACING_200;
-        } else if (hopping_schdule->operating_class == 3) {
-            hopping_schdule->ch0_freq = 8701;
-            hopping_schdule->channel_spacing = CHANNEL_SPACING_100;
-        } else if (hopping_schdule->operating_class == 4) {
-            hopping_schdule->ch0_freq = 8702;
-            hopping_schdule->channel_spacing = CHANNEL_SPACING_200;
+        if (hopping_schdule->channel_plan_id == 255) {
+            if (hopping_schdule->operating_class == 1) {
+                hopping_schdule->ch0_freq = 8631;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_100;
+            } else if (hopping_schdule->operating_class == 2) {
+                hopping_schdule->ch0_freq = 8631;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_200;
+            } else if (hopping_schdule->operating_class == 3) {
+                hopping_schdule->ch0_freq = 8701;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_100;
+            } else if (hopping_schdule->operating_class == 4) {
+                hopping_schdule->ch0_freq = 8702;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_200;
+            } else {
+                return -1;
+            }
         } else {
-            return -1;
+            if (hopping_schdule->channel_plan_id == 32) {
+                hopping_schdule->ch0_freq = 8631;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_100;
+            } else if (hopping_schdule->channel_plan_id == 33) {
+                hopping_schdule->ch0_freq = 8631;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_200;
+            } else if (hopping_schdule->channel_plan_id == 34) {
+                hopping_schdule->ch0_freq = 8701;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_100;
+            } else if (hopping_schdule->channel_plan_id == 35) {
+                hopping_schdule->ch0_freq = 8702;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_200;
+            } else if (hopping_schdule->channel_plan_id == 36) {
+                hopping_schdule->ch0_freq = 8631;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_100;
+            } else if (hopping_schdule->channel_plan_id == 37) {
+                hopping_schdule->ch0_freq = 8631;
+                hopping_schdule->channel_spacing = CHANNEL_SPACING_200;
+            } else {
+                return -1;
+            }
         }
     } else if (hopping_schdule->regulatory_domain == REG_DOMAIN_IN) {
         if (hopping_schdule->operating_class == 1) {
@@ -397,15 +329,10 @@ uint16_t ws_common_channel_number_calc(uint8_t regulatory_domain, uint8_t operat
             return 16;
         }
     } else if (regulatory_domain == REG_DOMAIN_EU) {
-        if (operating_class == 1) {
-            return 69;
-        } else if (operating_class == 2) {
-            return 35;
-        } else if (operating_class == 3) {
-            return 55;
-        } else if (operating_class == 4) {
-            return 27;
+        if (channel_plan_id == 255) {
+            channel_plan_id = ws_phy_convert_operating_class_to_channel_plan_id(operating_class, regulatory_domain);
         }
+        return ws_phy_get_number_of_channels_using_channel_plan_id(channel_plan_id);
     } else if (regulatory_domain == REG_DOMAIN_IN) {
         if (operating_class == 1) {
             return 19;
@@ -414,22 +341,9 @@ uint16_t ws_common_channel_number_calc(uint8_t regulatory_domain, uint8_t operat
         }
     } else if (regulatory_domain == REG_DOMAIN_NA) {
         if (channel_plan_id == 255) {
-            if (operating_class == 1) {
-                return 129;
-            } else if (operating_class == 2) {
-                return 64;
-            } else if (operating_class == 3) {
-                return 42;
-            }
-        } else {
-            if (channel_plan_id == 1) {
-                return 136;
-            } else if (channel_plan_id == 2) {
-                return 64;
-            } else if (channel_plan_id == 5) {
-                return 24;
-            }
+            channel_plan_id = ws_phy_convert_operating_class_to_channel_plan_id(operating_class, regulatory_domain);
         }
+        return ws_phy_get_number_of_channels_using_channel_plan_id(channel_plan_id);
     } else if (regulatory_domain == REG_DOMAIN_JP) {
         if (operating_class == 1) {
             return 38;
@@ -440,22 +354,9 @@ uint16_t ws_common_channel_number_calc(uint8_t regulatory_domain, uint8_t operat
         }
     } else if (regulatory_domain == REG_DOMAIN_BZ) {
         if (channel_plan_id == 255) {
-            if (operating_class == 1) {
-                return 129;
-            } else if (operating_class == 2) {
-                return 64;
-            } else if (operating_class == 3) {
-                return 42;
-            }
-        } else {
-            if (channel_plan_id == 1) {
-                return 136;
-            } else if (channel_plan_id == 2) {
-                return 64;
-            } else if (channel_plan_id == 5) {
-                return 24;
-            }
+            channel_plan_id = ws_phy_convert_operating_class_to_channel_plan_id(operating_class, regulatory_domain);
         }
+        return ws_phy_get_number_of_channels_using_channel_plan_id(channel_plan_id);
     } else if (regulatory_domain == REG_DOMAIN_WW) {
         if (operating_class == 1) {
             // TODO we dont support this yet, but it is used as test value
@@ -484,12 +385,13 @@ int8_t ws_common_allocate_and_init(protocol_interface_info_entry_t *cur)
     ns_list_init(&cur->ws_info->parent_list_free);
     ns_list_init(&cur->ws_info->parent_list_reserved);
 
+    cur->ws_info->version = test_pan_version;
+
     cur->ws_info->network_pan_id = 0xffff;
     cur->ws_info->pan_information.use_parent_bs = true;
     cur->ws_info->pan_information.rpl_routing_method = true;
     cur->ws_info->pan_information.pan_version_set = false;
     cur->ws_info->pan_information.version = WS_FAN_VERSION_1_0;
-
     cur->ws_info->pending_key_index_info.state = NO_PENDING_PROCESS;
 
     cur->ws_info->hopping_schdule.regulatory_domain = REG_DOMAIN_EU;
@@ -502,14 +404,40 @@ int8_t ws_common_allocate_and_init(protocol_interface_info_entry_t *cur)
     ws_common_regulatory_domain_config(cur, &cur->ws_info->hopping_schdule);
     cur->ws_info->pending_key_index_info.state = NO_PENDING_PROCESS;
 
-
+    // initialize for FAN 1.1 defaults
+    if (ws_version_1_1(cur)) {
+        cur->ws_info->pan_information.version = WS_FAN_VERSION_1_1;
+    }
     return 0;
+}
+
+int ws_common_init(int8_t interface_id, net_6lowpan_mode_e bootstrap_mode)
+{
+    return ws_bootstrap_init(interface_id, bootstrap_mode);
+}
+
+void ws_common_state_machine(protocol_interface_info_entry_t *cur)
+{
+    if (wisun_mode_host(cur)) {
+        // Configure for LFN device
+        ws_bootstrap_6ln_state_machine(cur);
+    } else if (wisun_mode_router(cur)) {
+        // Configure FFN device
+        ws_bootstrap_6lr_state_machine(cur);
+    } else if (wisun_mode_border_router(cur)) {
+        // Configure as Border router
+        ws_bootstrap_6lbr_state_machine(cur);
+    }
+
 }
 
 void ws_common_seconds_timer(protocol_interface_info_entry_t *cur, uint32_t seconds)
 {
     ws_bbr_seconds_timer(cur, seconds);
     ws_bootstrap_seconds_timer(cur, seconds);
+    ws_bootstrap_6lbr_seconds_timer(cur, seconds);
+    ws_bootstrap_6lr_seconds_timer(cur, seconds);
+    ws_bootstrap_6ln_seconds_timer(cur, seconds);
     blacklist_ttl_update(seconds);
 }
 
@@ -520,6 +448,12 @@ void ws_common_fast_timer(protocol_interface_info_entry_t *cur, uint16_t ticks)
     ws_llc_fast_timer(cur, ticks);
 }
 
+void ws_common_create_ll_address(uint8_t *ll_address, const uint8_t *mac64)
+{
+    memcpy(ll_address, ADDR_LINK_LOCAL_PREFIX, 8);
+    memcpy(ll_address + 8, mac64, 8);
+    ll_address[8] ^= 2;
+}
 
 void ws_common_neighbor_update(protocol_interface_info_entry_t *cur, const uint8_t *ll_address)
 {
@@ -629,6 +563,7 @@ uint8_t ws_common_allow_child_registration(protocol_interface_info_entry_t *inte
     ws_common_neighbour_address_reg_link_update(interface, eui64, link_lifetime);
     tr_info("Child registration allowed %d/%d, max:%d", child_count, max_child_count, mac_neighbor_info(interface)->list_total_size);
 
+    ws_stats_update(interface, STATS_WS_CHILD_ADD, 1);
     return ARO_SUCCESS;
 }
 
@@ -639,9 +574,7 @@ bool ws_common_negative_aro_mark(protocol_interface_info_entry_t *interface, con
         return false;
     }
 
-    ws_neighbor_class_entry_t *ws_neighbor = ws_neighbor_class_entry_get(&interface->ws_info->neighbor_storage, neighbour->index);
-    ws_neighbor->negative_aro_send = true;
-    neighbour->lifetime = WS_NEIGHBOR_TEMPORARY_LINK_MIN_TIMEOUT_SMALL; //Remove anyway if Packet is freed before MAC push
+    ws_bootstrap_mac_neighbor_short_time_set(interface, eui64, WS_NEIGHBOUR_TEMPORARY_NEIGH_MAX_LIFETIME);
     return true;
 }
 
@@ -663,10 +596,33 @@ uint32_t ws_common_latency_estimate_get(protocol_interface_info_entry_t *cur)
     return latency;
 }
 
+uint32_t ws_common_datarate_get_from_phy_mode(uint8_t phy_mode_id, uint8_t operating_mode)
+{
+    if (phy_mode_id == 255) {
+        phy_mode_id = ws_phy_convert_operating_mode_to_phy_mode_id(operating_mode);
+    }
+    return ws_phy_get_datarate_using_phy_mode_id(phy_mode_id);
+}
+
 uint32_t ws_common_datarate_get(protocol_interface_info_entry_t *cur)
 {
-    return ws_get_datarate_using_operating_mode(cur->ws_info->hopping_schdule.operating_mode);
+    return ws_common_datarate_get_from_phy_mode(cur->ws_info->hopping_schdule.phy_mode_id, cur->ws_info->hopping_schdule.operating_mode);
 }
+
+uint32_t ws_common_usable_application_datarate_get(protocol_interface_info_entry_t *cur)
+{
+    /* Usable data rate is a available data rate when removed ACK and wait times required to send a packet
+     *
+     * Estimated to be around 70% with following assumptions with 150kbs data rate
+     * Average ACK size 48 bytes
+     * Average tACK 2ms
+     * Average CCA check time + processing 7ms
+     * Delays in bytes with 150kbs data rate 168 + 48 bytes for ACK 216 bytes
+     * Usable data rate is 1 - 216/(216 + 500) about 70%
+     */
+    return 70 * ws_common_datarate_get_from_phy_mode(cur->ws_info->hopping_schdule.phy_mode_id, cur->ws_info->hopping_schdule.operating_mode) / 100;
+}
+
 
 uint32_t ws_common_network_size_estimate_get(protocol_interface_info_entry_t *cur)
 {
@@ -680,14 +636,60 @@ uint32_t ws_common_network_size_estimate_get(protocol_interface_info_entry_t *cu
     return network_size_estimate;
 }
 
+uint32_t ws_common_connected_time_get(protocol_interface_info_entry_t *cur)
+{
+    if (!ws_info(cur)) {
+        return 0;
+    }
+    if (cur->ws_info->connected_time == 0) {
+        // We are not connected
+        return 0;
+    }
+    return cur->ws_info->uptime - cur->ws_info->connected_time;
+}
+
+uint32_t ws_common_authentication_time_get(protocol_interface_info_entry_t *cur)
+{
+    if (!ws_info(cur)) {
+        return 0;
+    }
+    if (cur->ws_info->authentication_time == 0) {
+        // Authentication was not done when joined to network so time is not known
+        return 0;
+    }
+    return cur->ws_info->uptime - cur->ws_info->authentication_time;
+}
+
 void ws_common_primary_parent_update(protocol_interface_info_entry_t *interface, mac_neighbor_table_entry_t *neighbor)
 {
-    ws_bootstrap_primary_parent_update(interface, neighbor);
+    ws_bootstrap_6lr_primary_parent_update(interface, neighbor);
 }
 
 void ws_common_secondary_parent_update(protocol_interface_info_entry_t *interface)
 {
-    ws_bootstrap_secondary_parent_update(interface);
+    ws_bootstrap_6lr_secondary_parent_update(interface);
+}
+
+void ws_common_border_router_alive_update(protocol_interface_info_entry_t *interface)
+{
+    if (interface->bootsrap_mode == ARM_NWK_BOOTSRAP_MODE_6LoWPAN_BORDER_ROUTER) {
+        return;
+    }
+
+    // After successful DAO ACK connection to border router is verified
+    interface->ws_info->pan_timeout_timer = interface->ws_info->cfg->timing.pan_timeout;
+}
+
+fhss_ws_configuration_t ws_common_get_current_fhss_configuration(protocol_interface_info_entry_t *cur)
+{
+    fhss_ws_configuration_t fhss_configuration;
+    memset(&fhss_configuration, 0, sizeof(fhss_ws_configuration_t));
+    if (ns_fhss_ws_configuration_get(cur->ws_info->fhss_api)) {
+        memcpy(&fhss_configuration, ns_fhss_ws_configuration_get(cur->ws_info->fhss_api), sizeof(fhss_ws_configuration_t));
+    } else {
+        tr_error("FHSS configuration could not be read");
+    }
+    return fhss_configuration;
 }
 
 #endif // HAVE_WS

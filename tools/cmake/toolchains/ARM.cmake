@@ -4,7 +4,6 @@
 set(CMAKE_ASM_COMPILER "armclang")
 set(CMAKE_C_COMPILER "armclang")
 set(CMAKE_CXX_COMPILER "armclang")
-set(CMAKE_AR "armar")
 set(ARM_ELF2BIN "fromelf")
 set_property(GLOBAL PROPERTY ELF2BIN ${ARM_ELF2BIN})
 
@@ -29,10 +28,6 @@ list(APPEND common_options
 list(APPEND asm_compile_options
     -masm=auto
     --target=arm-arm-none-eabi
-)
-
-list(APPEND link_options
-    "--map"
 )
 
 # Add linking time preprocessor macro for TFM targets
@@ -66,4 +61,16 @@ function(mbed_set_printf_lib target lib_type)
                 MBED_MINIMAL_PRINTF
         )
     endif()
+endfunction()
+
+# Add linker flags to generate a mapfile with a given name
+# `mapfile` is overridden as CMake provides the name of the diagnostic output
+# file by providing armlink with the --list command line option.
+# See https://gitlab.kitware.com/cmake/cmake/-/issues/21538
+function(mbed_configure_memory_map target mapfile)
+    target_link_options(${target}
+        PRIVATE
+            "--map"
+            "--list=${mapfile}"
+    )
 endfunction()

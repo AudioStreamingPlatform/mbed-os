@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018, Arm Limited and affiliates.
+ * Copyright (c) 2014-2019, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,7 +70,7 @@ void protocol_timer_start(protocol_timer_id_t id, void (*passed_fptr)(uint16_t),
         protocol_timer[id].fptr = passed_fptr;
         platform_exit_critical();
     } else {
-        tr_debug("Do Not use Null pointer for fptr!!!\n");
+        tr_debug("Do Not use Null pointer for fptr!!!");
     }
 }
 

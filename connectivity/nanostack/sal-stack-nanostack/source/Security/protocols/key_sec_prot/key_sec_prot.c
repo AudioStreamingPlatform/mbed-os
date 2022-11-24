@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, Arm Limited and affiliates.
+ * Copyright (c) 2016-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -324,7 +324,7 @@ static int8_t key_sec_prot_tx_status_ind(sec_prot_t *prot, sec_prot_tx_status_e 
         sec_prot_result_set(&data->common, SEC_RESULT_ERR_TX_NO_ACK);
     } else if (tx_status != SEC_PROT_TX_OK) {
         // Indicates other failure
-        sec_prot_result_set(&data->common, SEC_RESULT_ERR_UNSPEC);
+        sec_prot_result_set(&data->common, SEC_RESULT_ERR_TX_UNSPEC);
     }
     prot->state_machine_call(prot);
     return 0;
@@ -370,7 +370,7 @@ static void supp_key_sec_prot_state_machine(sec_prot_t *prot)
             // KMP-FINISHED.indication,
             prot->finished_ind(prot, sec_prot_result_get(&data->common), 0);
             sec_prot_state_set(prot, &data->common, KEY_STATE_FINISHED);
-            data->common.ticks = KEY_SEC_FINISHED_TIMEOUT;
+            sec_prot_timeout_set(&data->common, KEY_SEC_FINISHED_TIMEOUT);
             break;
 
         case KEY_STATE_FINISHED:
@@ -416,7 +416,7 @@ static void auth_key_sec_prot_state_machine(sec_prot_t *prot)
             // KMP-FINISHED.indication,
             prot->finished_ind(prot, sec_prot_result_get(&data->common), 0);
             sec_prot_state_set(prot, &data->common, KEY_STATE_FINISHED);
-            data->common.ticks = KEY_SEC_FINISHED_TIMEOUT;
+            sec_prot_timeout_set(&data->common, KEY_SEC_FINISHED_TIMEOUT);
             break;
 
         case KEY_STATE_FINISHED: {

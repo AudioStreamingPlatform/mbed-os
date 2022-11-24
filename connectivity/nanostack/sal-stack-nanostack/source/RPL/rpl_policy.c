@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, Arm Limited and affiliates.
+ * Copyright (c) 2015-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,6 +48,17 @@ static uint8_t rpl_policy_mrhof_parent_set_size_conf = 3; // default parent set 
 static uint16_t rpl_policy_minimum_dao_target_refresh_conf = 0; // by default follow the configuration
 static uint16_t rpl_policy_address_registration_timeout_value = 0; // Address registration timeouts in minutes 0 use address lifetime
 
+static bool rpl_policy_force_tunnel_to_BR = false;
+
+bool rpl_policy_force_tunnel(void)
+{
+    return rpl_policy_force_tunnel_to_BR;
+}
+
+void rpl_policy_force_tunnel_set(bool enable)
+{
+    rpl_policy_force_tunnel_to_BR = enable;
+}
 /* TODO - application API to control when to join new instances / DODAGs
  *
  * Eg, allow application to ignore local DODAGs, or specify known instance IDs,
@@ -76,7 +87,7 @@ bool rpl_policy_join_dodag(rpl_domain_t *domain, uint8_t g_mop_prf, uint8_t inst
     return true;
 }
 
-bool rpl_policy_join_config(rpl_domain_t *domain, const rpl_dodag_conf_t *conf, bool *leaf_only)
+bool rpl_policy_join_config(rpl_domain_t *domain, const rpl_dodag_conf_int_t *conf, bool *leaf_only)
 {
     (void)domain;
     (void)conf;
@@ -88,7 +99,7 @@ bool rpl_policy_join_config(rpl_domain_t *domain, const rpl_dodag_conf_t *conf, 
     }
 
     /* We don't support authentication */
-    if (conf->authentication) {
+    if (rpl_conf_option_security(conf)) {
         return false;
     }
 

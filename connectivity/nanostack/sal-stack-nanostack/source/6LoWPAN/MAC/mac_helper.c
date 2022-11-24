@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, Arm Limited and affiliates.
+ * Copyright (c) 2016-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -476,13 +476,14 @@ void mac_helper_security_key_clean(protocol_interface_info_entry_t *interface)
 
 void mac_helper_coordinator_address_set(protocol_interface_info_entry_t *interface, addrtype_t adr_type, uint8_t *adr_ptr)
 {
+    uint16_t short_addr;
     mlme_set_t set_req;
     set_req.attr_index = 0;
 
     if (adr_type == ADDR_802_15_4_SHORT) {
         memcpy(interface->mac_parameters->mac_cordinator_info.mac_mlme_coord_address, adr_ptr, 2);
         interface->mac_parameters->mac_cordinator_info.cord_adr_mode = MAC_ADDR_MODE_16_BIT;
-        uint16_t short_addr = common_read_16_bit(interface->mac_parameters->mac_cordinator_info.mac_mlme_coord_address);
+        short_addr = common_read_16_bit(interface->mac_parameters->mac_cordinator_info.mac_mlme_coord_address);
         set_req.attr = macCoordShortAddress;
         set_req.value_pointer = &short_addr;
         set_req.value_size = 2;
@@ -964,6 +965,62 @@ int8_t mac_helper_mac_mlme_max_retry_set(int8_t interface_id, uint8_t mac_retry_
     return 0;
 }
 
+int8_t mac_helper_mac_mlme_max_csma_backoffs_set(int8_t interface_id, uint8_t csma_backoffs)
+{
+    protocol_interface_info_entry_t *cur = protocol_stack_interface_info_get_by_id(interface_id);
+
+    if (!cur || !cur->mac_api) {
+        return -1;
+    }
+    mlme_set_t set_req;
+    set_req.attr = macMaxCSMABackoffs;
+    set_req.attr_index = 0;
+    set_req.value_pointer = &csma_backoffs;
+    set_req.value_size = 1;
+    cur->mac_api->mlme_req(cur->mac_api, MLME_SET, &set_req);
+
+    return 0;
+}
+
+int8_t mac_helper_mac_mlme_be_set(int8_t interface_id, uint8_t min_be, uint8_t max_be)
+{
+    protocol_interface_info_entry_t *cur = protocol_stack_interface_info_get_by_id(interface_id);
+
+    if (!cur || !cur->mac_api) {
+        return -1;
+    }
+    mlme_set_t set_req;
+    set_req.attr = macMinBE;
+    set_req.attr_index = 0;
+    set_req.value_pointer = &min_be;
+    set_req.value_size = 1;
+    cur->mac_api->mlme_req(cur->mac_api, MLME_SET, &set_req);
+
+    set_req.attr = macMaxBE;
+    set_req.attr_index = 0;
+    set_req.value_pointer = &max_be;
+    set_req.value_size = 1;
+    cur->mac_api->mlme_req(cur->mac_api, MLME_SET, &set_req);
+
+    return 0;
+}
+
+int8_t mac_helper_mac_mlme_data_request_restart_set(int8_t interface_id, mlme_request_restart_config_t *request_restart_config)
+{
+    protocol_interface_info_entry_t *cur = protocol_stack_interface_info_get_by_id(interface_id);
+
+    if (!cur || !cur->mac_api) {
+        return -1;
+    }
+    mlme_set_t set_req;
+    set_req.attr = macRequestRestart;
+    set_req.attr_index = 0;
+    set_req.value_pointer = (void *)request_restart_config;
+    set_req.value_size = sizeof(mlme_request_restart_config_t);
+    cur->mac_api->mlme_req(cur->mac_api, MLME_SET, &set_req);
+
+    return 0;
+}
 
 int8_t mac_helper_mac_device_description_pan_id_update(int8_t interface_id, uint16_t pan_id)
 {

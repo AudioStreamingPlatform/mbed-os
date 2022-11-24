@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * Copyright (c) 2018-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@
 
 #include "ws_management_api.h"
 #include "ns_time_api.h"
+#include "net_ws_test_ext.h"
 
 #ifndef HAVE_WS
 int ws_management_node_init(
@@ -68,20 +69,41 @@ int ws_management_network_name_validate(
     return -1;
 }
 
-int ws_management_phy_mode_id_set(
+int ws_management_domain_configuration_set(
     int8_t interface_id,
-    uint8_t phy_mode_id)
+    uint8_t regulatory_domain,
+    uint8_t phy_mode_id,
+    uint8_t channel_plan_id)
 {
+    (void)regulatory_domain;
     (void)interface_id;
     (void)phy_mode_id;
+    (void)channel_plan_id;
     return -1;
 }
 
-int ws_management_channel_plan_id_set(
+int ws_management_domain_configuration_get(
     int8_t interface_id,
+    uint8_t *regulatory_domain,
+    uint8_t *phy_mode_id,
+    uint8_t *channel_plan_id)
+{
+    (void)regulatory_domain;
+    (void)interface_id;
+    (void)phy_mode_id;
+    (void)channel_plan_id;
+    return -1;
+}
+
+int ws_management_domain_configuration_validate(
+    int8_t interface_id,
+    uint8_t regulatory_domain,
+    uint8_t phy_mode_id,
     uint8_t channel_plan_id)
 {
+    (void)regulatory_domain;
     (void)interface_id;
+    (void)phy_mode_id;
     (void)channel_plan_id;
     return -1;
 }
@@ -341,6 +363,12 @@ int ws_management_timing_parameters_validate(
 }
 
 /* ### test api ### */
+int ws_test_version_set(int8_t interface_id, uint8_t version)
+{
+    (void) interface_id;
+    (void) version;
+    return -1;
+}
 int ws_test_pan_size_set(int8_t interface_id, uint16_t pan_size)
 {
     (void) interface_id;
@@ -419,15 +447,21 @@ int ws_statistics_stop(int8_t interface_id)
     return -1;
 }
 
-void ns_time_api_system_time_callback_set(ns_time_api_system_time_callback callback)
-{
-    (void) callback;
-}
-
 int ws_stack_info_get(int8_t interface_id, ws_stack_info_t *info_ptr)
 {
     (void) interface_id;
     (void) info_ptr;
+    return -1;
+}
+
+int ws_neighbor_info_get(
+    int8_t interface_id,
+    ws_neighbour_info_t *neighbor_ptr,
+    uint16_t count)
+{
+    (void) interface_id;
+    (void) neighbor_ptr;
+    (void) count;
     return -1;
 }
 
@@ -458,6 +492,23 @@ int8_t  ws_test_drop_edfe_data_frames(int8_t interface_id, uint8_t number_of_dro
 {
     (void) interface_id;
     (void) number_of_dropped_frames;
+    return -1;
+}
+
+int ws_test_procedure_trigger(int8_t interface_id, ws_test_proc_t procedure, void *parameters)
+{
+    (void) interface_id;
+    (void) procedure;
+    (void) parameters;
+    return -1;
+}
+
+int ws_management_phy_capability_set(
+    int8_t interface_id,
+    ws_management_pcap_info_t *pcap_list)
+{
+    (void)interface_id;
+    (void)pcap_list;
     return -1;
 }
 

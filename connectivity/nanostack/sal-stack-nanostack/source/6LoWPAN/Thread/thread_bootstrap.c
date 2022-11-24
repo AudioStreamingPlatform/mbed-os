@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018, Arm Limited and affiliates.
+ * Copyright (c) 2014-2020, Pelion and affiliates.
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2308,7 +2308,7 @@ void thread_bootstrap_state_machine(protocol_interface_info_entry_t *cur)
             break;
 
         case ER_BOOTSRAP_DONE:
-            tr_debug("Thread SM:Bootstrap Done");
+            tr_info("Thread SM:Bootstrap Done");
             cur->nwk_nd_re_scan_count = 0;
             break;
         case ER_BOOTSTRAP_SCAN_FAIL:

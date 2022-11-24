@@ -8,8 +8,8 @@
   *          is using in the C source code, usually in main.c. This file contains:
   *           - Configuration section that allows to select:
   *              - The STM32L5xx device used in the target application
-  *              - To use or not the peripheral’s drivers in application code(i.e.
-  *                code will be based on direct access to peripheral’s registers
+  *              - To use or not the peripheral's drivers in application code(i.e.
+  *                code will be based on direct access to peripheral's registers
   *                rather than drivers API), this option is controlled by
   *                "#define USE_HAL_DRIVER"
   *
@@ -79,7 +79,7 @@
   */
 #define __STM32L5_CMSIS_VERSION_MAIN   (0x01U) /*!< [31:24] main version */
 #define __STM32L5_CMSIS_VERSION_SUB1   (0x00U) /*!< [23:16] sub1 version */
-#define __STM32L5_CMSIS_VERSION_SUB2   (0x03U) /*!< [15:8]  sub2 version */
+#define __STM32L5_CMSIS_VERSION_SUB2   (0x04U) /*!< [15:8]  sub2 version */
 #define __STM32L5_CMSIS_VERSION_RC     (0x00U) /*!< [7:0]  release candidate */
 #define __STM32L5_CMSIS_VERSION        ((__STM32L5_CMSIS_VERSION_MAIN << 24U)\
                                        |(__STM32L5_CMSIS_VERSION_SUB1 << 16U)\

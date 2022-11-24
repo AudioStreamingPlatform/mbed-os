@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, Arm Limited and affiliates.
+ * Copyright (c) 2016-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,10 +55,11 @@ static int8_t ns_sw_mac_initialize(mac_api_t *api, mcps_data_confirm *mcps_data_
                                    mlme_confirm *mlme_conf_callback, mlme_indication *mlme_ind_callback, int8_t parent_id);
 static int8_t ns_sw_mac_api_enable_mcps_ext(mac_api_t *api, mcps_data_indication_ext *data_ind_cb, mcps_data_confirm_ext *data_cnf_cb, mcps_ack_data_req_ext *ack_data_req_cb);
 static int8_t ns_sw_mac_api_enable_edfe_ext(mac_api_t *api, mcps_edfe_handler *edfe_ind_cb);
+static int8_t ns_sw_mac_api_mode_switch_resolver_set(mac_api_t *api, mode_switch_resolver *mode_resolver_cb, uint8_t base_phy_mode);
 
 static void mlme_req(const mac_api_t *api, mlme_primitive id, const void *data);
 static void mcps_req(const mac_api_t *api, const mcps_data_req_t *data);
-static void mcps_req_ext(const mac_api_t *api, const mcps_data_req_t *data, const mcps_data_req_ie_list_t *ie_ext, const channel_list_s *asynch_channel_list);
+static void mcps_req_ext(const mac_api_t *api, const mcps_data_req_t *data, const mcps_data_req_ie_list_t *ie_ext, const channel_list_s *asynch_channel_list,  mac_data_priority_t priority, uint8_t phy_mode_id);
 static uint8_t purge_req(const mac_api_t *api, const mcps_purge_t *data);
 static int8_t macext_mac64_address_set(const mac_api_t *api, const uint8_t *mac64);
 static int8_t macext_mac64_address_get(const mac_api_t *api, mac_extended_address_type type, uint8_t *mac64_buf);
@@ -130,6 +131,7 @@ mac_api_t *ns_sw_mac_create(int8_t rf_driver_id, mac_description_storage_size_t 
     this->mac_initialize = &ns_sw_mac_initialize;
     this->mac_mcps_extension_enable = &ns_sw_mac_api_enable_mcps_ext;
     this->mac_mcps_edfe_enable = &ns_sw_mac_api_enable_edfe_ext;
+    this->mac_mode_switch_resolver_set = &ns_sw_mac_api_mode_switch_resolver_set;
     this->mlme_req = &mlme_req;
     this->mcps_data_req = &mcps_req;
     this->mcps_data_req_ext = &mcps_req_ext;
@@ -341,6 +343,19 @@ static int8_t ns_sw_mac_api_enable_edfe_ext(mac_api_t *api, mcps_edfe_handler *e
     } else {
         mac_store.setup->mac_edfe_enabled = false;
     }
+    return 0;
+}
+
+static int8_t ns_sw_mac_api_mode_switch_resolver_set(mac_api_t *api, mode_switch_resolver *mode_resolver_cb, uint8_t base_phy_mode)
+{
+    if (api != mac_store.mac_api) {
+        return -1;
+    }
+    if (!mac_store.setup->mac_extension_enabled) {
+        return -1;
+    }
+    mac_store.setup->base_phy_mode = base_phy_mode;
+    mac_store.mac_api->mode_resolver_cb = mode_resolver_cb;
     return 0;
 }
 
@@ -575,22 +590,22 @@ void mlme_req(const mac_api_t *api, mlme_primitive id, const void *data)
     }
 }
 
-void mcps_req(const mac_api_t *api, const mcps_data_req_t *data)
+static void mcps_req(const mac_api_t *api, const mcps_data_req_t *data)
 {
     //TODO: Populate linked list when present
     if (mac_store.mac_api == api) {
         /* Call direct new API but without IE extensions */
         mcps_data_req_ie_list_t ie_list;
         memset(&ie_list, 0, sizeof(mcps_data_req_ie_list_t));
-        mcps_sap_data_req_handler_ext(mac_store.setup, data, &ie_list, NULL);
+        mcps_sap_data_req_handler_ext(mac_store.setup, data, &ie_list, NULL, MAC_DATA_NORMAL_PRIORITY, 0);
     }
 }
 
-void mcps_req_ext(const mac_api_t *api, const mcps_data_req_t *data, const mcps_data_req_ie_list_t *ie_ext, const channel_list_s *asynch_channel_list)
+static void mcps_req_ext(const mac_api_t *api, const mcps_data_req_t *data, const mcps_data_req_ie_list_t *ie_ext, const channel_list_s *asynch_channel_list, mac_data_priority_t priority, uint8_t phy_mode_id)
 {
 //TODO: Populate linked list when present
     if (mac_store.mac_api == api) {
-        mcps_sap_data_req_handler_ext(mac_store.setup, data, ie_ext, asynch_channel_list);
+        mcps_sap_data_req_handler_ext(mac_store.setup, data, ie_ext, asynch_channel_list, priority, phy_mode_id);
     }
 }
 
@@ -764,6 +779,11 @@ void sw_mac_stats_update(protocol_interface_rf_mac_setup_s *setup, mac_stats_typ
                 break;
             case STAT_MAC_TX_CCA_FAIL:
                 setup->mac_statistics->mac_failed_cca_count++;
+                break;
+            case STAT_MAC_TX_LATENCY:
+                if (update_val > setup->mac_statistics->mac_tx_latency_max) {
+                    setup->mac_statistics->mac_tx_latency_max = update_val;
+                }
                 break;
         }
     }

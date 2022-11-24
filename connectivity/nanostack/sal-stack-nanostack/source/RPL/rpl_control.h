@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, Arm Limited and affiliates.
+ * Copyright (c) 2015-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,6 @@
 #ifndef RPL_CONTROL_H_
 #define RPL_CONTROL_H_
 
-#ifdef HAVE_RPL
-
 #include "ns_list.h"
 #include "ipv6_stack/ipv6_routing_table.h"
 
@@ -36,6 +34,7 @@ typedef enum rpl_event {
     RPL_EVENT_LOCAL_REPAIR_START, /* RPL start scanning new parent by multicast DIS user can disable beacon request responser here*/
     RPL_EVENT_LOCAL_REPAIR_NO_MORE_DIS, /* RPL not sending DIS anymore user can report bootstrap error */
     RPL_EVENT_DAO_PARENT_ADD, /* RPL indicate that DAO downward Parent has been added */
+    RPL_EVENT_POISON_FINISHED, /* RPL have finished Dodag Poison proces */
 } rpl_event_t;
 
 typedef void rpl_domain_callback_t(rpl_event_t event, void *handle);
@@ -43,6 +42,8 @@ typedef void rpl_domain_callback_t(rpl_event_t event, void *handle);
 typedef void rpl_prefix_callback_t(struct prefix_entry_t *prefix, void *handle, uint8_t *parent_link_local);
 
 typedef bool rpl_new_parent_callback_t(uint8_t *ll_parent_address, void *handle, struct rpl_instance *instance, uint16_t candidate_rank);
+
+typedef void rpl_parent_dis_callback_t(const uint8_t *ll_parent_address, void *handle, struct rpl_instance *instance);
 
 typedef struct rpl_route_info {
     uint8_t node[8];                  /* IID of parent in parent child relation table */
@@ -64,6 +65,7 @@ typedef struct rpl_domain {
     rpl_domain_callback_t *callback;
     rpl_prefix_callback_t *prefix_cb;
     rpl_new_parent_callback_t *new_parent_add;
+    rpl_parent_dis_callback_t *parent_dis;
     void *cb_handle;
 } rpl_domain_t;
 
@@ -80,6 +82,29 @@ typedef struct rpl_dodag_conf {
     uint16_t objective_code_point;
     uint16_t lifetime_unit;                 /* seconds */
 } rpl_dodag_conf_t;
+
+/* Internally used configuration parameters for a DODAG, obtained through DIO DODAG Configuration options
+ *
+ * This structure has all the fields that are in the configuration
+ * to allow forwarding new bits that are added in future specifications.
+ */
+typedef struct rpl_dodag_conf_int {
+    uint8_t options;                        /* Flags|A|PCS */
+    uint8_t reserved;                       /* Reserved fields in options (byte 12)*/
+    uint8_t dio_interval_min;               /* log2 milliseconds */
+    uint8_t dio_interval_doublings;
+    uint8_t dio_redundancy_constant;
+    uint8_t default_lifetime;               /* lifetime units */
+    uint16_t dag_max_rank_increase;
+    uint16_t min_hop_rank_increase;
+    uint16_t objective_code_point;
+    uint16_t lifetime_unit;                 /* seconds */
+} rpl_dodag_conf_int_t;
+
+/* Helpers to handle configuration option bits*/
+#define rpl_conf_options(security, path_control_size) ((security ? 1:0) << 4) | (path_control_size & 0x07)
+#define rpl_conf_option_security(conf) (bool)((conf)->options & 0x08)
+#define rpl_conf_option_path_control_size(conf) ((conf)->options & 0x07)
 
 /* Descriptor for a route from a DIO Route Information option.
  * Used to hold the "master copy" in the DODAG structure - the table for the
@@ -100,6 +125,8 @@ typedef struct rpl_dio_route {
     uint8_t prefix[];                               /* Variable-length prefix */
 } rpl_dio_route_t;
 
+#ifdef HAVE_RPL
+
 typedef NS_LIST_HEAD(rpl_dio_route_t, link) rpl_dio_route_list_t;
 
 /******************************* RPL internal API ****************************/
@@ -108,7 +135,7 @@ void *rpl_realloc(void *p, uint16_t old_size, uint16_t new_size);
 void rpl_free(void *p, uint16_t size);
 void rpl_control_transmit(struct rpl_domain *domain, struct protocol_interface_info_entry *cur, uint8_t code, struct buffer *buf, const uint8_t *dst);
 void rpl_control_transmit_multicast_dio(struct rpl_domain *domain, struct rpl_instance *instance, uint8_t instance_id, uint8_t dodag_version, uint16_t rank, uint8_t g_mop_prf, uint8_t dtsn, const uint8_t dodagid[16], const struct rpl_dodag_conf *conf);
-void rpl_control_transmit_dio(struct rpl_domain *domain, struct protocol_interface_info_entry *cur, uint8_t instance_id, uint8_t dodag_version, uint16_t rank, uint8_t g_mop_prf, uint8_t dtsn, struct rpl_dodag *dodag, const uint8_t dodagid[16], const struct rpl_dodag_conf *conf, const uint8_t *dst);
+void rpl_control_transmit_dio(struct rpl_domain *domain, struct protocol_interface_info_entry *cur, uint8_t instance_id, uint8_t dodag_version, uint16_t rank, uint8_t g_mop_prf, uint8_t dtsn, struct rpl_dodag *dodag, const uint8_t dodagid[16], const struct rpl_dodag_conf_int *conf, const uint8_t *dst);
 bool rpl_control_transmit_dao(struct rpl_domain *domain, struct protocol_interface_info_entry *cur, struct rpl_instance *instance, uint8_t instance_id, uint8_t dao_sequence, const uint8_t dodagid[16], const uint8_t *opts, uint16_t opts_size, const uint8_t *dst);
 void rpl_control_disable_ra_routes(struct rpl_domain *domain);
 void rpl_control_event(struct rpl_domain *domain, rpl_event_t event);
@@ -129,6 +156,11 @@ struct buffer *rpl_control_source_route_error_handler(struct buffer *buf, struct
 
 /* Manually send DIS packets for bootstrap */
 void rpl_control_transmit_dis(struct rpl_domain *domain, struct protocol_interface_info_entry *cur, uint8_t pred, uint8_t instance_id, const uint8_t *dodagid, const uint8_t version, const uint8_t *dst);
+/* Manually send DIO packets for bootstrap */
+void rpl_control_transmit_dio_trigger(struct protocol_interface_info_entry *cur, struct rpl_domain *domain);
+/* Manually trigger RPL parent selection */
+void rpl_control_parent_selection_trigger(struct rpl_domain *domain);
+
 bool rpl_control_have_dodag(struct rpl_domain *domain);
 
 /* APIs used to manipulate configuration at the root */
@@ -158,7 +190,7 @@ void rpl_control_delete_domain(rpl_domain_t *domain);
 void rpl_control_set_domain_on_interface(struct protocol_interface_info_entry *cur, rpl_domain_t *domain, bool downstream);
 void rpl_control_remove_domain_from_interface(struct protocol_interface_info_entry *cur);
 void rpl_control_free_domain_instances_from_interface(struct protocol_interface_info_entry *cur);
-void rpl_control_set_callback(rpl_domain_t *domain, rpl_domain_callback_t callback, rpl_prefix_callback_t prefix_learn_cb, rpl_new_parent_callback_t new_parent_add, void *cb_handle);
+void rpl_control_set_callback(rpl_domain_t *domain, rpl_domain_callback_t callback, rpl_prefix_callback_t prefix_learn_cb, rpl_new_parent_callback_t new_parent_add, rpl_parent_dis_callback_t parent_dis, void *cb_handle);
 
 /* Target publishing */
 void rpl_control_publish_host_address(rpl_domain_t *domain, const uint8_t addr[16], uint32_t lifetime);
@@ -166,6 +198,7 @@ void rpl_control_unpublish_address(rpl_domain_t *domain, const uint8_t addr[16])
 bool rpl_control_is_dodag_parent(struct protocol_interface_info_entry *interface, const uint8_t ll_addr[16]);
 bool rpl_control_is_dodag_parent_candidate(struct protocol_interface_info_entry *interface, const uint8_t ll_addr[16], uint16_t candidate_cmp_limiter);
 bool rpl_control_probe_parent_candidate(struct protocol_interface_info_entry *interface, const uint8_t ll_addr[16]);
+uint16_t rpl_control_neighbor_info_get(struct protocol_interface_info_entry *interface, const uint8_t ll_addr[16], uint8_t *global_address);
 bool rpl_possible_better_candidate(struct protocol_interface_info_entry *interface, struct rpl_instance *rpl_instance, const uint8_t ll_addr[16], uint16_t candidate_rank, uint16_t etx);
 uint16_t rpl_control_parent_candidate_list_size(struct protocol_interface_info_entry *interface, bool parent_list);
 uint16_t rpl_control_candidate_list_size(struct protocol_interface_info_entry *interface, struct rpl_instance *rpl_instance);
@@ -176,6 +209,7 @@ bool rpl_control_find_worst_neighbor(struct protocol_interface_info_entry *inter
 
 /* Parent link confirmation API extension */
 void rpl_control_request_parent_link_confirmation(bool requested);
+void rpl_control_set_force_tunnel(bool requested);
 void rpl_control_set_dio_multicast_min_config_advertisment_count(uint8_t min_count);
 void rpl_control_set_address_registration_timeout(uint16_t timeout_in_minutes);
 void rpl_control_set_dao_retry_count(uint8_t count);
@@ -196,21 +230,47 @@ struct rpl_instance *rpl_control_enumerate_instances(rpl_domain_t *domain, struc
 struct rpl_instance *rpl_control_lookup_instance(rpl_domain_t *domain, uint8_t instance_id, const uint8_t *dodagid);
 bool rpl_control_get_instance_dao_target_count(rpl_domain_t *domain, uint8_t instance_id, const uint8_t *dodagid, const uint8_t *prefix, uint16_t *target_count);
 bool rpl_control_read_dodag_info(const struct rpl_instance *instance, struct rpl_dodag_info_t *dodag_info);
-const rpl_dodag_conf_t *rpl_control_get_dodag_config(const struct rpl_instance *instance);
+const rpl_dodag_conf_int_t *rpl_control_get_dodag_config(const struct rpl_instance *instance);
 const uint8_t *rpl_control_preferred_parent_addr(const struct rpl_instance *instance, bool global);
 uint16_t rpl_control_current_rank(const struct rpl_instance *instance);
 uint8_t rpl_policy_mrhof_parent_set_size_get(const rpl_domain_t *domain);
+void rpl_control_instant_poison(struct protocol_interface_info_entry *cur, rpl_domain_t *domain);
 
 #else /* HAVE_RPL */
 
+#define rpl_control_set_memory_limits(soft_limit, hard_limit)
 #define rpl_control_fast_timer(ticks) ((void) 0)
 #define rpl_control_slow_timer(seconds) ((void) 0)
+#define rpl_control_transmit_dis(domain, cur, pred, instance_id, dodagid, version, dst) ((void) 0)
+#define rpl_control_transmit_dio_trigger(cur, domain) ((void) 0)
+#define rpl_control_parent_selection_trigger(domain) ((void) 0)
+#define rpl_control_force_leaf(domain, leaf) ((void) 0)
+#define rpl_control_poison(domain, poison_count) ((void) 0)
+#define rpl_control_dao_timeout(domain, seconds) ((void) 0)
+#define rpl_control_set_domain_on_interface(cur, domain, downstream) ((void) 0)
 #define rpl_control_remove_domain_from_interface(cur) ((void) 0)
 #define rpl_control_free_domain_instances_from_interface(cur) ((void) 0)
+#define rpl_control_set_callback(domain, callback, prefix_learn_cb, new_parent_add, parent_dis, cb_handle) ((void) 0)
+#define rpl_control_is_dodag_parent(interface, ll_addr) (false)
+#define rpl_control_is_dodag_parent_candidate(interface, ll_addr, candidate_cmp_limiter) (false)
+#define rpl_control_probe_parent_candidate(interface, ll_addr) (false)
+#define rpl_control_neighbor_info_get(interface, ll_addr, global_address) (0xffff)
+#define rpl_possible_better_candidate(interface, rpl_instance, ll_addr, candidate_rank, etx) (false)
+#define rpl_control_parent_candidate_list_size(interface, parent_list) (0)
+#define rpl_control_candidate_list_size(interface, rpl_instance) (0)
+#define rpl_control_selected_parent_count(interface, rpl_instance) (0)
+#define rpl_control_neighbor_delete(interface, ll_addr) ((void) 0)
+#define rpl_control_find_worst_neighbor(interface, rpl_instance, ll_addr) (false)
 #define rpl_control_register_address(interface, addr) ((void) 0)
 #define rpl_control_address_register_done(interface, ll_addr, status) (false)
+#define rpl_control_enumerate_instances(domain, instance) (NULL)
+#define rpl_control_read_dodag_info(instance, dodag_info) (false)
+#define rpl_control_get_dodag_config(instance) (NULL)
+#define rpl_control_preferred_parent_addr(instance, global) (NULL)
+#define rpl_control_current_rank(instance) (RPL_RANK_INFINITE)
 #define rpl_policy_mrhof_parent_set_size_get(domain) (0)
-#define rpl_control_set_mrhof_parent_set_size(parent_set_size)
+#define rpl_control_instant_poison(cur, domain) ((void) 0)
+
 #endif /* HAVE_RPL */
 
 #endif /* RPL_CONTROL_H_ */

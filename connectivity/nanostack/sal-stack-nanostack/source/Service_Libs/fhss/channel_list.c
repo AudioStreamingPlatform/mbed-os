@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Arm Limited and affiliates.
+ * Copyright (c) 2015-2018, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ static bool channel_list_bit_test32(uint32_t word, int_fast8_t bit_number)
 {
     bool bitSet;
 
-    if (word & ((uint32_t) 1 << bit_number)) {
+    if (word & (1U << bit_number)) {
         bitSet = true;
     } else {
         bitSet = false;
@@ -92,9 +92,9 @@ void channel_list_set_channel(uint32_t *list, int channel, bool active)
         return;
     }
     if (active) {
-        list[channel / 32] |= (1 << channel % 32);
+        list[channel / 32] |= (1U << channel % 32);
     } else {
-        list[channel / 32] &= ~(1 << channel % 32);
+        list[channel / 32] &= ~(1U << channel % 32);
     }
     return;
 }

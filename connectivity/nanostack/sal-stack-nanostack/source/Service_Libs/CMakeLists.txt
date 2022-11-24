@@ -1,4 +1,4 @@
-# Copyright (c) 2020 ARM Limited. All rights reserved.
+# Copyright (c) 2020-2021, Pelion and affiliates.
 # SPDX-License-Identifier: Apache-2.0
 
 target_include_directories(mbed-nanostack-sal_stack
@@ -101,6 +101,7 @@ target_sources(mbed-nanostack-sal_stack
         utils/ns_conf.c
         utils/ns_crc.c
         utils/ns_file_system.c
+        utils/ns_time.c
 
         whiteboard/whiteboard.c
 )

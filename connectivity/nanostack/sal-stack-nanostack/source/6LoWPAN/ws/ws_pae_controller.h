@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * Copyright (c) 2018-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@
 typedef enum {
     AUTH_RESULT_OK = 0,                    // Successful
     AUTH_RESULT_ERR_NO_MEM = -1,           // No memory
-    AUTH_RESULT_ERR_TX_NO_ACK = -2,        // No acknowledge was received
+    AUTH_RESULT_ERR_TX_ERR = -2,           // TX error (e.g. no acknowledge was received)
     AUTH_RESULT_ERR_UNSPEC = -3            // Other reason
 } auth_result_e;
 
@@ -31,6 +31,7 @@ struct nvm_tlv_entry;
 struct ws_sec_timer_cfg_s;
 struct ws_sec_prot_cfg_s;
 struct bbr_radius_timing;
+struct ws_timing_cfg_s;
 
 /**
  * ws_pae_controller_set_target sets EAPOL target for PAE supplicant
@@ -98,12 +99,13 @@ int8_t ws_pae_controller_init(protocol_interface_info_entry_t *interface_ptr);
  * \param interface_ptr interface
  * \param sec_timer_cfg timer configuration or NULL if not set
  * \param sec_prot_cfg protocol configuration or NULL if not set
+ * \param timing_cfg timing configuration or NULL if not set
  *
  * \return < 0 failure
  * \return >= 0 success
  *
  */
-int8_t ws_pae_controller_configure(protocol_interface_info_entry_t *interface_ptr, struct ws_sec_timer_cfg_s *sec_timer_cfg, struct ws_sec_prot_cfg_s *sec_prot_cfg);
+int8_t ws_pae_controller_configure(protocol_interface_info_entry_t *interface_ptr, struct ws_sec_timer_cfg_s *sec_timer_cfg, struct ws_sec_prot_cfg_s *sec_prot_cfg, struct ws_timing_cfg_s *timing_cfg);
 
 /**
  * ws_pae_controller_init initializes PAE supplicant
@@ -572,6 +574,22 @@ typedef void ws_pae_controller_nw_frame_counter_set(protocol_interface_info_entr
 typedef void ws_pae_controller_nw_frame_counter_read(protocol_interface_info_entry_t *interface_ptr, uint32_t *counter, uint8_t slot);
 
 /**
+ * ws_pae_controller_nw_key_cb_register register network key control callbacks
+ *
+ * \param interface_ptr interface
+ * \param nw_key_set network key set callback
+ * \param nw_key_clear network key clear callback
+ * \param nw_send_key_index_set network send key index set callback
+ * \param nw_frame_counter_set network frame counter set callback
+ * \param nw_frame_counter_read network frame counter read callback
+ *
+ * \return < 0 failure
+ * \return >= 0 success
+ *
+ */
+int8_t ws_pae_controller_nw_key_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_controller_nw_key_set *nw_key_set, ws_pae_controller_nw_key_clear *nw_key_clear, ws_pae_controller_nw_send_key_index_set *nw_send_key_index_set, ws_pae_controller_nw_frame_counter_set *nw_frame_counter_set, ws_pae_controller_nw_frame_counter_read *nw_frame_counter_read);
+
+/**
  * ws_pae_controller_auth_completed authentication completed callback
  *
  * \param interface_ptr interface
@@ -594,43 +612,17 @@ typedef void ws_pae_controller_auth_completed(protocol_interface_info_entry_t *i
 typedef const uint8_t *ws_pae_controller_auth_next_target(protocol_interface_info_entry_t *interface_ptr, const uint8_t *previous_eui_64, uint16_t *pan_id);
 
 /**
- * ws_pae_controller_pan_ver_increment PAN version increment callback
- *
- * \param interface_ptr interface
- *
- */
-typedef void ws_pae_controller_pan_ver_increment(protocol_interface_info_entry_t *interface_ptr);
-
-/**
- * ws_pae_controller_nw_info_updated network information is updated (read from memory)
- *
- * \param interface_ptr interface
- * \param pan_id PAN ID
- * \param pan_version PAN version
- * \param network_name network name
- *
- */
-typedef void ws_pae_controller_nw_info_updated(protocol_interface_info_entry_t *interface_ptr, uint16_t pan_id, uint16_t pan_version, char *network_name);
-
-/**
- * ws_pae_controller_cb_register register controller callbacks
+ * ws_pae_controller_authentication_cb_register register supplicant authentication control callbacks
  *
  * \param interface_ptr interface
  * \param completed authentication completed callback
  * \param next_target authentication next target callback
- * \param nw_key_set network key set callback
- * \param nw_key_clear network key clear callback
- * \param nw_send_key_index_set network send key index set callback
- * \param nw_frame_counter_set network frame counter set callback
- * \param nw_frame_counter_read network frame counter read callback
- * \param pan_ver_increment PAN version increment callback
- * \param nw_info_updated network information updated callback
  *
  * \return < 0 failure
  * \return >= 0 success
  *
  */
-int8_t ws_pae_controller_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_controller_auth_completed *completed, ws_pae_controller_auth_next_target *auth_next_target, ws_pae_controller_nw_key_set *nw_key_set, ws_pae_controller_nw_key_clear *nw_key_clear, ws_pae_controller_nw_send_key_index_set *nw_send_key_index_set, ws_pae_controller_nw_frame_counter_set *nw_frame_counter_set, ws_pae_controller_nw_frame_counter_read *nw_frame_counter_read, ws_pae_controller_pan_ver_increment *pan_ver_increment, ws_pae_controller_nw_info_updated *nw_info_updated);
+int8_t ws_pae_controller_authentication_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_controller_auth_completed *completed, ws_pae_controller_auth_next_target *auth_next_target);
 
 /**
  * ws_pae_controller_ip_addr_get gets IP addressing information
@@ -645,16 +637,60 @@ int8_t ws_pae_controller_cb_register(protocol_interface_info_entry_t *interface_
 typedef int8_t ws_pae_controller_ip_addr_get(protocol_interface_info_entry_t *interface_ptr, uint8_t *address);
 
 /**
- * ws_pae_controller_auth_cb_register register authenticator callbacks
+ * ws_pae_controller_nw_info_updated network information is updated (read from memory)
+ *
+ * \param interface_ptr interface
+ * \param pan_id PAN ID
+ * \param pan_version PAN version
+ * \param network_name network name
+ *
+ */
+typedef void ws_pae_controller_nw_info_updated(protocol_interface_info_entry_t *interface_ptr, uint16_t pan_id, uint16_t pan_version, char *network_name);
+
+/**
+ * ws_pae_controller_congestion_get get congestion information
+ *
+ * \param interface_ptr interface
+ * \param active_supp active supplicants
+ *
+ * \return TRUE reject, FALSE accept
+ *
+ */
+typedef bool ws_pae_controller_congestion_get(protocol_interface_info_entry_t *interface_ptr, uint16_t active_supp);
+
+/**
+ * ws_pae_controller_information_cb_register register information callbacks
  *
  * \param interface_ptr interface
  * \param ip_addr_get IP address get callback
+ * \param nw_info_updated network information updated callback
+ * \param congestion_get congestion get callback
  *
  * \return < 0 failure
  * \return >= 0 success
  *
  */
-int8_t ws_pae_controller_auth_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_controller_ip_addr_get *ip_addr_get);
+int8_t ws_pae_controller_information_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_controller_ip_addr_get *ip_addr_get, ws_pae_controller_nw_info_updated *nw_info_updated, ws_pae_controller_congestion_get *congestion_get);
+
+/**
+ * ws_pae_controller_pan_ver_increment PAN version increment callback
+ *
+ * \param interface_ptr interface
+ *
+ */
+typedef void ws_pae_controller_pan_ver_increment(protocol_interface_info_entry_t *interface_ptr);
+
+/**
+ * ws_pae_controller_bbr_control_cb_register register PAN version control callbacks
+ *
+ * \param interface_ptr interface
+ * \param pan_ver_increment PAN version increment callback
+ *
+ * \return < 0 failure
+ * \return >= 0 success
+ *
+ */
+int8_t ws_pae_controller_pan_version_cb_register(protocol_interface_info_entry_t *interface_ptr, ws_pae_controller_pan_ver_increment *pan_ver_increment);
 
 /**
  * ws_pae_controller_fast_timer PAE controller fast timer call
@@ -701,7 +737,7 @@ void ws_pae_controller_forced_gc(bool full_gc);
 
 #define ws_pae_controller_stop(interface_ptr)
 #define ws_pae_controller_delete(interface_ptr)
-#define ws_pae_controller_cb_register(interface_ptr, completed, nw_key_set, nw_key_clear, nw_send_key_index_set, pan_ver_increment) 1
+#define ws_pae_controller_cb_register(interface_ptr, completed, nw_key_set, nw_key_clear, nw_send_key_index_set, pan_ver_increment, congestion_get) 1
 #define ws_pae_controller_nvm_tlv_get(interface_ptr) NULL
 
 #define ws_pae_controller_forced_gc NULL

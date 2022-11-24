@@ -1,12 +1,14 @@
 {
     "name": "lora",
+    "requires": ["mbedtls", "events"],
     "config": {
         "phy": {
             "help": "LoRa PHY region: EU868, AS923, AU915, CN470, CN779, EU433, IN865, KR920, US915",
             "value": "EU868"
         },
-        "radio": {
-            "help": "value set in radio driver : SX126X, SX1272, SX1276"
+        "phy-as923-sub-region" : {
+            "help": "AS923 sub region: AS1, AS2, AS3, AS4",
+            "value": "AS1"
         },
         "over-the-air-activation": {
             "help": "When set to 1 the application uses the Over-the-Air activation procedure, default: true",
@@ -95,6 +97,12 @@
         "fsb-mask-china": {
             "help": "FSB mask for upstream [CN470 PHY] Check lorawan/FSB_Usage.txt for more details",
             "value": "{0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF}"
+        }
+    },
+    "target_overrides": {
+        "STM32WL": {
+            "wakeup-time": 3,
+            "max-sys-rx-error": 10
         }
     }
 }

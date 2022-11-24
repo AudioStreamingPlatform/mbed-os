@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited and affiliates.
+ * Copyright (c) 2020-2021, Pelion and affiliates.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,6 @@ typedef struct ws_gen_cfg_s {
        default values */
     uint8_t network_size;               /**< Network size selection; default medium (= 8) */
     char network_name[33];              /**< Network name; max 32 octets + terminating 0 */
-    uint16_t network_pan_id;            /**< PAN identifier; PAN_ID; default 0xffff */
     uint16_t rpl_parent_candidate_max;  /**< RPL parent candidate maximum value; default 5 */
     uint16_t rpl_selected_parent_max;   /**< RPL selected parent maximum value; default 2 */
 } ws_gen_cfg_t;
@@ -64,6 +63,7 @@ typedef struct ws_bbr_cfg_s {
     uint16_t dag_max_rank_increase;
     uint16_t min_hop_rank_increase;
     uint32_t dhcp_address_lifetime;     /**< DHCP address lifetime in seconds minimum 2 hours and maximum as days hours*/
+    uint32_t rpl_default_lifetime;      /**< RPL default lifetime value minimum from 30 minutes to 16 hours*/
 } ws_bbr_cfg_t;
 
 /**
@@ -114,11 +114,12 @@ typedef struct ws_sec_prot_cfg_s {
     uint16_t sec_prot_trickle_imin;           /**< Security protocol trickle parameters Imin; seconds; default 30 */
     uint16_t sec_prot_trickle_imax;           /**< Security protocol trickle parameters Imax; seconds; default 90 */
     uint8_t sec_prot_trickle_timer_exp;       /**< Security protocol trickle timer expirations; default 2 */
-    uint16_t sec_max_ongoing_authentication;  /**< Pae authenticator max Accept ongoing authentication count */
-    uint16_t initial_key_retry_delay;         /**< Delay before starting initial key trickle; seconds; default 120 */
-    uint16_t initial_key_imin;                /**< Initial key trickle Imin; seconds; default 360 */
-    uint16_t initial_key_imax;                /**< Initial key trickle Imax; seconds; default 720 */
-    uint8_t initial_key_retry_cnt;            /**< Number of initial key retries; default 2 */
+    uint16_t max_simult_sec_neg_tx_queue_min; /**< PAE authenticator max simultaneous security negotiations TX queue minimum */
+    uint16_t max_simult_sec_neg_tx_queue_max; /**< PAE authenticator max simultaneous security negotiations TX queue maximum */
+    uint16_t initial_key_retry_min;           /**< Initial EAPOL-Key retry exponential backoff min; seconds; default 180 */
+    uint16_t initial_key_retry_max;           /**< Initial EAPOL-Key retry exponential backoff max; seconds; default 420 */
+    uint16_t initial_key_retry_max_limit;     /**< Initial EAPOL-Key retry exponential backoff max limit; seconds; default 720 */
+    uint8_t initial_key_retry_cnt;            /**< Number of initial key retries; default 4 */
 } ws_sec_prot_cfg_t;
 
 /**
@@ -161,48 +162,50 @@ typedef enum {
 int8_t ws_cfg_settings_init(void);
 int8_t ws_cfg_settings_default_set(void);
 int8_t ws_cfg_settings_interface_set(protocol_interface_info_entry_t *cur);
-int8_t ws_cfg_network_size_configure(protocol_interface_info_entry_t *cur, uint16_t network_size);
+int8_t ws_cfg_settings_get(ws_cfg_t *cfg);
+int8_t ws_cfg_settings_validate(struct ws_cfg_s *new_cfg);
+int8_t ws_cfg_settings_set(protocol_interface_info_entry_t *cur, ws_cfg_t *new_cfg);
 
 cfg_network_size_type_e ws_cfg_network_config_get(protocol_interface_info_entry_t *cur);
 
-int8_t ws_cfg_network_size_get(ws_gen_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_network_size_validate(ws_gen_cfg_t *cfg, ws_gen_cfg_t *new_cfg);
-int8_t ws_cfg_network_size_set(protocol_interface_info_entry_t *cur, ws_gen_cfg_t *cfg, ws_gen_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_network_size_get(ws_gen_cfg_t *cfg);
+int8_t ws_cfg_network_size_validate(ws_gen_cfg_t *new_cfg);
+int8_t ws_cfg_network_size_set(protocol_interface_info_entry_t *cur, ws_gen_cfg_t *new_cfg, uint8_t flags);
 
-int8_t ws_cfg_gen_get(ws_gen_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_gen_validate(ws_gen_cfg_t  *cfg, ws_gen_cfg_t  *new_cfg);
-int8_t ws_cfg_gen_set(protocol_interface_info_entry_t *cur, ws_gen_cfg_t *cfg, ws_gen_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_gen_get(ws_gen_cfg_t *cfg);
+int8_t ws_cfg_gen_validate(ws_gen_cfg_t *new_cfg);
+int8_t ws_cfg_gen_set(protocol_interface_info_entry_t *cur, ws_gen_cfg_t *new_cfg, uint8_t flags);
 
 int8_t ws_cfg_phy_default_set(ws_phy_cfg_t *cfg);
-int8_t ws_cfg_phy_get(ws_phy_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_phy_validate(ws_phy_cfg_t *cfg, ws_phy_cfg_t *new_cfg);
-int8_t ws_cfg_phy_set(protocol_interface_info_entry_t *cur, ws_phy_cfg_t *cfg, ws_phy_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_phy_get(ws_phy_cfg_t *cfg);
+int8_t ws_cfg_phy_validate(ws_phy_cfg_t *new_cfg);
+int8_t ws_cfg_phy_set(protocol_interface_info_entry_t *cur, ws_phy_cfg_t *new_cfg, uint8_t flags);
 
 int8_t ws_cfg_timing_default_set(ws_timing_cfg_t *cfg);
-int8_t ws_cfg_timing_get(ws_timing_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_timing_validate(ws_timing_cfg_t *cfg, ws_timing_cfg_t *new_cfg);
-int8_t ws_cfg_timing_set(protocol_interface_info_entry_t *cur, ws_timing_cfg_t *cfg, ws_timing_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_timing_get(ws_timing_cfg_t *cfg);
+int8_t ws_cfg_timing_validate(ws_timing_cfg_t *new_cfg);
+int8_t ws_cfg_timing_set(protocol_interface_info_entry_t *cur, ws_timing_cfg_t *new_cfg, uint8_t flags);
 
-int8_t ws_cfg_bbr_get(ws_bbr_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_bbr_validate(ws_bbr_cfg_t *cfg, ws_bbr_cfg_t *new_cfg);
-int8_t ws_cfg_bbr_set(protocol_interface_info_entry_t *cur, ws_bbr_cfg_t *cfg, ws_bbr_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_bbr_get(ws_bbr_cfg_t *cfg);
+int8_t ws_cfg_bbr_validate(ws_bbr_cfg_t *new_cfg);
+int8_t ws_cfg_bbr_set(protocol_interface_info_entry_t *cur, ws_bbr_cfg_t *new_cfg, uint8_t flags);
 
-int8_t ws_cfg_mpl_get(ws_mpl_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_mpl_validate(ws_mpl_cfg_t *cfg, ws_mpl_cfg_t *new_cfg);
-int8_t ws_cfg_mpl_set(protocol_interface_info_entry_t *cur, ws_mpl_cfg_t *cfg, ws_mpl_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_mpl_get(ws_mpl_cfg_t *cfg);
+int8_t ws_cfg_mpl_validate(ws_mpl_cfg_t *new_cfg);
+int8_t ws_cfg_mpl_set(protocol_interface_info_entry_t *cur, ws_mpl_cfg_t *new_cfg, uint8_t flags);
 
 int8_t ws_cfg_fhss_default_set(ws_fhss_cfg_t *cfg);
-int8_t ws_cfg_fhss_get(ws_fhss_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_fhss_validate(ws_fhss_cfg_t *cfg, ws_fhss_cfg_t *new_cfg);
-int8_t ws_cfg_fhss_set(protocol_interface_info_entry_t *cur, ws_fhss_cfg_t *cfg, ws_fhss_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_fhss_get(ws_fhss_cfg_t *cfg);
+int8_t ws_cfg_fhss_validate(ws_fhss_cfg_t *new_cfg);
+int8_t ws_cfg_fhss_set(protocol_interface_info_entry_t *cur, ws_fhss_cfg_t *new_cfg, uint8_t flags);
 
-int8_t ws_cfg_sec_timer_get(ws_sec_timer_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_sec_timer_validate(ws_sec_timer_cfg_t *cfg, ws_sec_timer_cfg_t *new_cfg);
-int8_t ws_cfg_sec_timer_set(protocol_interface_info_entry_t *cur, ws_sec_timer_cfg_t *cfg, ws_sec_timer_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_sec_timer_get(ws_sec_timer_cfg_t *cfg);
+int8_t ws_cfg_sec_timer_validate(ws_sec_timer_cfg_t *new_cfg);
+int8_t ws_cfg_sec_timer_set(protocol_interface_info_entry_t *cur, ws_sec_timer_cfg_t *new_cfg, uint8_t flags);
 
-int8_t ws_cfg_sec_prot_get(ws_sec_prot_cfg_t *cfg, uint8_t *flags);
-int8_t ws_cfg_sec_prot_validate(ws_sec_prot_cfg_t *cfg, ws_sec_prot_cfg_t *new_cfg);
-int8_t ws_cfg_sec_prot_set(protocol_interface_info_entry_t *cur, ws_sec_prot_cfg_t *cfg, ws_sec_prot_cfg_t *new_cfg, uint8_t *flags);
+int8_t ws_cfg_sec_prot_get(ws_sec_prot_cfg_t *cfg);
+int8_t ws_cfg_sec_prot_validate(ws_sec_prot_cfg_t *new_cfg);
+int8_t ws_cfg_sec_prot_set(protocol_interface_info_entry_t *cur, ws_sec_prot_cfg_t *new_cfg, uint8_t flags);
 
 uint32_t ws_cfg_neighbour_temporary_lifetime_get(void);
 void ws_cfg_neighbour_temporary_lifetime_set(uint32_t lifetime);
