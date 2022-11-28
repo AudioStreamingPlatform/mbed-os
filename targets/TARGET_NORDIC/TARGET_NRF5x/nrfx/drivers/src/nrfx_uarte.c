@@ -457,7 +457,10 @@ nrfx_err_t nrfx_uarte_tx(nrfx_uarte_t const * p_instance,
 
 bool nrfx_uarte_tx_in_progress(nrfx_uarte_t const * p_instance)
 {
-    return (m_cb[p_instance->drv_inst_idx].tx_buffer_length != 0);
+    // note: events also checked to support output when interrupts disabled (e.g. when logging fatal errors)
+    return (m_cb[p_instance->drv_inst_idx].tx_buffer_length != 0 &&
+        !nrf_uarte_event_check(p_instance->p_reg, NRF_UARTE_EVENT_ENDTX) &&
+        !nrf_uarte_event_check(p_instance->p_reg, NRF_UARTE_EVENT_TXSTOPPED));
 }
 
 nrfx_err_t nrfx_uarte_rx(nrfx_uarte_t const * p_instance,
