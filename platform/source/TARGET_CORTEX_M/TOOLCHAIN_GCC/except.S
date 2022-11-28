@@ -103,7 +103,13 @@ UsageFault_Handler:
         .cantunwind
 
 Fault_Handler:
-#if (DOMAIN_NS == 1)
+
+// Always enable FaultHandler for crash diagnostics
+// TrustZone Secure Image: __ARM_FEATURE_CMSE set, DOMAIN_NS=0
+// TrustZone Non-Secure Image: DOMAIN_NS=1
+// Non-TrustZone Image: DOMAIN_NS=0
+// #if (DOMAIN_NS == 1)
+#if 1
 #if MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED
 #define mbed_fault_context __CRASH_DATA_RAM_START__
 #endif
