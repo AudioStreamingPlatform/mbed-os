@@ -761,10 +761,7 @@ public:
 
         F *e = new (p) F(std::move(f));
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
-        int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
-        if (!id)
-            queue_full(QUEUE_FULL_CALL, sizeof(F));
-        return id;
+        return equeue_post(&_equeue, &EventQueue::function_call<F>, e);
     }
 
 
@@ -841,10 +838,7 @@ public:
         F *e = new (p) F(std::move(f));
         equeue_event_delay(e, ms.count());
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
-        int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
-        if (!id)
-            queue_full(QUEUE_FULL_CALL_IN, sizeof(F));
-        return id;
+        return equeue_post(&_equeue, &EventQueue::function_call<F>, e);
     }
 
     /** Calls an event on the queue after a specified delay
@@ -999,10 +993,7 @@ public:
         equeue_event_delay(e, ms.count());
         equeue_event_period(e, ms.count());
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
-        int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
-        if (!id)
-            queue_full(QUEUE_FULL_CALL_EVERY, sizeof(F));
-        return id;
+        return equeue_post(&_equeue, &EventQueue::function_call<F>, e);
     }
 
     /** Calls an event on the queue periodically
