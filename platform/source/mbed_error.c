@@ -46,6 +46,12 @@
 #endif
 
 #ifndef NDEBUG
+# ifndef MBED_CONF_PLATFORM_CRASH_ERROR_REPORT_ENABLED
+#  define MBED_CONF_PLATFORM_CRASH_ERROR_REPORT_ENABLED
+# endif
+#endif
+
+#ifdef MBED_CONF_PLATFORM_CRASH_ERROR_REPORT_ENABLED
 #define ERROR_REPORT(ctx, error_msg, error_filename, error_line) print_error_report(ctx, error_msg, error_filename, error_line)
 static void print_error_report(const mbed_error_ctx *ctx, const char *, const char *error_filename, int error_line);
 #else
@@ -64,6 +70,20 @@ static mbed_error_status_t handle_error(mbed_error_status_t error_status, unsign
 #if MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED
 #define report_error_ctx MBED_CRASH_DATA.error.context
 static bool is_reboot_error_valid = false;
+
+#ifdef MBED_CONF_RTOS_PRESENT
+static inline const char *name_or_unnamed(const osRtxThread_t *thread)
+{
+    const char *unnamed = "<unnamed>";
+
+    if (!thread) {
+        return unnamed;
+    }
+
+    const char *name = thread->name;
+    return name ? name : unnamed;
+}
+#endif // MBED_CONF_RTOS_PRESENT
 
 //Helper function to calculate CRC
 //NOTE: It would have been better to use MbedCRC implementation. But
@@ -125,7 +145,7 @@ WEAK MBED_NORETURN void error(const char *format, ...)
         handle_error(MBED_ERROR_UNKNOWN, 0, NULL, 0, MBED_CALLER_ADDR());
         ERROR_REPORT(&last_error_ctx, "Fatal Run-time error", NULL, 0);
 
-#ifndef NDEBUG
+#ifdef MBED_CONF_PLATFORM_CRASH_ERROR_REPORT_ENABLED
         va_list arg;
         va_start(arg, format);
         mbed_error_vprintf(format, arg);
@@ -206,16 +226,21 @@ static mbed_error_status_t handle_error(mbed_error_status_t error_status, unsign
 #endif //MBED_CONF_RTOS_PRESENT
 
 #if MBED_CONF_PLATFORM_ERROR_FILENAME_CAPTURE_ENABLED
-    //Capture filename/linenumber if provided
-    //Index for tracking error_filename
-    const char* copy_from = strrchr(filename, '/');
-    if (!copy_from) {
-        copy_from = filename;
+    if (filename) {
+        //Capture filename/linenumber if provided
+        //Index for tracking error_filename
+        const char* copy_from = strrchr(filename, '/');
+        if (!copy_from) {
+            copy_from = filename;
+        } else {
+            ++copy_from; // Skip the '/'
+        }
+        strncpy(current_error_ctx.error_filename, copy_from, MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN);
+        current_error_ctx.error_line_number = line_number;
     } else {
-        ++copy_from; // Skip the '/'
+        // Store thread name in error_filename (line=0) :-/
+        strncpy(current_error_ctx.error_filename, name_or_unnamed(current_thread), sizeof(current_error_ctx.error_filename));
     }
-    strncpy(current_error_ctx.error_filename, copy_from, MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN);
-    current_error_ctx.error_line_number = line_number;
 #endif
 
     //Prevent corruption by holding out other callers
@@ -359,7 +384,7 @@ WEAK MBED_NORETURN mbed_error_status_t mbed_error(mbed_error_status_t error_stat
     core_util_critical_section_exit();
     //We need not call delete_mbed_crc(crc_obj) here as we are going to reset the system anyway, and calling delete while handling a fatal error may cause nested exception
 #if MBED_CONF_PLATFORM_FATAL_ERROR_AUTO_REBOOT_ENABLED && (MBED_CONF_PLATFORM_ERROR_REBOOT_MAX > 0)
-#ifndef NDEBUG
+#ifdef MBED_CONF_PLATFORM_CRASH_ERROR_REPORT_ENABLED
     mbed_error_printf("\n= System will be rebooted due to a fatal error =\n");
     if (report_error_ctx.error_reboot_count >= MBED_CONF_PLATFORM_ERROR_REBOOT_MAX) {
         //We have rebooted more than enough, hold the system here.
@@ -499,20 +524,6 @@ mbed_error_status_t mbed_clear_all_errors(void)
     return status;
 }
 
-#ifdef MBED_CONF_RTOS_PRESENT
-static inline const char *name_or_unnamed(const osRtxThread_t *thread)
-{
-    const char *unnamed = "<unnamed>";
-
-    if (!thread) {
-        return unnamed;
-    }
-
-    const char *name = thread->name;
-    return name ? name : unnamed;
-}
-#endif // MBED_CONF_RTOS_PRESENT
-
 #if MBED_STACK_DUMP_ENABLED
 /** Prints stack dump from given stack information.
  * The arguments should be given in address raw value to check alignment.
@@ -588,7 +599,7 @@ static void print_threads_info(const osRtxThread_t *threads)
 }
 #endif
 
-#ifndef NDEBUG
+#ifdef MBED_CONF_PLATFORM_CRASH_ERROR_REPORT_ENABLED
 #define GET_TARGET_NAME_STR(tgt_name)   #tgt_name
 #define GET_TARGET_NAME(tgt_name)       GET_TARGET_NAME_STR(tgt_name)
 static void print_error_report(const mbed_error_ctx *ctx, const char *error_msg, const char *error_filename, int error_line)
@@ -691,7 +702,7 @@ static void print_error_report(const mbed_error_ctx *ctx, const char *error_msg,
 
     mbed_error_printf("\n-- MbedOS Error Info --\n");
 }
-#endif //ifndef NDEBUG
+#endif
 
 
 #if MBED_CONF_PLATFORM_ERROR_HIST_ENABLED
