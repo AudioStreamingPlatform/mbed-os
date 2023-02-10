@@ -74,5 +74,6 @@ target_sources(mbed-core
         pinmap.c
         port_api.c
         qspi_api.c
+        reset_reason.c
         rtc_api.c
 )
