@@ -248,7 +248,7 @@ static void mbed_minimal_formatted_string_void_pointer(char *buffer, size_t leng
     mbed_minimal_putchar(buffer, length, result, 'x', stream);
 
     /* write rest as a regular hexadecimal number */
-    mbed_minimal_formatted_string_integer(buffer, length, result, (ptrdiff_t) value, HEX_UPPER, 0, false, stream);
+    mbed_minimal_formatted_string_integer(buffer, length, result, (uintptr_t) value, HEX_UPPER, 0, false, stream);
 }
 
 #if MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_FLOATING_POINT
