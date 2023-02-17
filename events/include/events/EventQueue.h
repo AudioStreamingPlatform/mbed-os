@@ -755,7 +755,7 @@ public:
     {
         void *p = equeue_alloc(&_equeue, sizeof(F));
         if (!p) {
-            queue_full(QUEUE_FULL_CALL, sizeof(F));
+            queue_full(QUEUE_FULL_CALL, sizeof(F), __builtin_return_address(0));
             return 0;
         }
 
@@ -763,7 +763,7 @@ public:
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
         int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
         if (!id)
-            queue_full(QUEUE_FULL_CALL, sizeof(F));
+            queue_full(QUEUE_FULL_CALL, sizeof(F), __builtin_return_address(0));
         return id;
     }
 
@@ -834,7 +834,7 @@ public:
     {
         void *p = equeue_alloc(&_equeue, sizeof(F));
         if (!p) {
-            queue_full(QUEUE_FULL_CALL_IN, sizeof(F));
+            queue_full(QUEUE_FULL_CALL_IN, sizeof(F), __builtin_return_address(0));
             return 0;
         }
 
@@ -843,7 +843,7 @@ public:
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
         int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
         if (!id)
-            queue_full(QUEUE_FULL_CALL_IN, sizeof(F));
+            queue_full(QUEUE_FULL_CALL_IN, sizeof(F), __builtin_return_address(0));
         return id;
     }
 
@@ -991,7 +991,7 @@ public:
     {
         void *p = equeue_alloc(&_equeue, sizeof(F));
         if (!p) {
-            queue_full(QUEUE_FULL_CALL_EVERY, sizeof(F));
+            queue_full(QUEUE_FULL_CALL_EVERY, sizeof(F), __builtin_return_address(0));
             return 0;
         }
 
@@ -1001,7 +1001,7 @@ public:
         equeue_event_dtor(e, &EventQueue::function_dtor<F>);
         int id = equeue_post(&_equeue, &EventQueue::function_call<F>, e);
         if (!id)
-            queue_full(QUEUE_FULL_CALL_EVERY, sizeof(F));
+            queue_full(QUEUE_FULL_CALL_EVERY, sizeof(F), __builtin_return_address(0));
         return id;
     }
 
@@ -1397,7 +1397,7 @@ protected:
     };
 
     /** Error callback. Called when task is rejected because queue is full */
-    virtual void queue_full(queue_full_call_type call_type, size_t function_size) const
+    virtual void queue_full(queue_full_call_type call_type, size_t function_size, void* calledFrom) const
     {
         // Can be overridden in subclass
     }
