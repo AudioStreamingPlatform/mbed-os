@@ -4800,6 +4800,7 @@ static HAL_StatusTypeDef I2C_Slave_AF(I2C_HandleTypeDef *hi2c)
   */
 static void I2C_ITError(I2C_HandleTypeDef *hi2c)
 {
+  volatile uint8_t discard;
   /* Declaration of temporary variable to prevent undefined behavior of volatile usage */
   uint32_t CurrentState = hi2c->State;
 
@@ -4854,12 +4855,8 @@ static void I2C_ITError(I2C_HandleTypeDef *hi2c)
 
       if(HAL_DMA_Abort_IT(hi2c->hdmarx) != HAL_OK)
       {
-        /* Store Last receive data if any */
         if(__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_RXNE) == SET)
-        {
-          /* Read data from DR */
-          (*hi2c->pBuffPtr++) = hi2c->Instance->DR;
-        }
+          discard = hi2c->Instance->DR; /* clear I2C_FLAG_RXNE */
 
         /* Disable I2C peripheral to prevent dummy data in buffer */
         __HAL_I2C_DISABLE(hi2c);
@@ -4876,12 +4873,8 @@ static void I2C_ITError(I2C_HandleTypeDef *hi2c)
     hi2c->State = HAL_I2C_STATE_READY;
     hi2c->ErrorCode = HAL_I2C_ERROR_NONE;
 
-    /* Store Last receive data if any */
     if(__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_RXNE) == SET)
-    {
-      /* Read data from DR */
-      (*hi2c->pBuffPtr++) = hi2c->Instance->DR;
-    }
+      discard = hi2c->Instance->DR; /* clear I2C_FLAG_RXNE */
 
     /* Disable I2C peripheral to prevent dummy data in buffer */
     __HAL_I2C_DISABLE(hi2c);
@@ -4891,12 +4884,8 @@ static void I2C_ITError(I2C_HandleTypeDef *hi2c)
   }
   else
   {
-    /* Store Last receive data if any */
     if(__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_RXNE) == SET)
-    {
-      /* Read data from DR */
-      (*hi2c->pBuffPtr++) = hi2c->Instance->DR;
-    }
+      discard = hi2c->Instance->DR; /* clear I2C_FLAG_RXNE (seen with i2cslave, e.g. after stop in debugger) */
 
     /* Call user error callback */
     HAL_I2C_ErrorCallback(hi2c);
