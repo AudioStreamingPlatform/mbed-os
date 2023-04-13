@@ -49,6 +49,9 @@
 #include "nrfx_spi.h"
 #endif
 #include "nrfx_twim.h"
+#if DEVICE_I2CSLAVE
+#include "nrfx_twis.h"
+#endif
 
 #include "nrf_pwm.h"
 
@@ -109,6 +112,29 @@ struct pwmout_s {
     nrf_pwm_sequence_t sequence;
 };
 
+#if DEVICE_I2CSLAVE
+typedef struct {
+    nrfx_twis_evt_type_t event;
+    union {
+        nrfx_twis_error_t twis;
+        nrfx_err_t nrfx;
+    } code;
+} i2c_slave_error;
+
+typedef void (*i2c_slave_req_buf_cb_t)(void *, uint8_t **, size_t *);
+typedef void (*i2c_slave_xfer_done_cb_t)(void *, size_t);
+typedef void (*i2c_slave_error_cb_t)(void *, i2c_slave_error);
+
+typedef struct {
+    void *context;
+    i2c_slave_req_buf_cb_t rxbuf_req;
+    i2c_slave_req_buf_cb_t txbuf_req;
+    i2c_slave_xfer_done_cb_t rx_done;
+    i2c_slave_xfer_done_cb_t tx_done;
+    i2c_slave_error_cb_t error;
+} i2c_slave_callbacks;
+#endif // DEVICE_I2CSLAVE
+
 struct i2c_s {
     nrfx_twim_t instance;
     nrfx_twim_config_t config;
@@ -117,6 +143,13 @@ struct i2c_s {
     int address;
     char buffer[256];
     uint16_t length;
+
+#if DEVICE_I2CSLAVE
+    bool is_slave;
+    uint8_t slave_addr;
+    nrfx_twis_t slave_instance;
+    i2c_slave_callbacks slave_callbacks;
+#endif // DEVICE_I2CSLAVE
 };
 
 struct analogin_s {
