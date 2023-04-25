@@ -31,7 +31,14 @@
 #if DEVICE_I2CSLAVE
 #include "nrfx_twis.h"
 
-nrfx_err_t twis_buf_req_handler(nrfx_twis_evt_type_t type,
+#if (NRFX_TWIS_ENABLED_COUNT < 1)
+#error "Cannot use DEVICE_I2CSLAVE without any TWIS enabled"
+#endif
+
+static bool nrfx_twis_in_use[NRFX_TWIS_ENABLED_COUNT] = { false };
+static struct i2c_s *global_i2c_s = NULL;
+
+static nrfx_err_t twis_buf_req_handler(nrfx_twis_evt_type_t type,
                                 nrfx_twis_t *twis_obj,
                                 i2c_slave_req_buf_cb_t cb,
                                 void *context)
@@ -62,9 +69,7 @@ nrfx_err_t twis_buf_req_handler(nrfx_twis_evt_type_t type,
     return err;
 }
 
-static struct i2c_s *global_i2c_s = NULL;
-
-void twis_event_handler(nrfx_twis_evt_t const *p_event)
+static void twis_event_handler(nrfx_twis_evt_t const *p_event)
 {
     bool report_error = false;
     i2c_slave_error error;
@@ -109,13 +114,11 @@ void twis_event_handler(nrfx_twis_evt_t const *p_event)
         cb_struct->error(cb_struct->context, error);
 }
 
-static bool nrfx_twis_in_use[4] = { false };
-
 static nrfx_twis_t get_next_free_twis_instance(void)
 {
     nrfx_twis_t instance = { .p_reg = NULL, .drv_inst_idx = 0 };
 
-    for (uint8_t index = 0; index < 4; ++index) {
+    for (uint8_t index = 0; index < NRFX_TWIS_ENABLED_COUNT; ++index) {
         if (nrfx_twis_in_use[index])
             continue;
 
@@ -382,7 +385,7 @@ int i2c_byte_write(i2c_t *obj_, int data)
 
     /* return if master instance is invalid */
     if (!obj->instance.p_twim)
-        return 0;
+        return I2C_ERROR_NO_SLAVE;
 
     if (!is_master_active(obj_))
         i2c_configure_driver_instance(obj_);
@@ -431,7 +434,7 @@ int i2c_read(i2c_t *obj_, int address, char *data, int length, int stop)
 
     /* return if master instance is invalid */
     if (!obj->instance.p_twim)
-        return 0;
+        return I2C_ERROR_NO_SLAVE;
 
     if (!is_master_active(obj_))
         i2c_configure_driver_instance(obj_);
@@ -503,7 +506,7 @@ int i2c_slave_receive(i2c_t *obj_)
 
     /* return if slave instance is invalid */
     if (!obj->slave_instance.p_reg)
-        return 0;
+        return I2C_ERROR_NO_SLAVE;
 
     if (nrfx_twis_is_waiting_rx_buff(&obj->slave_instance)) {
         return 3;
