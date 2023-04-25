@@ -514,6 +514,7 @@ void i2c_slave_mode(i2c_t *obj_, int enable_slave)
  */
 int i2c_slave_receive(i2c_t *obj_)
 {
+    /* At the time of implementing, the blocking interface is untested */
     struct i2c_s *obj = GET_I2C_S(obj_);
 
     /* return if slave instance is invalid */
@@ -539,6 +540,7 @@ int i2c_slave_receive(i2c_t *obj_)
  */
 int i2c_slave_read(i2c_t *obj_, char *data, int length)
 {
+    /* At the time of implementing, the blocking interface is untested */
     struct i2c_s *obj = GET_I2C_S(obj_);
 
     /* return if slave instance is invalid */
@@ -567,6 +569,7 @@ int i2c_slave_read(i2c_t *obj_, char *data, int length)
  */
 int i2c_slave_write(i2c_t *obj_, const char* data, int length)
 {
+    /* At the time of implementing, the blocking interface is untested */
     struct i2c_s *obj = GET_I2C_S(obj_);
 
     /* return if slave instance is invalid */
