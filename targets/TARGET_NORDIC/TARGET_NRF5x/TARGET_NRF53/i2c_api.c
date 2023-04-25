@@ -31,11 +31,19 @@
 #if DEVICE_I2CSLAVE
 #include "nrfx_twis.h"
 
-#if (NRFX_TWIS_ENABLED_COUNT < 1)
+/* nrfx_twis.h does not define this for twis, only twim */
+#ifndef TWIS_COUNT
+#define TWIS_COUNT 4
+#endif
+
+#if !(NRFX_TWIS0_ENABLED    \
+    || NRFX_TWIS1_ENABLED   \
+    || NRFX_TWIS2_ENABLED   \
+    || NRFX_TWIS3_ENABLED)
 #error "Cannot use DEVICE_I2CSLAVE without any TWIS enabled"
 #endif
 
-static bool nrfx_twis_in_use[NRFX_TWIS_ENABLED_COUNT] = { false };
+static bool nrfx_twis_in_use[TWIS_COUNT] = { false };
 static struct i2c_s *global_i2c_s = NULL;
 
 static nrfx_err_t twis_buf_req_handler(nrfx_twis_evt_type_t type,
@@ -118,7 +126,7 @@ static nrfx_twis_t get_next_free_twis_instance(void)
 {
     nrfx_twis_t instance = { .p_reg = NULL, .drv_inst_idx = 0 };
 
-    for (uint8_t index = 0; index < NRFX_TWIS_ENABLED_COUNT; ++index) {
+    for (uint8_t index = 0; index < TWIS_COUNT; ++index) {
         if (nrfx_twis_in_use[index])
             continue;
 
@@ -286,6 +294,10 @@ void i2c_init(i2c_t *obj_, PinName sda, PinName scl)
 
     nrfx_twim_config_t config = NRFX_TWIM_DEFAULT_CONFIG(scl, sda);
     memcpy(&obj->config, &config, sizeof(obj->config));
+
+    /* Defer init of the underlying driver instance until first usage to allow
+     * changing to slave mode before attempting to init a master instance
+     * */
 }
 
 void i2c_frequency(i2c_t *obj_, int hz)
