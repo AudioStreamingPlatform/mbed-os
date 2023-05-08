@@ -137,6 +137,9 @@ void serial_baud(serial_t *obj, int baudrate) {
         case 9600:
             obj->config.baudrate = NRF_UARTE_BAUDRATE_9600;
             break;
+        case 19200:
+            obj->config.baudrate = NRF_UARTE_BAUDRATE_19200;
+            break;
         case 115200:
             obj->config.baudrate = NRF_UARTE_BAUDRATE_115200;
             break;
