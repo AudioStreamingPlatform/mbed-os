@@ -1642,10 +1642,10 @@ extern "C" WEAK void *__aeabi_read_tp(void)
 #elif defined (__GNUC__)
 struct _reent;
 // Stub out locks when an rtos is not present
-extern "C" WEAK void __rtos_malloc_lock(struct _reent *_r) {}
-extern "C" WEAK void __rtos_malloc_unlock(struct _reent *_r) {}
-extern "C" WEAK void __rtos_env_lock(struct _reent *_r) {}
-extern "C" WEAK void __rtos_env_unlock(struct _reent *_r) {}
+extern "C" WEAK void __rtos_malloc_lock(struct _reent *_r);
+extern "C" WEAK void __rtos_malloc_unlock(struct _reent *_r);
+extern "C" WEAK void __rtos_env_lock(struct _reent *_r);
+extern "C" WEAK void __rtos_env_unlock(struct _reent *_r);
 
 extern "C" void __malloc_lock(struct _reent *_r)
 {
