@@ -99,6 +99,10 @@ uint16_t analogin_read_u16(analogin_t* obj) {
     result = nrfx_saadc_mode_trigger();
     MBED_ASSERT(result == NRFX_SUCCESS);
 
+    /* clamp value positive to prevent the following conversion from erroring */
+    if (value < 0)
+        value = 0;
+
     /* Convert the value from 12 to 16-bit as used by Mbed */
     return (((uint32_t)value) * ADC_16BIT_RANGE) / ADC_12BIT_RANGE;
 }
