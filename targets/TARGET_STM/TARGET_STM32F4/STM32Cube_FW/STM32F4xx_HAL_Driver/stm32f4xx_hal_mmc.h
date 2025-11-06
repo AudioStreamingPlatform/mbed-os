@@ -270,7 +270,7 @@ typedef struct
 
 #define BLOCKSIZE   512U        /*!< Block size is 512 bytes */
     
-#define CAPACITY    0x400000U   /*!< Log Block Nuumber for 2 G bytes Cards */
+#define HAL_MMC_CAPACITY    0x400000U   /*!< Log Block Nuumber for 2 G bytes Cards */
 
 /** @defgroup MMC_Exported_Constansts_Group1 MMC Error status enumeration Structure definition 
   * @{

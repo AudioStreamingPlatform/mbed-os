@@ -520,7 +520,7 @@ HAL_StatusTypeDef HAL_MMC_ReadBlocks(MMC_HandleTypeDef *hmmc, uint8_t *pData, ui
     hmmc->Instance->DCTRL = 0U;
     
     /* Check the Card capacity in term of Logical number of blocks */
-    if ((hmmc->MmcCard.LogBlockNbr) < CAPACITY)
+    if ((hmmc->MmcCard.LogBlockNbr) < HAL_MMC_CAPACITY)
     {
       BlockAdd *= 512U;
     }
@@ -709,7 +709,7 @@ HAL_StatusTypeDef HAL_MMC_WriteBlocks(MMC_HandleTypeDef *hmmc, uint8_t *pData, u
     hmmc->Instance->DCTRL = 0U;
     
     /* Check the Card capacity in term of Logical number of blocks */
-    if ((hmmc->MmcCard.LogBlockNbr) < CAPACITY)
+    if ((hmmc->MmcCard.LogBlockNbr) < HAL_MMC_CAPACITY)
     {
       BlockAdd *= 512U;
     }
@@ -885,7 +885,7 @@ HAL_StatusTypeDef HAL_MMC_ReadBlocks_IT(MMC_HandleTypeDef *hmmc, uint8_t *pData,
     __HAL_MMC_ENABLE_IT(hmmc, (SDIO_IT_DCRCFAIL | SDIO_IT_DTIMEOUT | SDIO_IT_RXOVERR | SDIO_IT_DATAEND | SDIO_FLAG_RXFIFOHF));
 
     /* Check the Card capacity in term of Logical number of blocks */
-    if ((hmmc->MmcCard.LogBlockNbr) < CAPACITY)
+    if ((hmmc->MmcCard.LogBlockNbr) < HAL_MMC_CAPACITY)
     {
       BlockAdd *= 512U;
     }
@@ -988,7 +988,7 @@ HAL_StatusTypeDef HAL_MMC_WriteBlocks_IT(MMC_HandleTypeDef *hmmc, uint8_t *pData
     __HAL_MMC_ENABLE_IT(hmmc, (SDIO_IT_DCRCFAIL | SDIO_IT_DTIMEOUT | SDIO_IT_TXUNDERR | SDIO_IT_DATAEND | SDIO_FLAG_TXFIFOHE)); 
     
     /* Check the Card capacity in term of Logical number of blocks */
-    if ((hmmc->MmcCard.LogBlockNbr) < CAPACITY)
+    if ((hmmc->MmcCard.LogBlockNbr) < HAL_MMC_CAPACITY)
     {
       BlockAdd *= 512U;
     }
@@ -1106,7 +1106,7 @@ HAL_StatusTypeDef HAL_MMC_ReadBlocks_DMA(MMC_HandleTypeDef *hmmc, uint8_t *pData
     __HAL_MMC_DMA_ENABLE(hmmc);
     
     /* Check the Card capacity in term of Logical number of blocks */
-    if ((hmmc->MmcCard.LogBlockNbr) < CAPACITY)
+    if ((hmmc->MmcCard.LogBlockNbr) < HAL_MMC_CAPACITY)
     {
       BlockAdd *= 512U;
     }
@@ -1219,7 +1219,7 @@ HAL_StatusTypeDef HAL_MMC_WriteBlocks_DMA(MMC_HandleTypeDef *hmmc, uint8_t *pDat
     hmmc->hdmatx->XferAbortCallback = NULL;
     
     /* Check the Card capacity in term of Logical number of blocks */
-    if ((hmmc->MmcCard.LogBlockNbr) < CAPACITY)
+    if ((hmmc->MmcCard.LogBlockNbr) < HAL_MMC_CAPACITY)
     {
       BlockAdd *= 512U;
     }
@@ -1333,7 +1333,7 @@ HAL_StatusTypeDef HAL_MMC_Erase(MMC_HandleTypeDef *hmmc, uint32_t BlockStartAdd,
     }
     
     /* Check the Card capacity in term of Logical number of blocks */
-    if ((hmmc->MmcCard.LogBlockNbr) < CAPACITY)
+    if ((hmmc->MmcCard.LogBlockNbr) < HAL_MMC_CAPACITY)
     {
       BlockStartAdd *= 512U;
       BlockEndAdd   *= 512U;
